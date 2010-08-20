@@ -22,14 +22,9 @@ std::vector<double> Simulation::spikes()
 
 double Simulation::dV(double V, double I)
 {
-	  boost::mt19937 rng; // I don't seed it on purpouse (it's not relevant)
-	  boost::normal_distribution<> nd(0.0, 0.8);
-	  boost::variate_generator<boost::mt19937&, 
-							   boost::normal_distribution<> > var_nor(rng, nd);
-	
 	double r = (-this->gL*(V-this->EL)+this->gL*this->dT*exp((V-this->VT)/this->dT)+I-this->w)/this->C;
 	if (r > 10000) return 10000;
-	return r+var_nor();
+	return r;
 }
 
 double Simulation::dw(double w)
@@ -42,7 +37,7 @@ double Simulation::dw(double w)
 void Simulation::runSim()
 {
 	int steps = T/dt;
-	this->m_Vstored.reserve(steps);
+	if (this->useVoltage) this->m_Vstored.reserve(steps);
 	double k1,k2,k3,k4;
 	double I;
 	std::vector<Synapse>::iterator synit;
@@ -68,12 +63,12 @@ void Simulation::runSim()
 
 		if (V > 0)
 		{
-			this->m_Vstored.push_back(40);
+			if (this->useVoltage) this->m_Vstored.push_back(40);
 			this->m_Spikes.push_back(i*dt);
 			V = Vr;
 			w = w + b;
 		} else {
-			this->m_Vstored.push_back(V);
+			if (this->useVoltage) this->m_Vstored.push_back(V);
 		}
 
 	}
@@ -97,4 +92,6 @@ void Simulation::defaultparams()
 	this->Vr = -46;
 
 	this->V = this->EL;
+
+	this->useVoltage = false;
 }

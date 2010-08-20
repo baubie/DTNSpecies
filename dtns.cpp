@@ -3,6 +3,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 #include "boost/threadpool.hpp"
+#include <boost/math/distributions/normal.hpp>
+#include <boost/random.hpp>
 #include "GLE.h"
 #include "simulation.h"
 #include "synapse.h"
@@ -15,77 +17,118 @@ int main(int argc, char* argv[])
 	std::vector< std::vector<Simulation> > sims;
 	std::vector<Simulation>::iterator simit;
 	std::vector< std::vector<Simulation> >::iterator simsimit;
+
+	std::vector< std::vector< std::vector<Simulation> > > trials;
+	std::vector< std::vector< std::vector<Simulation> > >::iterator trialit;
+
 	std::vector<double> simNames;
 	std::vector<Simulation> simtau;
 	double sS, sE, sI;
+	int repeats = 1;
 	sS = 1;
-	sE = 200;
+	sE = 100;
 	sI = 1;
+	trials.reserve(repeats);
 
-	for (double tau = 1; tau <= 5; tau +=0.5)
+	boost::mt19937 rng; // I don't seed it on purpouse (it's not relevant)
+	boost::normal_distribution<> nd(0.0, 1.5);
+	boost::variate_generator<boost::mt19937&, 
+						   boost::normal_distribution<> > var_nor(rng, nd);
+	
+
+	for (int repeat = 0; repeat < repeats; ++repeat)
 	{
-		simtau.clear();
-		simNames.clear();
-		for (int i = sS; i <= sE; i+=sI)
+		sims.clear();
+		for (double tau = 1; tau <= 10; tau +=1.0)
 		{
-			double gMax = 10.5-tau*1.5;
-			simNames.push_back((double)i);
-			Simulation sim;
-			sim.defaultparams();
-			Synapse OnE;
-			Synapse OffE;
-			Synapse SusI;
-			OnE.gMax = gMax;
-			OnE.tau1 = tau;
-			OnE.tau2 = tau;
-			OnE.del = 10+15*tau;
-			OffE.gMax = gMax;
-			OffE.tau1 = tau;
-			OffE.tau2 = tau;
-			OffE.del = 3;
-			SusI.E = -75;
-			SusI.tau1 = 4;
-			SusI.tau2 = 6;
-			SusI.gMax = 0;	
-
-			OnE.spikes.push_back(10);
-			OffE.spikes.push_back(10+i);
-			for (int j = 10; j<=10+i; j++)
+			simtau.clear();
+			simNames.clear();
+			for (int i = sS; i <= sE; i+=sI)
 			{
-				SusI.spikes.push_back(j);
-			}
-			sim.synapses.push_back(OnE);
-			sim.synapses.push_back(OffE);
-			sim.synapses.push_back(SusI);
+				double gMax = 10;
+				simNames.push_back((double)i);
+				Simulation sim;
+				sim.C = 200 + (tau-1)*10;
+				sim.useVoltage = true;
+				sim.defaultparams();
+				Synapse OnE;
+				Synapse OffE;
+				Synapse SusI;
+				OnE.gMax = gMax;
+				OnE.tau1 = tau;
+				OnE.tau2 = tau;
+				OnE.del = 15;
+				OffE.gMax = gMax;
+				OffE.tau1 = tau;
+				OffE.tau2 = tau;
+				OffE.del = 3;
+				SusI.E = -75;
+				SusI.tau1 = 4;
+				SusI.tau2 = 6;
+				SusI.gMax = 0;	
 
-			simtau.push_back(sim);
+				OnE.spikes.push_back(10+var_nor());
+				OffE.spikes.push_back(10+i+var_nor());
+				for (int j = 10; j<=10+i; j++)
+				{
+					SusI.spikes.push_back(j);
+				}
+				sim.synapses.push_back(OnE);
+				sim.synapses.push_back(OffE);
+				sim.synapses.push_back(SusI);
+
+				simtau.push_back(sim);
+			}
+			sims.push_back(simtau);
 		}
-		sims.push_back(simtau);
+		trials.push_back(sims);
 	}
 
 	std::cout << "Running threads..." << std::endl;
 	boost::threadpool::thread_pool<> threads(2);
-	for (simsimit = sims.begin(); simsimit < sims.end(); simsimit++)
+	for (trialit = trials.begin(); trialit < trials.end(); trialit++)
 	{
-		for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+		for (simsimit = trialit->begin(); simsimit < trialit->end(); simsimit++)
 		{
-			threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
+			for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+			{
+				threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
+			}
 		}
 	}
 	threads.wait();
 
-//	std::vector<double> time = sims[0].timesteps();
-	std::vector< std::vector<double> > y;
+	std::vector<double> time = trials[0][0][0].timesteps();
+	std::vector< std::vector<double> > y,tmp;
 	std::vector<double> spikes;
-	for (simsimit = sims.begin(); simsimit < sims.end(); simsimit++)
+	bool first = true;
+	for (trialit = trials.begin(); trialit < trials.end(); trialit++)
 	{
-		spikes.clear();
-		for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+		tmp.clear();
+		for (simsimit = trialit->begin(); simsimit < trialit->end(); simsimit++)
 		{
-			spikes.push_back(simit->spikes().size());
+			spikes.clear();
+			for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+			{
+				spikes.push_back((double)simit->spikes().size()/repeats);
+			}
+			tmp.push_back(spikes);
 		}
-		y.push_back(spikes);
+		if (first) {
+			y = tmp;
+			first = false;
+		} else {
+			for (unsigned int i = 0; i < tmp.size(); ++i)
+			{
+				for (unsigned int j = 0; j < tmp[0].size(); ++j)
+				{
+					y[i][j] += tmp[i][j];
+				}
+			}
+		}
 	}
+	y.clear();
+	y.push_back(trials[0][0][0].voltagetrace());
 
 	GLE gle;
 	GLE::PlotProperties plotProperties;
@@ -94,11 +137,17 @@ int main(int argc, char* argv[])
 	GLE::Color end;
 	GLE::PanelID panelID;
 	plotProperties.pointSize = 0;
-	panelID = gle.plot(simNames,y, plotProperties);
-	gle.setPanelProperties(panelProperties, panelID);
+	for (unsigned int i = 0; i < y.size(); ++i)
+	{
+		//panelID = gle.plot(simNames,y[i], plotProperties);
+		panelID = gle.plot(time,y[i], plotProperties);
+		gle.setPanelProperties(panelProperties, panelID);
+	}
 	gle.canvasProperties.width = 10;
-	gle.canvasProperties.height = 4;
+	gle.canvasProperties.height = 4*y.size();
+
 	gle.draw("temp.pdf");
+	
 
     return 0;
 }

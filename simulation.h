@@ -6,8 +6,6 @@
 #include <boost/thread.hpp>
 #include <vector>
 #include "synapse.h"
-#include <boost/math/distributions/normal.hpp>
-#include <boost/random.hpp>
 
 class Simulation
 {
@@ -26,6 +24,18 @@ class Simulation
 		// Synapses
 		std::vector<Synapse> synapses;
 
+        // Model neuron parameters
+		double gL;
+		double EL;
+        double a;
+        double b;
+        double C;
+        double dT;
+		double VT;
+		double Vr;
+        double tau_w;
+		bool useVoltage;
+
     private:
 
         // Simulation parameters
@@ -39,16 +49,6 @@ class Simulation
 		std::vector<double> m_Vstored;
 		std::vector<double> m_Spikes;
 
-        // Model neuron parameters
-		double gL;
-		double EL;
-        double a;
-        double b;
-        double C;
-        double dT;
-		double VT;
-		double Vr;
-        double tau_w;
 
         // V = V + dt*dV
         double dV(double V, double I);
