@@ -184,6 +184,7 @@ class GLE
         PanelID plot(std::vector<double> &x, std::vector<double> &y, std::vector<double> &err_up, std::vector<double> &err_down, PlotProperties properties, PanelID panel);
 
         PanelID plot3d(std::vector<double> &x, std::vector<double> &y, std::vector< std::vector<double> > &z, PlotProperties properties, PanelID ID);
+        PanelID plot3d(std::vector<double> &x, std::vector<double> &y, std::vector< std::vector<double> > &z, PlotProperties properties);
 
         bool setPanelProperties(PanelProperties properties, PanelID ID); // Set the panel properties for a particular panel
         bool setPanelProperties(PanelProperties properties); // Set the panel properties for all panels
