@@ -36,7 +36,7 @@ double Synapse::alpha(double t)
     {
         return gMax*(tt)*exp(1-tt);
     } else {
-        return gMax*(exp(-t/tau1)-exp(-t/tau2))/(tau1-tau2);
+        return gMax*(exp(-t/tau1)-exp(-t/tau2));
     }
 }
 

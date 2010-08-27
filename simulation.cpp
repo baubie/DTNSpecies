@@ -77,8 +77,8 @@ void Simulation::runSim()
 void Simulation::defaultparams()
 {
 	// Simulation Parameters
-    this->dt = 0.05;
-	this->T = 333;
+    this->dt = 0.10;
+	this->T = 500;
 	this->del = 10;
 
 	this->C = 200;

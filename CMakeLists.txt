@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 project (DTNS CXX)
 
-find_package(Boost 1.43.0 COMPONENTS thread iostreams filesystem system)
+find_package(Boost 1.43.0 COMPONENTS thread iostreams filesystem system program_options)
 include(${Boost_INCLUDE_DIR})
 
 add_definitions (-Wall -W)
