@@ -7,87 +7,82 @@
 #include <boost/random.hpp>
 #include <boost/program_options.hpp>
 #include <boost/progress.hpp>
-#include "GLE.h"
-#include "simulation.h"
-#include "synapse.h"
 #include <vector>
 #include <numeric>
 #include <math.h>
 
+#include "GLE.h"
+#include "simulation.h"
+#include "synapse.h"
+#include "tuning.h"
+#include "wvector.h"
+
 namespace po = boost::program_options;
 
-bool progress(boost::threadpool::pool &threads, int total) 
+bool progress(unsigned int done, unsigned int total)
 {
-
-    int left = threads.pending();
-    int done = total - threads.pending();
     static boost::progress_display show_progress( total );
-
-    if (left == 0) {
+    if (done == total) {
         show_progress += total - show_progress.count();
         std::cout << std::endl;
         return false;
     }
-
     show_progress += done - show_progress.count();
-
-    /*
-    cout << "\r[" << (int) (percent_done * 100) << "%] ";
-    cout << "[" << pending << "/" << total << "] ";
-    cout << "[" << (active - 1) << " active] ";
-    cout << left << " remaining." << flush;
-    */
     return true;
 }
+
+
 
 int main(int argc, char* argv[]) 
 {
 
+    /**********************************************************************/
+    /* SETUP THE PROGRAM */
+    /**********************************************************************/
     // Determine the program options and set default values
     int nThreads = 4;
-
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("threads", po::value<int>(), "set number of concurrent events")
         ;
-
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
-
     if(vm.count("help")) {
         std::cout << desc << std::endl;
         return 1;
     }
-
     if(vm.count("threads")) {
         nThreads = vm["threads"].as<int>();
     }
+    /**********************************************************************/
 
 
 
-	std::cout << "Initializing Simulations... " << std::flush;
+    std::cout << "Initializing Simulations... " << std::flush;
+    boost::threadpool::thread_pool<> threads(nThreads);
+
     // Define iterators for use later
-	std::vector<Simulation>::iterator simit;
-	std::vector< std::vector<Simulation> >::iterator simsimit;
-	std::vector< std::vector< std::vector<Simulation> > >::iterator simsimsimit;
+    std::vector<Simulation>::iterator simit;
+    std::vector< std::vector<Simulation> >::iterator simsimit;
+    std::vector< std::vector< std::vector<Simulation> > >::iterator simsimsimit;
 
     // 3D Array for simulations. [Parameter][Input Duration][Repeated Trials] 
-	std::vector< std::vector< std::vector<Simulation> > > trials;
-	std::vector< std::vector<Simulation> > durations;
-	std::vector<Simulation> sims;
+    std::vector< std::vector< std::vector<Simulation> > > trials;
+    std::vector< std::vector<Simulation> > durations;
+    std::vector<Simulation> sims;
 
     // 2D Array for Surface Plot of Average Spike Counts over 2 Dimensions
     std::vector< std::vector< double > > averagedResults;
     std::vector<double> simY;
     std::vector<double> simX;
 
-	double sS, sE, sI;
-	int repeats = 5;
-	sS = 1;
-	sE = 200;
-	sI = 2;
+    double sS, sE, sI;
+    int repeats = 1;
+    sS = 2;
+    sE = 200;
+    sI = 2;
 
     boost::mt19937 rng;
     boost::normal_distribution<> nd(0.0, 1.5);
@@ -96,6 +91,7 @@ int main(int argc, char* argv[])
     // Seed with current time
     rng.seed(static_cast<unsigned int>(std::time(0)));
 
+    bool normalize = true;
     double tOn1,tOn2,tOff1,tOff2,tS1,tS2,dOn,dOff,gMaxOn,gMaxOff,gMaxS;
     tOn1 = tOn2 = 1.1;
     tOff1 = tOff2 = 1.1;
@@ -107,18 +103,43 @@ int main(int argc, char* argv[])
     gMaxOff = 10;
     gMaxS = 0;
 
-    bool normalize = true;
+    wvector<double> wv_tau, wv_dOn, wv_dOff, wv_gMaxOn, wv_gMaxOff;
 
-    unsigned int numSims = 0;
+    // Fill wvectors with possible values
+    for (double i = 0.2; i <= 20; i+=0.2)
+    {
+        wv_tau.push_back(i);
+    }
+    for (double i = 1; i <= 200; i+=1.0)
+    {
+        wv_dOn.push_back(i);
+        wv_dOff.push_back(i);
+    }
+    for (double i = 0; i <= 30; i+=0.5)
+    {
+        wv_gMaxOn.push_back(i);
+        wv_gMaxOff.push_back(i);
+    }
+
+    std::cout << "[OK]" << std::endl;
+
+    unsigned int numIterations = 50;
+    unsigned int numSimsPerIteration =  ((sE-sS)/sI + 1)*repeats;
+    unsigned int numSims = numIterations * numSimsPerIteration;
+    unsigned int done = 0;
 
     simX.clear();
-    for (double p = 0; p <= 1; p += 0.05)
+    std::cout << "Running " << numSims << " Simulations... " << std::flush;
+    for (unsigned int iteration = 0; iteration < numIterations; ++iteration)
     {
-        gMaxOn = gMaxOff= 2;
-        gMaxS = p*50;
+        progress(done, numSims);
+        gMaxOn = *(wv_gMaxOn.random());
+        gMaxOff = *(wv_gMaxOff.random());
+        tOn1 = tOn2 = tOff1 = tOff2 = *(wv_tau.random());
+        dOn = *(wv_dOn.random());
+        dOff = *(wv_dOff.random());
 
-        simX.push_back(p);
-
+        simX.push_back(iteration);
         durations.clear();
 
         simY.clear();
@@ -153,7 +174,7 @@ int main(int argc, char* argv[])
                 OffE.spikes.push_back(10+i/*+var_nor()*/);
                 for (int j = 10; j<=10+i; j++)
                 {
-                        SusI.spikes.push_back(j);
+                    SusI.spikes.push_back(j);
                 }
                 sim.synapses.push_back(OnE);
                 sim.synapses.push_back(OffE);
@@ -163,31 +184,24 @@ int main(int argc, char* argv[])
             }
             durations.push_back(sims);
         }
-        trials.push_back(durations);
-    }
-    std::cout << numSims << " prepared... [OK]" << std::endl;
 
-    std::cout << "Pooling " << nThreads << " threads... " << std::flush;
-	boost::threadpool::thread_pool<> threads(nThreads+1); // Add one for the looped task func
-    std::cout << "[OK]" << std::endl;
-	std::cout << "Running threads... " << std::flush;
-    threads.schedule(boost::threadpool::looped_task_func(boost::bind(progress, threads, numSims), 250));
-    for (simsimsimit = trials.begin(); simsimsimit < trials.end(); simsimsimit++)
-    {
-        for (simsimit = simsimsimit->begin(); simsimit < simsimsimit->end(); simsimit++)
+        for (simsimit = durations.begin(); simsimit < durations.end(); simsimit++)
         {
             for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
             {
                 threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
             }
         }
+        threads.wait();
+        done += numSimsPerIteration;
+        trials.push_back(durations);
     }
-	threads.wait();
     std::cout << "[OK]" << std::endl;
+
 
     std::vector<double> tmp;
     std::vector<double>::iterator tmpit;
-	double spikes;
+    double spikes;
     double max;
     for (simsimsimit = trials.begin(); simsimsimit < trials.end(); simsimsimit++)
     {
@@ -214,12 +228,10 @@ int main(int argc, char* argv[])
 	GLE gle;
 	GLE::PlotProperties plotProperties;
 	GLE::PanelProperties panelProperties;
-	GLE::Color start;
-	GLE::Color end;
-	GLE::PanelID panelID = GLE::NEW_PANEL;
+	GLE::PanelID panelID;
 	plotProperties.pointSize = 0;
-    plotProperties.usemap = true;
-    panelID = gle.plot3d(simY, simX, averagedResults, plotProperties);
+        plotProperties.usemap = true;
+        panelID = gle.plot3d(simY, simX, averagedResults, plotProperties);
 	gle.canvasProperties.width = 6;
 	gle.canvasProperties.height = 6;
 	gle.draw("temp.pdf");

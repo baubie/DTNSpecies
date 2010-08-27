@@ -10,6 +10,7 @@ class Tuning {
         std::map<double,double> counts;
         float score(std::map<double,double> input);
 
+
 };
 
 #endif
