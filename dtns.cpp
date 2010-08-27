@@ -80,8 +80,8 @@ int main(int argc, char* argv[])
 
     double sS, sE, sI;
     int repeats = 1;
-    sS = 2;
-    sE = 200;
+    sS = 1;
+    sE = 100;
     sI = 2;
 
     boost::mt19937 rng;
@@ -104,6 +104,8 @@ int main(int argc, char* argv[])
     gMaxS = 0;
 
     wvector<double> wv_tau, wv_dOn, wv_dOff, wv_gMaxOn, wv_gMaxOff;
+
+    std::vector<double> tauRec;
 
     // Fill wvectors with possible values
     for (double i = 0.2; i <= 20; i+=0.2)
@@ -138,14 +140,15 @@ int main(int argc, char* argv[])
         tOn1 = tOn2 = tOff1 = tOff2 = *(wv_tau.random());
         dOn = *(wv_dOn.random());
         dOff = *(wv_dOff.random());
+        tauRec.push_back(tOn1);
 
-        simX.push_back(iteration);
+        simY.push_back(iteration);
         durations.clear();
 
-        simY.clear();
+        simX.clear();
         for (int i = sS; i <= sE; i+=sI)
         {
-            simY.push_back(i);
+            simX.push_back(i);
             sims.clear();
             for (int repeat = 0; repeat < repeats; ++repeat)
             {
@@ -231,7 +234,8 @@ int main(int argc, char* argv[])
 	GLE::PanelID panelID;
 	plotProperties.pointSize = 0;
         plotProperties.usemap = true;
-        panelID = gle.plot3d(simY, simX, averagedResults, plotProperties);
+        panelID = gle.plot3d(simX, simY, averagedResults, plotProperties);
+        panelID = gle.plot(simX, tauRec, plotProperties);
 	gle.canvasProperties.width = 6;
 	gle.canvasProperties.height = 6;
 	gle.draw("temp.pdf");
