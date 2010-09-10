@@ -28,10 +28,10 @@ bool Tuning::possiblematch(std::map<double,double> input)
     for (it_count = this->extraPenalty.begin(); it_count != this->extraPenalty.end(); it_count++)
     {
         it_input = input.find(it_count->first);
-        if (it_input != input.end())
+        if (it_input != input.end() && this->useinsearch(it_count->first))
         {
            if (it_input->second == 0 && this->counts.find(it_count->first)->second > 0) r = false;
-           if (it_input->second >= 0.5 && this->counts.find(it_count->first)->second == 0) r = false;
+           if (it_input->second > 0 && this->counts.find(it_count->first)->second == 0) r = false;
         }
     }
     return r;
@@ -77,6 +77,7 @@ std::string Tuning::print()
     {
         ss << "," << i->second;
     }
+
     return ss.str();
 }
 

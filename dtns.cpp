@@ -28,6 +28,13 @@ using namespace boost::gregorian;
 
 void progress(ptime start, long done, long total, int found, bool searchMode, int row)
 {
+    // Update at most twice a second for sanity sake
+    static ptime last;
+
+    if ((microsec_clock::local_time() - last).total_microseconds() < 250000) return;
+    last = microsec_clock::local_time();
+
+
     std::string endTime, timeLeft, timeElapsed;
     double percent = ((double)done/(double)total);
     long seconds_left = 0;
@@ -42,7 +49,6 @@ void progress(ptime start, long done, long total, int found, bool searchMode, in
         endTime = to_simple_string(finish);
         timeLeft = to_simple_string(left);
     } else { timeElapsed = "Unknown"; endTime = "Unknown"; timeLeft = "Unknown"; } 
-
 
     int rowtop = row;
     move(row,0); clrtoeol();
@@ -143,12 +149,10 @@ int main(int argc, char* argv[])
     std::vector<Simulation>::iterator simit;
     std::map< double, std::vector<Simulation> >::iterator simsimit;
     std::vector< std::vector< std::vector<Simulation> > >::iterator simsimsimit;
-
-    // 3D Array for simulations. [Parameter][Input Duration][Repeated Trials] 
-    std::vector< std::vector< std::vector<Simulation> > > trials;
     std::map< double, std::vector<Simulation> > durations;
+    std::map<int,std::map<double,std::vector<Simulation> > > simbundle;
+    std::map< int, std::map< double, std::vector<Simulation> > >::iterator bundleit;
     std::vector<Simulation> sims;
-
 
 
     boost::mt19937 rng;
@@ -190,13 +194,18 @@ int main(int argc, char* argv[])
     //params.add("dOff", param);
     param.clear();
     param.push_back(0);
-    for (double i = 8; i <= 12; i+=1.0)
-    {
-        param.push_back(i);
-    }
+    param.push_back(2);
+    param.push_back(4);
+    param.push_back(8);
+    param.push_back(10);
+    params.add("gMaxI", param);
+    param.push_back(11);
+    param.push_back(12);
+    param.push_back(14);
+    param.push_back(16);
+    param.push_back(18);
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
-    params.add("gMaxI", param);
     param.clear();
 
 
@@ -247,15 +256,23 @@ int main(int argc, char* argv[])
     bool searchMode;
     bool goodNetwork = false;
     int actrepeats = 1;
+    int numsimsinbundle = 0;
+
     for (int i_search = 0; i_search < 2; ++i_search)
     {
         searchMode = (i_search == 0);
-        if (searchMode) numSims = (bp.numsearchedfor()) * params.size();
-        if (!searchMode) numSims = repeats * ((sE-sS)/sI+1) * goodTrials.size();
+        if (searchMode) 
+        {
+            numSims = (bp.numsearchedfor()) * params.size();
+        }
+        if (!searchMode) 
+        {
+            numSims = repeats * ((sE-sS)/sI+1) * goodTrials.size();
+            actrepeats = repeats;
+        }
         start = second_clock::local_time();
         networkID = 0;
         done = 0;
-        if (!searchMode) actrepeats = repeats;
         params.reset();
         for (; !params.done(); params++)
         {
@@ -269,7 +286,6 @@ int main(int argc, char* argv[])
             durations.clear();
             goodNetwork = searchMode || std::find(goodTrials.begin(), goodTrials.end(), networkID) != goodTrials.end();
 
-            trialResults.clear();
             if (goodNetwork)
             {
                 for (int i = sS; i <= sE; i+=sI)
@@ -320,6 +336,7 @@ int main(int argc, char* argv[])
                             sim.synapses.push_back(OffE);
                             sim.synapses.push_back(SusI);
                             sims.push_back(sim);
+                            numsimsinbundle++;
                             ++done;
                         }
                     }
@@ -328,57 +345,69 @@ int main(int argc, char* argv[])
                         durations[i] = sims;
                     }
                 }
-            }
-            if (networkID % 50 == 0)
-            {
-                threads.schedule(boost::bind(&progress, start, done, numSims, goodTrials.size(), searchMode,row));
-            }
-            for (simsimit = durations.begin(); simsimit != durations.end(); simsimit++)
-            {
-                for (simit = simsimit->second.begin(); simit != simsimit->second.end(); simit++)
-                {
-                    threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
-                }
-            }
-            threads.wait();
-
-            // Extract results
-            double spikes;
-            if (goodNetwork)
-            {
-                for (simsimit = durations.begin(); simsimit != durations.end(); simsimit++)
-                {
-                    spikes = 0;
-                    for (simit = simsimit->second.begin(); simit < simsimit->second.end(); simit++)
-                    {
-                        spikes += simit->spikes().size();
-                    }
-                    spikes /= repeats;
-                    trialResults[simsimit->first] = spikes;
-                }
-
-                if (searchMode)
-                {
-                    if (bp.possiblematch(trialResults)) {
-                        goodTrials.push_back(networkID);
-                    }
-                }
-                else
-                {
-                    double score = bp.score(trialResults);
-                    std::clog << score << "," << gMaxOn << "," <<  gMaxOff << "," <<  gMaxS << "," << tOn1 << "," << tOff1 << "," << dOn << "," << dOff << "," << dIOn ;
-
-                    // Print it out
-                    for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
-                    {
-                        std::clog << "," << it_trialResults->second;
-                    }
-                    std::clog << std::endl;
-                    std::clog << std::flush;
-                }
+                simbundle[networkID] = durations;
             }
             ++networkID;
+            threads.schedule(boost::bind(&progress, start, done, numSims, goodTrials.size(), searchMode,row));
+
+            if (params.done() || numsimsinbundle > nThreads * 4)
+            {
+                numsimsinbundle = 0;
+                for (bundleit = simbundle.begin(); bundleit != simbundle.end(); bundleit++)
+                {
+                    for (simsimit = bundleit->second.begin(); simsimit != bundleit->second.end(); simsimit++)
+                    {
+                        for (simit = simsimit->second.begin(); simit != simsimit->second.end(); simit++)
+                        {
+                            threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
+                        }
+                    }
+                }
+                threads.wait();
+
+                // Extract results
+                double spikes;
+                if (goodNetwork)
+                {
+                    for (bundleit = simbundle.begin(); bundleit != simbundle.end(); bundleit++)
+                    {
+                        trialResults.clear();
+                        for (simsimit = bundleit->second.begin(); simsimit != bundleit->second.end(); simsimit++)
+                        {
+                            spikes = 0;
+                            for (simit = simsimit->second.begin(); simit < simsimit->second.end(); simit++)
+                            {
+                                spikes += simit->spikes().size();
+                            }
+                            spikes /= repeats;
+                            trialResults[simsimit->first] = spikes;
+                        }
+
+                        if (searchMode)
+                        {
+                            if (bp.possiblematch(trialResults)) {
+                                goodTrials.push_back(bundleit->first);
+                            }
+                        }
+                        else
+                        {
+                            double score = bp.score(trialResults);
+                            std::clog << score << "," << gMaxOn << "," <<  gMaxOff << "," <<  gMaxS << "," << tOn1 << "," << tOff1 << "," << dOn << "," << dOff << "," << dIOn ;
+
+                            // Print it out
+                            for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
+                            {
+                                std::clog << "," << it_trialResults->second;
+                            }
+                            std::clog << std::endl;
+                            std::clog << std::flush;
+                        }
+                    }
+                }
+                simbundle.clear();
+            }
         }
+
     }
 
     endwin();
