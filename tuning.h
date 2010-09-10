@@ -6,6 +6,7 @@
 #include <string>
 #include <math.h>
 #include <iostream>
+#include <iomanip>
 #include <iterator>
 #include <numeric>
 #include <algorithm>
@@ -15,7 +16,9 @@ class Tuning {
     public:
         Tuning(double start, double end, double interval): start(start),end(end),interval(interval) {}
         double score(std::map<double,double> input);
+        bool possiblematch(std::map<double,double> input);
         bool useinsearch(double x);
+        int numsearchedfor();
         void define(double x, double y);
         void define(double x, double y, double extra);
         void smooth();

@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <numeric>
+#include <algorithm>
 #include <math.h>
 #include <ncurses.h>
 
@@ -25,34 +26,63 @@ namespace po = boost::program_options;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
-bool progress(long done, long total)
+void progress(ptime start, long done, long total, int found, bool searchMode, int row)
 {
-    static ptime start = second_clock::local_time();
-    std::string endTime;
-    time_duration diff, total_time;
+    std::string endTime, timeLeft, timeElapsed;
+    double percent = ((double)done/(double)total);
+    long seconds_left = 0;
 
     if (done > 0) {
-        ptime now = second_clock::local_time();
-        diff = now - start;
-        total_time = (now-start) * (total / done);
-        ptime finish = start + total_time;
+        time_duration elapsed = second_clock::local_time()-start;
+        seconds_left = elapsed.total_seconds()*(1/percent-1);
+        time_duration left = seconds(seconds_left);
+        ptime finish = second_clock::local_time() + left;
+
+        timeElapsed = to_simple_string(elapsed);
         endTime = to_simple_string(finish);
-    } else { endTime = "Unknown"; } 
+        timeLeft = to_simple_string(left);
+    } else { timeElapsed = "Unknown"; endTime = "Unknown"; timeLeft = "Unknown"; } 
 
-    int row,col;
-    getyx(stdscr,row,col);
-    double percent = (double)(done/total);
 
-    clrtoeol();
-    mvprintw(LINES-2,0,"%d/%d (%.5f\%) Time Left: ", total-done, total, percent);
-    printw(to_simple_string(total_time-diff).c_str());
-    printw(" Estimated End Time: ");
-    printw(endTime.c_str());
-    refresh();
-    if (done == total) {
-        return false;
+    int rowtop = row;
+    move(row,0); clrtoeol();
+    printw("+--------------------------------------------------------+");
+    move(++row,0); clrtoeol();
+    if (searchMode) printw("| Searching for potential networks. %d found thus far.", found);
+    else printw("| Running simulations on %d potential networks.", found);
+
+    move(++row,0); clrtoeol();
+    printw("| %d/%d (%.3f\%)", total-done, total, percent*100);
+    move(++row,0); clrtoeol();
+    printw("| Elapsed: %s", timeElapsed.c_str());
+    move(++row,0); clrtoeol();
+    printw("| Remaining: %s", timeLeft.c_str());
+    move(++row,0); clrtoeol();
+    printw("| Done At: %s", endTime.c_str());
+    
+    // Draw progress bar for fun
+    move(++row,0); clrtoeol();
+    int pb_width = 52;
+    int pb_done = pb_width * percent; 
+    printw("| >");
+    for (int i = 0; i < pb_done ; ++i)
+    {
+        printw("#");
     }
-    return true;
+    for (int i = pb_done; i < pb_width; ++i)
+    {
+        printw(" ");
+    }
+    printw("<");
+    move(++row,0); clrtoeol();
+    printw("+--------------------------------------------------------+");
+    for (int i = rowtop+1; i < row; ++i)
+    {
+        move(i, 57);
+        printw("|");
+    }
+    move(++row,0);
+    refresh();
 }
 
 
@@ -67,13 +97,11 @@ int main(int argc, char* argv[])
     // Determine the program options and set default values
     int nThreads = 4;
     int repeats = 1;
-    bool normalize = false;
     std::string logFile = "log";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("threads,t", po::value<int>(), "set number of concurrent events")
-        ("normalize,n", po::value<bool>()->implicit_value(true), "normalize the plot")
         ("repeats,r", po::value<int>(), "number of times to repeat each trial")
         ("logfile,l", po::value<std::string>(), "log file")
         ;
@@ -86,9 +114,6 @@ int main(int argc, char* argv[])
     }
     if(vm.count("threads")) {
         nThreads = vm["threads"].as<int>();
-    }
-    if(vm.count("normalize")) {
-        normalize = true;
     }
     if(vm.count("repeats")) {
         repeats = vm["repeats"].as<int>();
@@ -107,6 +132,7 @@ int main(int argc, char* argv[])
 
     std::ofstream oflog(logFile.c_str());
     std::clog.rdbuf(oflog.rdbuf());
+    std::clog << std::setiosflags(std::ios::fixed) << std::setprecision(2);
 
     printw("Logging results in %s\n", logFile.c_str());
     printw("Initializing simulations...\n");
@@ -115,26 +141,23 @@ int main(int argc, char* argv[])
 
     // Define iterators for use later
     std::vector<Simulation>::iterator simit;
-    std::vector< std::vector<Simulation> >::iterator simsimit;
+    std::map< double, std::vector<Simulation> >::iterator simsimit;
     std::vector< std::vector< std::vector<Simulation> > >::iterator simsimsimit;
 
     // 3D Array for simulations. [Parameter][Input Duration][Repeated Trials] 
     std::vector< std::vector< std::vector<Simulation> > > trials;
-    std::vector< std::vector<Simulation> > durations;
+    std::map< double, std::vector<Simulation> > durations;
     std::vector<Simulation> sims;
 
 
-    double sS, sE, sI;
-    sS = 10;
-    sE = 200;
-    sI = 10;
 
     boost::mt19937 rng;
-    boost::normal_distribution<> nd(0.0, 1.5);
+    boost::normal_distribution<> nd(0.0, 1.0);
     boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor(rng, nd);
     
     // Seed with current time
-    rng.seed(static_cast<unsigned int>(std::time(0)));
+    unsigned int RANDOM_SEED = static_cast<unsigned int>(std::time(0));
+    rng.seed(RANDOM_SEED);
 
     double tOn1,tOn2,tOff1,tOff2,tS1,tS2,dOn,dOff,dIOn,gMaxOn,gMaxOff,gMaxS;
     tOn1 = tOn2 = 1.1;
@@ -150,134 +173,169 @@ int main(int argc, char* argv[])
 
     vectors<double> params;
     std::vector<double> param;
-    std::vector<double> recVal;
 
-
-    for (double i = 1.0; i <= 21; i+=5.0)
+    for (double i = 1.0; i <= 10; i+=1)
     {
         param.push_back(i);
     }
     params.add("tauOn", param);
     params.add("tauOff", param);
     param.clear();
-    for (double i = 0; i <= 150; i+=25.0)
+    for (double i = 1; i <= 10; i+=1)
     {
         param.push_back(i);
     }
     params.add("dOn", param);
     params.add("dIOn", param);
+    //params.add("dOff", param);
     param.clear();
-    /*
-    for (double i = 1; i <= 10; i+=1)
-    {
-        param.push_back(i);
-    }
-    params.add("dOff", param);
-    param.clear();
-    */
-    for (double i = 8; i <= 10; i+=2.0)
+    param.push_back(0);
+    for (double i = 8; i <= 12; i+=1.0)
     {
         param.push_back(i);
     }
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
-//    params.add("gMaxI", param);
+    params.add("gMaxI", param);
     param.clear();
 
 
+    double sS, sE, sI;
+    sS = 1;
+    sE = 25;
+    sI = 1;
     Tuning bp(sS,sE,sI);
-    /* Bat Bandpass 
-    bp.define(1,0,0.5);
-    bp.define(2,0,0.9);
-    bp.define(6,2);
-    bp.define(12,0,0.9);
-    bp.define(13,0,0.5);
-    bp.define(20,0,0.5);
-    bp.define(25,0,0.5);
-    */
+
+    /* Bat Bandpass */
+    bp.define(1,0,0);
+    bp.define(6,2,1.1);
+    bp.define(13,0,0);
 
     /* Rat Bandpass */
-    bp.define(50,2);
+    /*
+    bp.define(50,2,1);
     bp.define(5,0,0.5);
     bp.define(100,0,0.5);
+    */
     bp.smooth();
-    std::clog << bp.print() << std::flush;
+    std::clog << "Random Seed: " << RANDOM_SEED << std::endl;
+    std::clog << "Spreadsheet results below" << std::endl;
+    std::clog << "=========================" << std::endl;
+    std::clog << "Score,gMaxOn,gMaxOff,gMaxSus,tauOn,tauOff,dOn,dOff,dIOn";
+    for (double i = sS; i <= sE; i+=sI) 
+    {
+        std::clog << ","<<i;
+    }
+    std::clog << std::endl;
+    std::clog << "1,,,,,,,," << bp.print() << std::endl;
 
-    long numSims = repeats * ((sE-sS)/sI+1) * params.size();
-    long done = 0;
+    long numSims; 
+    long done;
+    ptime start;
     std::map<double,double> trialResults;
+    std::map<double,double>::iterator it_trialResults;
 
-    double maxScore = 0;
+    int networkID = 0;
     std::vector<int> goodTrials; // Any searches that yield results store here
 
-    printw("Search through %d networks  over %d parameters.\n", numSims, params.size());
+    printw("Running simulations...\n");
     refresh();
 
-    for (bool searchMode = true; searchMode != false; searchMode = !searchMode)
+    int row,col;
+    getyx(stdscr,row,col);
+
+    bool searchMode;
+    bool goodNetwork = false;
+    int actrepeats = 1;
+    for (int i_search = 0; i_search < 2; ++i_search)
     {
+        searchMode = (i_search == 0);
+        if (searchMode) numSims = (bp.numsearchedfor()) * params.size();
+        if (!searchMode) numSims = repeats * ((sE-sS)/sI+1) * goodTrials.size();
+        start = second_clock::local_time();
+        networkID = 0;
+        done = 0;
+        if (!searchMode) actrepeats = repeats;
+        params.reset();
         for (; !params.done(); params++)
         {
-            if (done % 50 == 0)
-            {
-                progress(done, numSims);
-            }
-
             gMaxOn = params.val("gMaxOn");
             gMaxOff = params.val("gMaxOff");;
+            gMaxS = params.val("gMaxI");;
             tOn1 = tOn2 = params.val("tauOn");
             tOff1 = tOff2 = params.val("tauOff");
             dOn = params.val("dOn");
-            //dOff = params.val("dOff");
 
             durations.clear();
+            goodNetwork = searchMode || std::find(goodTrials.begin(), goodTrials.end(), networkID) != goodTrials.end();
 
             trialResults.clear();
-            for (int i = sS; i <= sE; i+=sI)
+            if (goodNetwork)
             {
-                sims.clear();
-                for (int repeat = 0; repeat < repeats; ++repeat)
+                for (int i = sS; i <= sE; i+=sI)
                 {
-                    Simulation sim;
-                    sim.C = 180;
-                    sim.useVoltage = false;
-                    sim.defaultparams();
-                    sim.T = 333;
-
-                    Synapse OnE;
-                    Synapse OffE;
-                    Synapse SusI;
-                    OnE.gMax = gMaxOn;
-                    OnE.tau1 = 1.0;
-                    OnE.tau2 = tOn2;
-                    OnE.del = dOn;
-                    OffE.gMax = gMaxOff;
-                    OffE.tau1 = 1.0;
-                    OffE.tau2 = tOff2;
-                    OffE.del = dOff;
-                    SusI.E = -75;
-                    SusI.del = dIOn;
-                    SusI.tau1 = tS1;
-                    SusI.tau2 = tS2;
-                    SusI.gMax = gMaxS;
-
-                    OnE.spikes.push_back(0+var_nor());
-                    OffE.spikes.push_back(i+var_nor());
-                    for (int j = 0; j<=+i; ++j)
+                    sims.clear();
+                    for (int repeat = 0; repeat < actrepeats; ++repeat)
                     {
-                        SusI.spikes.push_back(j);
-                    }
-                    sim.synapses.push_back(OnE);
-                    sim.synapses.push_back(OffE);
-                    sim.synapses.push_back(SusI);
-                    sims.push_back(sim);
-                    ++done;
-                }
-                durations.push_back(sims);
-            }
+                        if (!searchMode || bp.useinsearch(i))
+                        {
+                            Simulation sim;
+                            sim.C = 180;
+                            sim.useVoltage = false;
+                            sim.defaultparams();
+                            sim.T = 333;
+                            if (searchMode) sim.dt = 0.25;
+                            else sim.dt = 0.05;
 
-            for (simsimit = durations.begin(); simsimit < durations.end(); simsimit++)
+                            Synapse OnE;
+                            Synapse OffE;
+                            Synapse SusI;
+                            OnE.gMax = gMaxOn;
+                            OnE.tau1 = tOn1;
+                            OnE.tau2 = tOn2;
+                            OnE.del = dOn;
+                            OffE.gMax = gMaxOff;
+                            OffE.tau1 = tOff1;
+                            OffE.tau2 = tOff2;
+                            OffE.del = dOff;
+                            SusI.E = -75;
+                            SusI.del = dIOn;
+                            SusI.tau1 = tS1;
+                            SusI.tau2 = tS2;
+                            SusI.gMax = gMaxS;
+
+                            if (!searchMode)
+                            {
+                                OnE.spikes.push_back(0+var_nor());
+                                OffE.spikes.push_back(i+var_nor());
+                            } else {
+                                OnE.spikes.push_back(0);
+                                OffE.spikes.push_back(i);
+                            }
+                            for (int j = 0; j<=+i; ++j)
+                            {
+                                SusI.spikes.push_back(j);
+                            }
+                            sim.synapses.push_back(OnE);
+                            sim.synapses.push_back(OffE);
+                            sim.synapses.push_back(SusI);
+                            sims.push_back(sim);
+                            ++done;
+                        }
+                    }
+                    if (!searchMode || bp.useinsearch(i))
+                    {
+                        durations[i] = sims;
+                    }
+                }
+            }
+            if (networkID % 50 == 0)
             {
-                for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+                threads.schedule(boost::bind(&progress, start, done, numSims, goodTrials.size(), searchMode,row));
+            }
+            for (simsimit = durations.begin(); simsimit != durations.end(); simsimit++)
+            {
+                for (simit = simsimit->second.begin(); simit != simsimit->second.end(); simit++)
                 {
                     threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
                 }
@@ -286,99 +344,42 @@ int main(int argc, char* argv[])
 
             // Extract results
             double spikes;
-            for (simsimit = durations.begin(); simsimit < durations.end(); simsimit++)
+            if (goodNetwork)
             {
-                spikes = 0;
-                for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
+                for (simsimit = durations.begin(); simsimit != durations.end(); simsimit++)
                 {
-                    spikes += simit->spikes().size();
+                    spikes = 0;
+                    for (simit = simsimit->second.begin(); simit < simsimit->second.end(); simit++)
+                    {
+                        spikes += simit->spikes().size();
+                    }
+                    spikes /= repeats;
+                    trialResults[simsimit->first] = spikes;
                 }
-                spikes /= repeats;
-                trialResults[std::distance(durations.begin(), simsimit)*sI+sS] = spikes;
-            }
-            double score = bp.score(trialResults);
 
-            if (score > maxScore) {
-                maxScore = score;
-                std::clog << "MAX (" << score << ") [";
-                std::clog << "gMaxOn: " << gMaxOn << ", ";
-                std::clog << "gMaxOff: " << gMaxOff << ", ";
-                std::clog << "gMaxS: " << gMaxS << ", ";
-                std::clog << "tauOn: " << tOn1 << ", ";
-                std::clog << "tauOff: " << tOff1 << ", ";
-                std::clog << "dOn: " << dOn << ", ";
-                std::clog << "dOff: " << dOff << ", ";
-                std::clog << "dIOn: " << dIOn << "]" << std::endl;
-
-                // Print it out
-                std::clog << "[ ";
-                for (unsigned int i = 0; i < trialResults.size(); ++i)
+                if (searchMode)
                 {
-                    std::clog << trialResults[i] << "\t";
+                    if (bp.possiblematch(trialResults)) {
+                        goodTrials.push_back(networkID);
+                    }
                 }
-                std::clog << "]" << std::endl;
-                std::clog << std::endl;
-                std::clog << std::flush;
+                else
+                {
+                    double score = bp.score(trialResults);
+                    std::clog << score << "," << gMaxOn << "," <<  gMaxOff << "," <<  gMaxS << "," << tOn1 << "," << tOff1 << "," << dOn << "," << dOff << "," << dIOn ;
+
+                    // Print it out
+                    for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
+                    {
+                        std::clog << "," << it_trialResults->second;
+                    }
+                    std::clog << std::endl;
+                    std::clog << std::flush;
+                }
             }
-            mvprintw(LINES-3, 0, "High Score: %.5f", maxScore);
-            refresh();
-            recVal.push_back(score);
+            ++networkID;
         }
     }
-
-/*
-    std::vector<double> tmp;
-    std::vector<double>::iterator tmpit;
-    double spikes;
-    double max;
-    for (simsimsimit = trials.begin(); simsimsimit < trials.end(); simsimsimit++)
-    {
-        tmp.clear();
-        for (simsimit = simsimsimit->begin(); simsimit < simsimsimit->end(); simsimit++)
-        {
-            spikes = 0;
-            for (simit = simsimit->begin(); simit < simsimit->end(); simit++)
-            {
-                spikes += simit->spikes().size();
-            }
-            spikes /= repeats;
-            tmp.push_back(spikes);
-        }
-        max = *(std::max_element(tmp.begin(), tmp.end()));
-        if (max == 0.0 || !normalize) max = 1;
-        for (tmpit = tmp.begin(); tmpit < tmp.end(); tmpit++)
-        {
-            *tmpit /= max;
-        }
-    }
-
-    // Find the maximum weight
-    // Use that to find the best output
-    std::vector<double>::iterator maxWeight = std::max_element(recVal.begin(), recVal.end()); 
-    unsigned int pos = std::distance(recVal.begin(), maxWeight);
-    std::vector<double> bestOutput = averagedResults[pos];
-    // Print it out
-    std::cout << "Best Score: " << *maxWeight << " at position " << pos << std::endl;
-    std::cout << "[ ";
-    for (unsigned int i = 0; i < bestOutput.size(); ++i)
-    {
-        std::cout << bestOutput[i] << "\t";
-    }
-    std::cout << "]" << std::endl;
-    bp.print();
-
-	GLE gle;
-	GLE::PlotProperties plotProperties;
-	GLE::PanelProperties panelProperties;
-	GLE::PanelID panelID;
-	plotProperties.pointSize = 0;
-    plotProperties.usemap = true;
-    panelID = gle.plot3d(simX, simY, averagedResults, plotProperties);
-    panelID = gle.plot(simY, recVal, plotProperties);
-	gle.canvasProperties.width = 10;
-	gle.canvasProperties.height = 20;
-	gle.draw("temp.pdf");
-*/
 
     endwin();
 

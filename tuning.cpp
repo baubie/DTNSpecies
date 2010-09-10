@@ -13,7 +13,28 @@ void Tuning::define(double x, double y, double extra)
 
 bool Tuning::useinsearch(double x)
 {
-    return input.find(x) != input.end();
+    return this->extraPenalty.find(x) != this->extraPenalty.end();
+}
+
+int Tuning::numsearchedfor()
+{
+    return (int)this->extraPenalty.size();
+}
+
+bool Tuning::possiblematch(std::map<double,double> input) 
+{
+    bool r = true;
+    std::map<double,double>::iterator it_count, it_input;
+    for (it_count = this->extraPenalty.begin(); it_count != this->extraPenalty.end(); it_count++)
+    {
+        it_input = input.find(it_count->first);
+        if (it_input != input.end())
+        {
+           if (it_input->second == 0 && this->counts.find(it_count->first)->second > 0) r = false;
+           if (it_input->second >= 0.5 && this->counts.find(it_count->first)->second == 0) r = false;
+        }
+    }
+    return r;
 }
 
 void Tuning::smooth()
@@ -51,13 +72,11 @@ std::string Tuning::print()
 {
     std::stringstream ss;
 
-    ss << "[ ";
+    ss << std::setiosflags(std::ios::fixed) << std::setprecision(2);
     for (std::map<double,double>::iterator i = this->counts.begin(); i != this->counts.end(); i++)
     {
-        ss << i->second << "\t";
+        ss << "," << i->second;
     }
-    ss << "]" << std::endl;
-
     return ss.str();
 }
 
