@@ -56,7 +56,8 @@ void progress(ptime start, long done, long total, int found, bool searchMode, in
     move(++row,0); clrtoeol();
     if (searchMode) printw("| Searching for potential networks. %d found thus far.", found);
     else printw("| Running simulations on %d potential networks.", found);
-
+    move(++row,0); clrtoeol();
+    printw("+--------------------------------------------------------+");
     move(++row,0); clrtoeol();
     printw("| %d/%d (%.3f\%)", total-done, total, percent*100);
     move(++row,0); clrtoeol();
@@ -84,8 +85,11 @@ void progress(ptime start, long done, long total, int found, bool searchMode, in
     printw("+--------------------------------------------------------+");
     for (int i = rowtop+1; i < row; ++i)
     {
-        move(i, 57);
-        printw("|");
+        if (i != rowtop+2)
+        {
+            move(i, 57);
+            printw("|");
+        }
     }
     move(++row,0);
     refresh();
@@ -178,14 +182,14 @@ int main(int argc, char* argv[])
     vectors<double> params;
     std::vector<double> param;
 
-    for (double i = 1.0; i <= 10; i+=1)
+    for (double i = 2.0; i <= 20; i+=2)
     {
         param.push_back(i);
     }
     params.add("tauOn", param);
     params.add("tauOff", param);
     param.clear();
-    for (double i = 1; i <= 10; i+=1)
+    for (double i = 2; i <= 50; i+=2)
     {
         param.push_back(i);
     }
@@ -211,14 +215,21 @@ int main(int argc, char* argv[])
 
     double sS, sE, sI;
     sS = 1;
-    sE = 25;
+    sE = 100;
     sI = 1;
     Tuning bp(sS,sE,sI);
 
     /* Bat Bandpass */
+    /*
     bp.define(1,0,0);
     bp.define(6,2,1.1);
     bp.define(13,0,0);
+    */
+
+    /* Mouse Bandpass */
+    bp.define(40,1,1.1);
+    bp.define(5,0,0);
+    bp.define(80,0,0);
 
     /* Rat Bandpass */
     /*
@@ -227,6 +238,14 @@ int main(int argc, char* argv[])
     bp.define(100,0,0.5);
     */
     bp.smooth();
+
+
+
+
+    std::clog << "Duration Tune Neuron Network Searcher" << std::endl;
+    std::clog << "Parameters Searched:" << std::endl;
+    std::clog << params.toString();
+    std::clog << "Trials per network: " << repeats << std::endl;
     std::clog << "Random Seed: " << RANDOM_SEED << std::endl;
     std::clog << "Spreadsheet results below" << std::endl;
     std::clog << "=========================" << std::endl;
@@ -391,16 +410,19 @@ int main(int argc, char* argv[])
                         }
                         else
                         {
-                            double score = bp.score(trialResults);
-                            std::clog << score << "," << gMaxOn << "," <<  gMaxOff << "," <<  gMaxS << "," << tOn1 << "," << tOff1 << "," << dOn << "," << dOff << "," << dIOn ;
-
-                            // Print it out
-                            for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
+                            if (trialResults.size() != 0)
                             {
-                                std::clog << "," << it_trialResults->second;
+                                double score = bp.score(trialResults);
+                                std::clog << score << "," << gMaxOn << "," <<  gMaxOff << "," <<  gMaxS << "," << tOn1 << "," << tOff1 << "," << dOn << "," << dOff << "," << dIOn ;
+
+                                // Print it out
+                                for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
+                                {
+                                    std::clog << "," << it_trialResults->second;
+                                }
+                                std::clog << std::endl;
+                                std::clog << std::flush;
                             }
-                            std::clog << std::endl;
-                            std::clog << std::flush;
                         }
                     }
                 }

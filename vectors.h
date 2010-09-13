@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <sstream>
 #include <iostream>
 
 template <class T>
@@ -14,6 +15,7 @@ class vectors {
         void print();
         bool done();
         void reset();
+        std::string toString();
 
     private:
        typename std::map<std::string, std::vector<T> > m_Vectors;
@@ -24,7 +26,21 @@ class vectors {
 
 
 
-
+template <class T>
+std::string vectors<T>::toString() {
+    std::stringstream ss;
+    typename std::map<std::string, std::vector<T> >::iterator i;
+    typename std::vector<T>::iterator v;
+    for (i = this->m_Vectors.begin(); i != this->m_Vectors.end(); i++) {
+        ss << i->first << " = [";
+        for (v = i->second.begin(); v != i->second.end(); v++) {
+            ss << *v;
+            if ((v+1) != i->second.end()) ss << ", ";
+        }
+        ss << "]" << std::endl;
+    }
+    return ss.str();
+}
 
 template <class T>
 void vectors<T>::print() {
