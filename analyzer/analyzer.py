@@ -54,7 +54,7 @@ class AnalyzerGTK:
         (model, pathlist) = self.treeview.get_selection().get_selected_rows()
         for p in pathlist:
             treeiter = self.liststore.get_iter(p)
-            d = self.logfile.getresults(self.liststore.get_value(treeiter,0)) # +1 because we skip the template in the liststore
+            d = self.logfile.getresults(self.liststore.get_value(treeiter,0))
             self.axis.plot(d.keys(), d.values())
         self.canvas.draw()
 
@@ -80,6 +80,10 @@ class AnalyzerGTK:
                 self.treeview = self.wTree.get_widget("NetworkList")
                 self.treeview.set_model(self.liststore)
                 self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+
+                # Remove any old columns
+                for c in self.treeview.get_columns():
+                    self.treeview.remove_column(c)
 
                 # Add columns
                 textrenderer = gtk.CellRendererText()

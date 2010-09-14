@@ -32,6 +32,7 @@ class LogFile:
         for row in self.data:
             results = self.getresults(count)
             row["BD"] = find_key(results,max(results.values()))
+            row["Max"] = max(results.values())
             tmpData.append(row)
             count = count + 1
         self.data = tmpData
