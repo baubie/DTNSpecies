@@ -10,6 +10,18 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Subplot   
 from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
 
+def unique(seq, idfun=None): 
+    if idfun is None:
+        def idfun(x): return x
+    seen = {}
+    result = []
+    for item in seq:
+        marker = idfun(item)
+        if marker in seen: continue
+        seen[marker] = 1
+        result.append(item)
+    return result
+
 class AnalyzerGTK:
 
     def __init__(self):
@@ -85,9 +97,12 @@ class AnalyzerGTK:
                 for c in self.treeview.get_columns():
                     self.treeview.remove_column(c)
 
-                # Add columns
+                # Add columns and rows to filter table
+                self.filtertable = self.wTree.get_widget("FilterTable")
+                self.filtertable.resize(len(self.logfile.params()), 2)
                 textrenderer = gtk.CellRendererText()
                 col = 1
+                self.filtercboxes = []
                 for p in self.logfile.params():
                     column = gtk.TreeViewColumn(p, textrenderer, text=col)
                     column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
@@ -95,11 +110,37 @@ class AnalyzerGTK:
                     column.set_clickable(True)
                     column.set_sort_column_id(col)
                     self.treeview.append_column(column)
+                    label = gtk.Label(p)
+                    label.set_justify(gtk.JUSTIFY_RIGHT)
+                    label.show()
+                    cbox = gtk.combo_box_new_text()
+                    self.filtercboxes.append(cbox)
+                    self.filtercboxes[-1].show()
+                    self.filtertable.attach(label, 0, 1, col-1, col)
+                    self.filtertable.attach(cbox, 1, 2, col-1, col)
                     col = col + 1
 
-                # Add data
+                # Add data to table
                 for n in self.logfile.networkdefs():
                     itt = self.liststore.append(n)
+
+                # Add data to columns
+                tmp = []
+                for i in range(len(self.logfile.params())):
+                    tmp.append([]) 
+
+                for n in self.logfile.networkdefs():
+                    for i in range(1,len(self.logfile.params())+1):
+                        tmp[i-1].append(n[i])
+
+
+                for i in range(len(tmp)):
+                    tmp[i] = unique(tmp[i])
+                    tmp[i].sort()
+                    self.filtercboxes[i].append_text("All")
+                    self.filtercboxes[i].set_active(0)
+                    for n in tmp[i]:
+                        self.filtercboxes[i].append_text(str(n))
 
         chooser.destroy()
 
