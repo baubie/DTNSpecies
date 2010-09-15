@@ -1,4 +1,5 @@
 #include <map>
+#include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -10,6 +11,7 @@ class vectors {
         long size();
         void add(std::string name, std::vector<T> v);
         T val(std::string name);
+        T val(std::string name, unsigned int pos);
         vectors<T>& operator++();
         vectors<T> operator++(int);
         void print();
@@ -21,6 +23,7 @@ class vectors {
        typename std::map<std::string, std::vector<T> > m_Vectors;
        std::map<std::string, unsigned int> m_Count;
        bool m_Done;
+       bool m_Last;
 };
 
 
@@ -73,6 +76,7 @@ void vectors<T>::reset() {
         i->second = 0;
     }
     this->m_Done = false;
+    this->m_Last = false;
 }
 
 template <class T>
@@ -84,15 +88,18 @@ template <class T>
 vectors<T>& vectors<T>::operator++() {
 
     typename std::map<std::string, unsigned int>::iterator i;
+    int count = 0;
     for (i = this->m_Count.begin(); i != this->m_Count.end(); i++) {
         i->second++;
+        ++count;
         if (i->second == this->m_Vectors[i->first].size()) {
             i->second = 0;
         } else {
+            if (count == this->size()) this->m_Last = true;
             return *this;
         }
     }
-    // We made it all the way through
+    // We have just rolled over
     this->m_Done = true; 
     return *this;
 }
@@ -106,7 +113,12 @@ vectors<T> vectors<T>::operator++(int) {
 
 template <class T>
 T vectors<T>::val(std::string name) {
-    return this->m_Vectors[name][this->m_Count[name]];
+    if (this->m_Vectors.find(name) != this->m_Vectors.end())
+        return this->m_Vectors[name][this->m_Count[name]];
+    else
+        std::cout << "Error, " << name << " is not in this vectors object." << std::endl;
+        T a;
+        return a;
 }
 
 template <class T>
@@ -114,4 +126,20 @@ void vectors<T>::add(std::string name, std::vector<T> v) {
     this->m_Vectors[name] = v;
     this->m_Count[name] = 0;
     this->reset();
+}
+
+
+
+template <class T>
+T vectors<T>::val(std::string name, unsigned int pos) {
+    // A silly little hack to get the arbitrary position
+    // Make a copy of the current object, then iterate up to pos
+    // Then use that object's val(string) function to get the value
+    // Hey.  it works.
+
+    vectors<T> tmp = *this;
+    tmp.reset();
+    for (unsigned int i = 0; i < pos; ++i)
+        tmp++;
+    return tmp.val(name);
 }
