@@ -4,5 +4,6 @@ GLE_scripts
 CMakeFiles
 CMakeCache.txt
 Makefile
+dtns
 *.pdf
 cmake_install.cmake
