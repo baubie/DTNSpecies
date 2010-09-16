@@ -111,7 +111,7 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkVPaned" id="vpanel">
+          <widget class="GtkVPaned" id="TopVPanel">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="orientation">vertical</property>
@@ -139,7 +139,7 @@
                   </widget>
                   <packing>
                     <property name="resize">False</property>
-                    <property name="shrink">True</property>
+                    <property name="shrink">False</property>
                   </packing>
                 </child>
                 <child>
@@ -147,7 +147,16 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <placeholder/>
+                      <widget class="GtkButton" id="btnClearFilter">
+                        <property name="label" translatable="yes">Clear Filter</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_btnClearFilter_clicked"/>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkTable" id="FilterTable">
@@ -167,13 +176,13 @@
                   </widget>
                   <packing>
                     <property name="resize">True</property>
-                    <property name="shrink">True</property>
+                    <property name="shrink">False</property>
                   </packing>
                 </child>
               </widget>
               <packing>
                 <property name="resize">False</property>
-                <property name="shrink">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
             <child>

@@ -42,7 +42,8 @@ class AnalyzerGTK:
             "on_menuAbout_activate": self.menuAbout_activate,
             "on_MainWindow_destroy": gtk.main_quit,
             "on_NetworkList_row_activated": self.plotRows,
-
+            
+            "on_btnClearFilter_clicked": self.clearFilter,
             "on_tbClear_clicked": self.clearPlot
         }
 
@@ -59,23 +60,50 @@ class AnalyzerGTK:
         self.axis.grid(True)   
         self.canvas = FigureCanvasGTK(self.figure) # a gtk.DrawingArea   
         self.canvas.show()   
-        self.graphview = self.wTree.get_widget("vpanel")   
+        self.graphview = self.wTree.get_widget("TopVPanel")   
         self.graphview.add2(self.canvas)
+        self.maxSpikes = 1
 
     def plotRows(self, widget, path, column):
         (model, pathlist) = self.treeview.get_selection().get_selected_rows()
         for p in pathlist:
             treeiter = self.liststore.get_iter(p)
             d = self.logfile.getresults(self.liststore.get_value(treeiter,0))
-            self.axis.plot(d.keys(), d.values())
+            X = [float(i) for i in d.keys()]
+            Y = [float(i) for i in d.values()]
+            tmp = Y[:]
+            tmp.append(self.maxSpikes)
+            self.maxSpikes = max(tmp)
+            self.axis.plot(X, Y)
+            self.axis.set_ylim( (0, self.maxSpikes+0.1) )
         self.canvas.draw()
 
     def clearPlot(self, widget):
+        self.maxSpikes = 1
         self.axis.cla()
         self.axis.set_xlabel('Duration')   
         self.axis.set_ylabel('Mean Number of Spikes')   
         self.axis.grid(True)   
         self.canvas.draw()
+
+    def clearFilter(self, widget):
+        for i in range(len(self.filtercboxes)):
+            self.filtercboxes[i].set_active(0)
+
+    def applyFilter(self,model,iter):
+        show = True
+        for i in range(len(self.filtercboxes)):
+            f = self.filtercboxes[i].get_active_text()
+            show = show and (f == "All" or f == str(self.liststore.get_value(iter,i+1)))
+        return show
+
+
+    def updateFilter(self, widget):
+        self.treemodelfilter = self.liststore.filter_new(root=None)
+        self.treemodelfilter.set_visible_func(self.applyFilter)
+        self.treemodelsorted = gtk.TreeModelSort(self.treemodelfilter)
+        self.treeview.set_model(self.treemodelsorted)
+
 
     def menuOpen_activate(self, widget):
         chooser = gtk.FileChooserDialog(title="Open Log File", 
@@ -116,6 +144,7 @@ class AnalyzerGTK:
                     cbox = gtk.combo_box_new_text()
                     self.filtercboxes.append(cbox)
                     self.filtercboxes[-1].show()
+                    self.filtercboxes[-1].connect("changed", self.updateFilter)
                     self.filtertable.attach(label, 0, 1, col-1, col)
                     self.filtertable.attach(cbox, 1, 2, col-1, col)
                     col = col + 1

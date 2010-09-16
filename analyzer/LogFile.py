@@ -7,8 +7,19 @@ def is_number(s):
     except ValueError:
         return False
 
-def find_key(dic, val):
-    return [k for k, v in dic.iteritems() if v == val][0]
+def find_key(dic, val, last=False, middle=False):
+    found = [k for k, v in dic.iteritems() if v == val]
+    pos = 0
+    if (last):
+        pos = -1
+    if (middle):
+        pos = int((len(found)-1)/2.0)
+
+    print found
+    print pos
+    return found[pos]
+
+
 
 class LogFile:
 
@@ -31,7 +42,7 @@ class LogFile:
         count = 0
         for row in self.data:
             results = self.getresults(count)
-            row["BD"] = find_key(results,max(results.values()))
+            row["BD"] = find_key(results,max(results.values()),middle=True)
             row["Max"] = max(results.values())
             tmpData.append(row)
             count = count + 1
