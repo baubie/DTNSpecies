@@ -73,15 +73,15 @@ class LogFile:
     def getresults(self, entryNum):
         r = []
         for item in self.fieldnames:
-            if is_number(self.data[entryNum][item]):
-                r.append(self.data[entryNum][item])
+            if is_number(item):
+                r.append(float(self.data[entryNum][item]))
         return r
 
     def getdurs(self):
         r = []
         for item in self.fieldnames:
             if is_number(item):
-                r.append(item)
+                r.append(float(item))
         r.sort()
         return r
                 

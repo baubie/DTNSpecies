@@ -70,9 +70,8 @@ class AnalyzerGTK:
         (model, pathlist) = self.treeview.get_selection().get_selected_rows()
         for p in pathlist:
             treeiter = self.liststore.get_iter(p)
-            X = self.logfile.getresults(self.liststore.get_value(treeiter,0))
-            Y = self.logfile.getdurs()
-            print Y
+            X = self.logfile.getdurs()
+            Y = self.logfile.getresults(self.liststore.get_value(treeiter,0))
             tmp = Y[:]
             tmp.append(self.maxSpikes)
             self.maxSpikes = max(tmp)
