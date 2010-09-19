@@ -47,9 +47,42 @@ class LogFile:
     def params(self):
         if (len(self.data) == 0):
             return []
+        params = []
         for item in self.fieldnames:
+            if is_number(item) == False:
+                params.append(item)
+        return params
+
+    def networkdefs(self):
+        if (len(self.data) == 0):
+            return []
+        r = []
+        count = 0
+        for entry in self.data:
+            row = [count]
+            for param in self.params():
+                if (is_number(entry[param])):
+                    row.append(float(entry[param]))
+                else:
+                    row.append("-")
+            if (count > 0): # First row is just sample data
+                r.append(row)
+            count = count + 1
+        return r
+
+    def getresults(self, entryNum):
+        r = []
+        for item in self.fieldnames:
+            if is_number(self.data[entryNum][item]):
+                r.append(self.data[entryNum][item])
+        return r
+
+    def getdurs(self):
+        r = []
+        for item in self.fieldnames:
+            if is_number(item):
+                r.append(item)
         r.sort()
-        return r        
-
-
+        return r
+                
 
