@@ -31,7 +31,7 @@ class LogFile:
         self.fieldnames = reader.fieldnames
         for row in self.data:
             results = self.getresults(count)
-            row["BD"] = 3 #find_key(results,max(results.values()),middle=True)
+            row["BD"] = self.BD(count)
             row["Max"] = max(results)
             tmpData.append(row)
             count = count + 1
@@ -43,6 +43,22 @@ class LogFile:
         if (len(self.params()) > 0):
             self.isOpen = True
         return self.isOpen
+
+    def BD(self, entrynum):
+        results = self.getresults(entrynum)
+        durs = self.getdurs()
+        maxSpikes = max(results)
+        start = -1
+        end = -1
+        mid = -1
+        for i in range(len(results)): 
+            if (results[i] == maxSpikes):
+                if start == -1:
+                    start = i
+                end = i
+                mid = start + (end-start)/2
+        return durs[mid]
+
 
     def params(self):
         if (len(self.data) == 0):

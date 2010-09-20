@@ -69,9 +69,9 @@ class AnalyzerGTK:
     def plotRows(self, widget, path, column):
         (model, pathlist) = self.treeview.get_selection().get_selected_rows()
         for p in pathlist:
-            treeiter = self.liststore.get_iter(p)
+            treeiter = self.treemodelsorted.get_iter(p)
             X = self.logfile.getdurs()
-            Y = self.logfile.getresults(self.liststore.get_value(treeiter,0))
+            Y = self.logfile.getresults(self.treemodelsorted.get_value(treeiter,0))
             tmp = Y[:]
             tmp.append(self.maxSpikes)
             self.maxSpikes = max(tmp)
@@ -150,6 +150,15 @@ class AnalyzerGTK:
                     self.filtertable.attach(cbox, 1, 2, col-1, col)
                     col = col + 1
 
+                # Debugging purposes add the index column too
+                col = 0
+                column = gtk.TreeViewColumn(p, textrenderer, text=col)
+                column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+                column.set_resizable(True)
+                column.set_clickable(True)
+                column.set_sort_column_id(col)
+                self.treeview.append_column(column)
+
                 # Add data to table
                 for n in self.logfile.networkdefs():
                     itt = self.liststore.append(n)
@@ -172,6 +181,13 @@ class AnalyzerGTK:
                     for n in tmp[i]:
                         self.filtercboxes[i].append_text(str(n))
 
+        # Setup the filtered sorted liststores
+        self.treemodelfilter = self.liststore.filter_new(root=None)
+        self.treemodelfilter.set_visible_func(self.applyFilter)
+        self.treemodelsorted = gtk.TreeModelSort(self.treemodelfilter)
+        self.treeview.set_model(self.treemodelsorted)
+
+        # Destroy the file chooser
         chooser.destroy()
 
     def menuAbout_activate(self, widget):
