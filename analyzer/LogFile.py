@@ -36,7 +36,7 @@ class LogFile:
             tmpData.append(row)
             count = count + 1
         self.data = tmpData
-
+        
         self.fieldnames = ["BD", "Max"]
         self.fieldnames.extend(reader.fieldnames)
             
