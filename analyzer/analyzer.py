@@ -13,8 +13,6 @@ matplotlib.use('GTK')
 from matplotlib.figure import Figure   
 from matplotlib.axes import Subplot   
 from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
-from mpl_toolkits.mplot3d import axes3d
-
 
 def unique(seq, idfun=None): 
     if idfun is None:
@@ -74,7 +72,7 @@ class AnalyzerGTK:
         self.showTemplate = False
 
         # Create an empty plot window for analysis
-        self.figureAN = Figure(dpi=72, projection='3d')
+        self.figureAN = Figure(dpi=72)
         self.axisAN = self.figureAN.add_subplot(111)
         self.canvasAN = FigureCanvasGTK(self.figureAN)
         self.canvasAN.show()
