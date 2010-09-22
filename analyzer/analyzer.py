@@ -6,13 +6,14 @@ import gtk
 import gtk.glade
 from collections import defaultdict
 from LogFile import LogFile
-from numpy import mean, std
+from numpy import mean, std, array, zeros
 
 import matplotlib
 matplotlib.use('GTK')   
 from matplotlib.figure import Figure   
 from matplotlib.axes import Subplot   
 from matplotlib.backends.backend_gtk import FigureCanvasGTK, NavigationToolbar   
+from matplotlib.image import NonUniformImage
 
 def unique(seq, idfun=None): 
     if idfun is None:
@@ -107,43 +108,77 @@ class AnalyzerGTK:
         if Xvar == None or Yvar == None or Zvar == None:
             return
 
-        XvarIndex = self.logfile.params().index(Xvar)+1
-        YvarIndex = self.logfile.params().index(Yvar)+1
-        ZvarIndex = self.logfile.params().index(Zvar)+1
 
-        rowiter = self.treemodelsorted.get_iter_first()
-        values = {}
-        Ykeys = []
+        if Zvar == "None":
+            XvarIndex = self.logfile.params().index(Xvar)+1
+            YvarIndex = self.logfile.params().index(Yvar)+1
+            rowiter = self.treemodelsorted.get_iter_first()
+            values = defaultdict(list)
 
-        while rowiter != None:
-            X = self.treemodelsorted.get_value(rowiter,XvarIndex)
-            Y = self.treemodelsorted.get_value(rowiter,YvarIndex)
-            Z = self.treemodelsorted.get_value(rowiter,ZvarIndex)
-            Ykeys.append(Y)
-            values.setdefault(X,defaultdict(list))[Y].append(Z)
-            rowiter = self.treemodelsorted.iter_next(rowiter)
+            while rowiter != None:
+                X = self.treemodelsorted.get_value(rowiter,XvarIndex)
+                Y = self.treemodelsorted.get_value(rowiter,YvarIndex)
+                values[float(X)].append(float(Y))
+                rowiter = self.treemodelsorted.iter_next(rowiter)
+
+            X = []
+            Y = []
+            for k in sorted(values.keys()):
+                X.append(k)
+                Y.append(mean(values[k]))
+
+            self.axisAN.cla()        
+            self.figureAN.clf()
+            self.axisAN = self.figureAN.add_subplot(111)
+            self.axisAN.plot(X,Y, 'k', linewidth=4)
+            self.axisAN.set_xlabel(Xvar)   
+            self.axisAN.set_ylabel(Yvar)   
+            self.canvasAN.draw()
+
+        else:
+            XvarIndex = self.logfile.params().index(Xvar)+1
+            YvarIndex = self.logfile.params().index(Yvar)+1
+            ZvarIndex = self.logfile.params().index(Zvar)+1
+            rowiter = self.treemodelsorted.get_iter_first()
+            values = {}
+            Ykeys = []
+
+            while rowiter != None:
+                X = self.treemodelsorted.get_value(rowiter,XvarIndex)
+                Y = self.treemodelsorted.get_value(rowiter,YvarIndex)
+                Z = self.treemodelsorted.get_value(rowiter,ZvarIndex)
+                Ykeys.append(Y)
+                values.setdefault(X,defaultdict(list))[Y].append(Z)
+                rowiter = self.treemodelsorted.iter_next(rowiter)
 
 
-        Ykeys = unique(Ykeys)
-        XY = []
-        for k in sorted(values.keys()):
-            tmp = []
-            for k2 in sorted(Ykeys):
-                if values[k].has_key(k2):
-                    tmp.append(mean(values[k][k2]))
-                else:
-                    tmp.append(0)
-            XY.append(tmp)
+            Ykeys = unique(Ykeys)
+            XY = []
+            for k in sorted(values.keys()):
+                tmp = []
+                for k2 in sorted(Ykeys):
+                    if values[k].has_key(k2):
+                        tmp.append(mean(values[k][k2]))
+                    else:
+                        tmp.append(0)
+                XY.append(tmp)
+            
+            Z = array(XY)
 
-        self.axisAN.cla()        
-        self.figureAN.clf()
-        self.axisAN = self.figureAN.add_subplot(111)
-        im = self.axisAN.imshow(XY)
-        self.axisAN.set_xlabel(Xvar)   
-        self.axisAN.set_ylabel(Yvar)   
-        self.axisAN.set_title(Zvar)   
-        self.figureAN.colorbar(im)
-        self.canvasAN.draw()
+            self.axisAN.cla()        
+            self.figureAN.clf()
+            self.axisAN = self.figureAN.add_subplot(111)
+            im = NonUniformImage(self.axisAN, interpolation='nearest', extent=(min(values.keys()),max(values.keys()),min(Ykeys),max(Ykeys)))
+            
+            im.set_data(values.keys(), Ykeys, Z.transpose())
+            self.axisAN.images.append(im)
+            self.axisAN.set_xlim(min(values.keys()),max(values.keys()))
+            self.axisAN.set_ylim(min(Ykeys),max(Ykeys))
+            self.axisAN.set_xlabel(Xvar)   
+            self.axisAN.set_ylabel(Yvar)   
+            self.axisAN.set_title(Zvar)   
+            self.figureAN.colorbar(im)
+            self.canvasAN.draw()
 
 
 
@@ -159,7 +194,7 @@ class AnalyzerGTK:
             tmp = Y[:]
             tmp.append(self.maxSpikes)
             self.maxSpikes = max(tmp)
-            self.axisDT.plot(X, Y)
+            self.axisDT.plot(X, Y, linewidth=2)
             self.axisDT.set_ylim( (0, self.maxSpikes+0.1) )
 
         if self.showTemplate:
@@ -223,6 +258,7 @@ class AnalyzerGTK:
                 self.cbXAxis.get_model().clear()
                 self.cbYAxis.get_model().clear()
                 self.cbZAxis.get_model().clear()
+                self.cbZAxis.append_text("None")
 
                 # Add columns to filter table and fill analysis dropdowns
                 self.filtertable = self.wTree.get_widget("FilterTable")
