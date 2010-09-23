@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
     */
 
     /* Rat Bandpass */
+    /*
     sS = 5; sE = 200; sI = 5;
     simC = 200; simT = 500;
     tS1 = 0.1; tS2 = 2;
@@ -102,6 +103,7 @@ int main(int argc, char* argv[])
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
     param.clear();
+    */
 
     /* Bat Bandpass */
     /*
@@ -135,6 +137,34 @@ int main(int argc, char* argv[])
     */
 
 
+    /* Bat Shortpass */
+    sS = 1; sE = 20; sI = 1;
+    simC = 180; simT = 50;
+    tS1 = 0.1; tS2 = 2;
+    Tuning bp(sS,sE,sI);
+
+    bp.define(1,2,0);
+    bp.reldefine(5,Tuning::LTEQ,1);
+    bp.define(15,0,1.0);
+
+    bp.smooth();
+    for (double i = 1.0; i <= 8; i+=1) param.push_back(i);
+    params.add("tauOn", param);
+    params.add("tauOff", param);
+    param.clear();
+    for (double i = 1; i <= 20; i+=1) param.push_back(i);
+    params.add("dOn", param);
+    params.add("dIOn", param);
+    param.clear();
+    param.push_back(5);
+    params.add("dOff", param);
+    param.clear();
+    for (double i = 0; i <= 4; i+=2) param.push_back(i);
+    params.add("gMaxI", param);
+    for (double i = 6; i <= 16; i+=2) param.push_back(i);
+    params.add("gMaxOn", param);
+    params.add("gMaxOff", param);
+    param.clear();
 
     /**********************************************************************/
     /* Read CLI Parameters                                                */
@@ -234,13 +264,13 @@ int main(int argc, char* argv[])
     std::clog << std::endl;
     std::clog << "Spreadsheet results below" << std::endl;
     std::clog << "=========================" << std::endl;
-    std::clog << "Score,gMaxOn,gMaxOff,gMaxSus,tauOn,tauOff,dOn,dOff,dIOn";
+    std::clog << "gMaxOn,gMaxOff,gMaxSus,tauOn,tauOff,dOn,dOff,dIOn";
     for (double i = sS; i <= sE; i+=sI) 
     {
         std::clog << ","<<i;
     }
     std::clog << std::endl;
-    std::clog << "1,,,,,,,," << bp.print() << std::endl;
+    std::clog << ",,,,,,," << bp.print() << std::endl;
 
     long numSims; 
     long done;
@@ -262,6 +292,7 @@ int main(int argc, char* argv[])
     int actrepeats = 1;
     int numsimsinbundle = 0;
     int simsperbundle;
+    int numNetworks = 0;
 
     for (int i_search = 0; i_search < 2; ++i_search)
     {
@@ -270,11 +301,13 @@ int main(int argc, char* argv[])
         if (searchMode) 
         {
             numSims = (bp.numsearchedfor()) * params.size();
+            numNetworks = params.size();
             simsperbundle = nThreads * 50;
         }
         if (!searchMode) 
         {
             numSims = repeats * ((sE-sS)/sI+1) * goodTrials.size();
+            numNetworks = goodTrials.size();
             actrepeats = repeats;
             simsperbundle = nThreads * 50;
         }
@@ -283,7 +316,7 @@ int main(int argc, char* argv[])
         done = 0;
         numsimsinbundle = 0;
         params.reset();
-        progress(start,done,numSims,goodTrials.size(),searchMode,row,true);
+        progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,true);
 
         for (; !params.done(); params++)
         {
@@ -312,7 +345,7 @@ int main(int argc, char* argv[])
                             sim.defaultparams();
                             sim.T = simT; 
                             if (searchMode) sim.dt = 0.25;
-                            else sim.dt = 0.05;
+                            else sim.dt = 0.10;
 
                             Synapse OnE;
                             Synapse OffE;
@@ -331,7 +364,7 @@ int main(int argc, char* argv[])
                             SusI.tau2 = tS2;
                             SusI.gMax = gMaxS;
 
-                            if (!searchMode)
+                            if (!searchMode && actrepeats > 1)
                             {
                                 OnE.spikes.push_back(0+var_nor());
                                 OffE.spikes.push_back(i+var_nor());
@@ -372,7 +405,7 @@ int main(int argc, char* argv[])
                                 ++count;
                                 ++done;
                                 if (count >= simsperbundle) {
-                                    progress(start,done,numSims,goodTrials.size(),searchMode,row,false);
+                                    progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,false);
                                     threads.wait();
                                     count = 0;
                                 }
@@ -406,10 +439,7 @@ int main(int argc, char* argv[])
                         }
                         else if (goodNetwork)
                         {
-                            double score = bp.score(trialResults);
                             int netID = bundleit->first;
-                            std::clog << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-                            std::clog << score << ",";
                             std::clog << std::setiosflags(std::ios::fixed) << std::setprecision(2);
                             std::clog << params.val("gMaxOn", netID) << "," <<  params.val("gMaxOff", netID) << "," <<  params.val("gMaxI", netID) << ",";
                             std::clog << params.val("tauOn",netID) << "," << params.val("tauOff",netID) << "," << params.val("dOn",netID) << "," << params.val("dOff",netID) << "," << dIOn ;
@@ -428,7 +458,7 @@ int main(int argc, char* argv[])
             ++networkID;
         }
     }
-    progress(start,done,numSims,goodTrials.size(),searchMode,row,true);
+    progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,true);
     printw("\nNetwork search completed.\n");
     endwin();
 

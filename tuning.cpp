@@ -11,20 +11,38 @@ void Tuning::define(double x, double y, double extra)
     this->extraPenalty[x] = extra;
 }
 
+void Tuning::reldefine(double x1, unsigned int rel, double x2)
+{
+    // Define a relative definition
+    // We assume that x2 is already defined
+    // and we are saying what x1 should be relative to it
+    Relation r;
+    r.x1 = x1;
+    r.x2 = x2;
+    r.rel = rel;
+    this->relations.push_back(r);
+}
+
 bool Tuning::useinsearch(double x)
 {
-    return this->extraPenalty.find(x) != this->extraPenalty.end();
+    bool r = false;
+    std::vector<Relation>::iterator it_rel;
+    for (it_rel = this->relations.begin(); it_rel != this->relations.end(); it_rel++)
+        if (it_rel->x1 == x || it_rel->x2 == x) r = true;
+
+    return this->extraPenalty.find(x) != this->extraPenalty.end() || r;
 }
 
 int Tuning::numsearchedfor()
 {
-    return (int)this->extraPenalty.size();
+    return (int)this->extraPenalty.size()+(int)this->relations.size();
 }
 
 bool Tuning::possiblematch(std::map<double,double> input) 
 {
     bool r = true;
     std::map<double,double>::iterator it_count, it_input;
+    std::vector<Relation>::iterator it_rel;
     for (it_count = this->extraPenalty.begin(); it_count != this->extraPenalty.end(); it_count++)
     {
         it_input = input.find(it_count->first);
@@ -32,6 +50,35 @@ bool Tuning::possiblematch(std::map<double,double> input)
         {
            if (it_input->second == 0 && this->counts.find(it_count->first)->second > 0) r = false;
            if (it_input->second > 0 && this->counts.find(it_count->first)->second == 0) r = false;
+        }
+    }
+
+    // We pass the basic test, now check relations
+    if (r)
+    {
+        for (it_rel = this->relations.begin(); it_rel != this->relations.end(); it_rel++)
+        {
+            switch (it_rel->rel) 
+            {
+                case Tuning::LTEQ:
+                    if (input[it_rel->x1] > input[it_rel->x2]) r = false; 
+                    break;
+                case Tuning::LTEQNZ:
+                    if (input[it_rel->x1] > input[it_rel->x2] || input[it_rel->x1] == 0) r = false; 
+                    break;
+                case Tuning::LT:
+                    if (input[it_rel->x1] >= input[it_rel->x2]) r = false; 
+                    break;
+                case Tuning::LTNZ:
+                    if (input[it_rel->x1] >= input[it_rel->x2] || input[it_rel->x1] == 0) r = false; 
+                    break;
+                case Tuning::GTEQ:
+                    if (input[it_rel->x1] < input[it_rel->x2]) r = false; 
+                    break;
+                case Tuning::GT:
+                    if (input[it_rel->x1] <= input[it_rel->x2]) r = false; 
+                    break;
+            }
         }
     }
     return r;
@@ -81,49 +128,3 @@ std::string Tuning::print()
     return ss.str();
 }
 
-void Tuning::test()
-{
-    std::cout << "=========================" << std::endl;
-    std::cout << "Running Tuning Score Test" << std::endl;
-    std::cout << "=========================" << std::endl;
-    std::cout << "Expect: 1   Got: " << this->score(this->counts) << std::endl;
-    std::cout << "=========================" << std::endl;
-}
-
-double Tuning::score(std::map<double,double> input) 
-{
-    std::map<double,double>::iterator it_count, it_input;
-
-
-    if (std::min_element(input.begin(), input.end())->second == std::max_element(input.begin(), input.end())->second) return 0;
-
-    double sum = 0;
-    double tmp;
-    for(it_count = this->counts.begin(); it_count != this->counts.end(); ++it_count)
-    {
-        it_input = input.find(it_count->first);
-        if (it_input != input.end()) 
-        {
-            tmp = (it_input->second-it_count->second);
-            sum += tmp*tmp;
-        }
-    }
-
-
-    double dist = sqrt(sum);
-
-    // Since results are all >=0, only half of our ND sphere will be used.
-    double score = pow(1/(0.1+dist),0.5)+0.75;
-
-    // Assign the extra penalty
-    for (it_count = this->extraPenalty.begin(); it_count != this->extraPenalty.end(); it_count++)
-    {
-        it_input = input.find(it_count->first);
-        if (it_input != input.end())
-        {
-           if (it_input->second !=  this->counts.find(it_count->first)->second) score *= it_count->second;
-        }
-    }
-
-    return score;
-}

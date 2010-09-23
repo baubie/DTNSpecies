@@ -17,7 +17,7 @@ double Synapse::I(double t, double V)
 
 double Synapse::g(double t)
 {
-	double g;
+	double g=0;
 	std::vector<double>::iterator it;
 	for (it = this->spikes.begin(); it < this->spikes.end(); it++)
 	{

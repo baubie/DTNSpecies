@@ -113,11 +113,11 @@ vectors<T> vectors<T>::operator++(int) {
 
 template <class T>
 T vectors<T>::val(std::string name) {
+    T a;
     if (this->m_Vectors.find(name) != this->m_Vectors.end())
         return this->m_Vectors[name][this->m_Count[name]];
     else
         std::cout << "Error, " << name << " is not in this vectors object." << std::endl;
-        T a;
         return a;
 }
 
