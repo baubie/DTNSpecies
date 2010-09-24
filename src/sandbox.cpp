@@ -1,5 +1,6 @@
 #include <gtkmm.h>
 #include <iostream>
+#include <vector>
 
 #include "synapse.h"
 #include "simulation.h"
@@ -10,6 +11,25 @@ static void on_btnQuit_clicked()
 {
     if (pMainWindow)
         pMainWindow->hide();
+}
+
+static void on_btnRefresh_clicked()
+{
+    Simulation sim;
+    sim.useVoltage = true;
+    sim.defaultparams();
+
+    Synapse AMPA;
+    AMPA.gMax = 10;
+    AMPA.tau1 = 0.8;
+    AMPA.tau2 = 3;
+    AMPA.del = 0;
+    AMPA.spikes.push_back(0);
+
+    sim.synapses.push_back(AMPA);
+    sim.runSim();
+
+    std::vector<double> V = sim.voltagetrace();
 }
 
 int main(int argc, char **argv) 
@@ -32,12 +52,16 @@ int main(int argc, char **argv)
     refBuilder->get_widget("MainWindow", pMainWindow);
     if (pMainWindow)
     {
-        Gtk::Button* pBtnQuit = 0;
+        Gtk::ToolButton* pBtnQuit = 0;
         refBuilder->get_widget("btnQuit", pBtnQuit);
         if (pBtnQuit)
-        {
             pBtnQuit->signal_clicked().connect( sigc::ptr_fun(on_btnQuit_clicked) );
-        }
+
+
+        Gtk::ToolButton* pBtnRefresh = 0;
+        refBuilder->get_widget("btnRefresh", pBtnRefresh);
+        if (pBtnRefresh)
+            pBtnRefresh->signal_clicked().connect( sigc::ptr_fun(on_btnRefresh_clicked) );
 
         kit.run(*pMainWindow);
     }

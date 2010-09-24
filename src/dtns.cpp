@@ -225,9 +225,9 @@ int main(int argc, char* argv[])
                         if (!searchMode || bp.useinsearch(*stim_it))
                         {
                             Simulation sim;
-                            sim.C = simC;
                             sim.useVoltage = false;
                             sim.defaultparams();
+                            sim.C = simC;
                             sim.T = simT; 
                             if (searchMode) sim.dt = 0.10;
                             else sim.dt = 0.10;
