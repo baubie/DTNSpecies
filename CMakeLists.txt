@@ -2,14 +2,8 @@ cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 project (DTNS CXX)
 
 find_package(Boost 1.43.0 COMPONENTS date_time thread iostreams system program_options)
-find_package(gtkmm)
-include(${Boost_INCLUDE_DIR})
+find_package(PkgConfig)
 
-add_definitions (-Wall -W)
-set (SRC dtns.cpp tuning.cpp simulation.cpp synapse.cpp)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -funroll-loops -ffast-math")
-set (SRCSANDBOX sandbox.cpp simulation.cpp synapse.cpp)
-add_executable (dtns ${SRC})
-add_executable (sandbox ${SRCSANDBOX})
-target_link_libraries(dtns ${Boost_LIBRARIES} ncurses)
-target_link_libraries(sandbox ${Boost_LIBRARIES} gtkmm-2.4)
+pkg_check_modules(GTKMM gtkmm-2.4)
+
+add_subdirectory(src)
