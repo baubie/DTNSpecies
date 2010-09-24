@@ -7,7 +7,6 @@
 #include "boost/threadpool.hpp"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/random.hpp>
 #include <boost/program_options.hpp>
 #include <vector>
 #include <map>
@@ -16,7 +15,6 @@
 #include <math.h>
 #include <ncurses.h>
 
-#include "GLE.h"
 #include "simulation.h"
 #include "synapse.h"
 #include "tuning.h"
@@ -25,9 +23,11 @@
 namespace po = boost::program_options;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
+using namespace std;
+
 
 void progress(ptime start, long done, long total, int found, bool searchMode, int row, bool force);
-
+vector<double> makeDurations();
 
 int main(int argc, char* argv[]) 
 {
@@ -35,166 +35,78 @@ int main(int argc, char* argv[])
     /**********************************************************************/
     /* Define Program Parameters                                          */
     /**********************************************************************/
-    double sS, sE, sI;
+    //double durs[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200};
+    double durs[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25};
+    vector<double> stimuli(durs, durs+sizeof(durs)/sizeof(double));
+    vector<double>::iterator stim_it;
+
+
     vectors<double> params;
-    std::vector<double> param;
     double simC, simT;
-
-    // Setup stimulus and basic neuron properties
-
-    double tOn1,tOn2,tOff1,tOff2,tS1,tS2,dOn,dOff,dIOn,gMaxOn,gMaxOff,gMaxS;
-    /* Mouse Bandpass */
-    /*
-    sS = 1; sE = 100; sI = 1;
-    simC = 200; simT = 333;
-    tS1 = 0.1; tS2 = 2;
-    Tuning bp(sS,sE,sI);
-    bp.define(5,0,0);
-    bp.define(40,1,1.1);
-    bp.define(80,0,0);
-    bp.smooth();
-    for (double i = 2.0; i <= 20; i+=2) param.push_back(i);
-    params.add("tauOn", param);
-    params.add("tauOff", param);
-    param.clear();
-    for (double i = 0; i <= 80; i+=5) param.push_back(i);
-    params.add("dOn", param);
-    param.clear();
-    param.push_back(5);
-    params.add("dOff", param);
-    param.clear();
-    param.push_back(0);
-    params.add("dIOn", param);
-    param.clear();
-    for (double i = 0; i <= 8; i+=2) param.push_back(i);
-    params.add("gMaxI", param);
-    for (double i = 10; i <= 20; i+=2) param.push_back(i);
-    params.add("gMaxOn", param);
-    params.add("gMaxOff", param);
-    param.clear();
-    */
-
-    /* Rat Bandpass */
-    /*
-    sS = 5; sE = 200; sI = 5;
-    simC = 200; simT = 500;
-    tS1 = 0.1; tS2 = 2;
-    Tuning bp(sS,sE,sI);
-    bp.define(5,0,0);
-    bp.define(80,1,1.1);
-    bp.define(150,0,0);
-    bp.smooth();
-    for (double i = 2.0; i <= 20; i+=2) param.push_back(i);
-    params.add("tauOn", param);
-    params.add("tauOff", param);
-    param.clear();
-    for (double i = 0; i <= 120; i+=5) param.push_back(i);
-    params.add("dOn", param);
-    param.clear();
-    param.push_back(5);
-    params.add("dOff", param);
-    param.clear();
-    param.push_back(0);
-    params.add("dIOn", param);
-    param.clear();
-    for (double i = 0; i <= 8; i+=2) param.push_back(i);
-    params.add("gMaxI", param);
-    for (double i = 10; i <= 20; i+=2) param.push_back(i);
-    params.add("gMaxOn", param);
-    params.add("gMaxOff", param);
-    param.clear();
-    */
-
-    /* Bat Bandpass */
-    /*
-    sS = 1; sE = 30; sI = 1;
-    simC = 180; simT = 333;
-    tS1 = 0.1; tS2 = 2;
-    Tuning bp(sS,sE,sI);
-    bp.define(1,0,0);
-    bp.define(6,2,1.1);
-    bp.define(13,0,0);
-    bp.smooth();
-    for (double i = 1.0; i <= 8; i+=1) param.push_back(i);
-    params.add("tauOn", param);
-    params.add("tauOff", param);
-    param.clear();
-    for (double i = 1; i <= 20; i+=1) param.push_back(i);
-    params.add("dOn", param);
-    param.clear();
-    param.push_back(5);
-    params.add("dOff", param);
-    param.clear();
-    param.push_back(0);
-    params.add("dIOn", param);
-    param.clear();
-    for (double i = 0; i <= 4; i+=2) param.push_back(i);
-    params.add("gMaxI", param);
-    for (double i = 6; i <= 16; i+=2) param.push_back(i);
-    params.add("gMaxOn", param);
-    params.add("gMaxOff", param);
-    param.clear();
-    */
-
-
-    /* Bat Shortpass */
-    sS = 1; sE = 20; sI = 1;
     simC = 180; simT = 50;
-    tS1 = 0.1; tS2 = 2;
-    Tuning bp(sS,sE,sI);
 
-    bp.define(1,2,0);
-    bp.reldefine(5,Tuning::LTEQ,1);
-    bp.define(15,0,1.0);
+    Tuning bp;
+    bp.define("Shortpass1", 1, -1, 3);
+    //bp.define("Shortpass2", 1, -1, 5);
+    //bp.define("Shortpass3", 1, -1, 10);
+    bp.check(10);
 
-    bp.smooth();
-    for (double i = 1.0; i <= 8; i+=1) param.push_back(i);
+
+    vector<double> param;
+    for (double i = 1.0; i <= 4; i+=1) param.push_back(i);
     params.add("tauOn", param);
     params.add("tauOff", param);
     param.clear();
-    for (double i = 1; i <= 20; i+=1) param.push_back(i);
+    for (double i = 1; i <= 10; i+=1) param.push_back(i);
     params.add("dOn", param);
-    params.add("dIOn", param);
     param.clear();
     param.push_back(5);
     params.add("dOff", param);
     param.clear();
+    param.push_back(1);
+    params.add("dSus", param);
+    param.clear();
     for (double i = 0; i <= 4; i+=2) param.push_back(i);
-    params.add("gMaxI", param);
+    params.add("gMaxS", param);
     for (double i = 6; i <= 16; i+=2) param.push_back(i);
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
     param.clear();
+    param.push_back(2);
+    params.add("tauS", param);
+    param.clear();
+
+
+
+    double jitter[] = {-0.3,-0.1,0,0.1,0.3};
+    int repeats = sizeof(jitter)/sizeof(double);
+
+
 
     /**********************************************************************/
     /* Read CLI Parameters                                                */
     /**********************************************************************/
     // Determine the program options and set default values
     int nThreads = 4;
-    int repeats = 1;
-    std::string logFile = "log";
+    string logFile = "log";
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
         ("threads,t", po::value<int>(), "set number of concurrent events")
-        ("repeats,r", po::value<int>(), "number of times to repeat each trial")
-        ("logfile,l", po::value<std::string>(), "log file")
+        ("logfile,l", po::value<string>(), "log file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
     if(vm.count("help")) {
-        std::cout << desc << std::endl;
+        cout << desc << endl;
         return 1;
     }
     if(vm.count("threads")) {
         nThreads = vm["threads"].as<int>();
     }
-    if(vm.count("repeats")) {
-        repeats = vm["repeats"].as<int>();
-    }
     if(vm.count("logfile")) {
-        logFile = vm["logfile"].as<std::string>();
+        logFile = vm["logfile"].as<string>();
     }
     /**********************************************************************/
 
@@ -205,12 +117,12 @@ int main(int argc, char* argv[])
     use_default_colors();
     init_pair(1, COLOR_BLUE, -1);
 
-    printw("Network Iterator - Version 0.9\n");
+    printw("Network Iterator - Version 1.0\n");
     refresh();
 
-    std::ofstream oflog(logFile.c_str());
-    std::clog.rdbuf(oflog.rdbuf());
-    std::clog << std::setiosflags(std::ios::fixed) << std::setprecision(2);
+    ofstream oflog(logFile.c_str());
+    clog.rdbuf(oflog.rdbuf());
+    clog << setiosflags(ios::fixed) << setprecision(2);
 
     printw("Logging results in %s\n", logFile.c_str());
     printw("Initializing simulations...\n");
@@ -218,22 +130,13 @@ int main(int argc, char* argv[])
     boost::threadpool::thread_pool<> threads(nThreads);
 
     // Define iterators for use later
-    std::vector<Simulation>::iterator simit;
-    std::map< double, std::vector<Simulation> >::iterator simsimit;
-    std::vector< std::vector< std::vector<Simulation> > >::iterator simsimsimit;
-    std::map< double, std::vector<Simulation> > durations;
-    std::map<int,std::map<double,std::vector<Simulation> > > simbundle;
-    std::map< int, std::map< double, std::vector<Simulation> > >::iterator bundleit;
-    std::vector<Simulation> sims;
-
-
-    boost::mt19937 rng;
-    boost::normal_distribution<> nd(0.0, 1.0);
-    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor(rng, nd);
-    
-    // Seed with current time
-    unsigned int RANDOM_SEED = static_cast<unsigned int>(std::time(0));
-    rng.seed(RANDOM_SEED);
+    vector<Simulation>::iterator simit;
+    map< double, vector<Simulation> >::iterator simsimit;
+    vector< vector< vector<Simulation> > >::iterator simsimsimit;
+    map< double, vector<Simulation> > durations;
+    map<int,map<double,vector<Simulation> > > simbundle;
+    map< int, map< double, vector<Simulation> > >::iterator bundleit;
+    vector<Simulation> sims;
 
 
 
@@ -243,43 +146,36 @@ int main(int argc, char* argv[])
 
     Simulation defs;
     defs.defaultparams();
-    std::clog << "Duration Tune Neuron Network Searcher" << std::endl;
-    std::clog << "Parameters Searched:" << std::endl;
-    std::clog << params.toString();
-    std::clog << "Trials per network: " << repeats << std::endl;
-    std::clog << "Random Seed: " << RANDOM_SEED << std::endl;
-    std::clog << "Time per trial: " << simT << " ms" << std::endl;
-    std::clog << "Start Time: " << sS << std::endl;
-    std::clog << "End Time: " << sE << std::endl;
-    std::clog << "Interval Time: " << sI << std::endl;
-    std::clog << "C: " << simC;
-    std::clog << "\tgL: " << defs.gL;
-    std::clog << "\tEL: " << defs.EL;
-    std::clog << "\ta: " << defs.a;
-    std::clog << "\tb: " << defs.b;
-    std::clog << "\tdT: " << defs.dT;
-    std::clog << "\tVT: " << defs.VT;
-	std::clog << "\tVr: " << defs.Vr;
-    std::clog << "\ttau_w: " << defs.tau_w;
-    std::clog << std::endl;
-    std::clog << "Spreadsheet results below" << std::endl;
-    std::clog << "=========================" << std::endl;
-    std::clog << "gMaxOn,gMaxOff,gMaxSus,tauOn,tauOff,dOn,dOff,dIOn";
-    for (double i = sS; i <= sE; i+=sI) 
+    clog << "Duration Tune Neuron Network Searcher" << endl;
+    clog << "Parameters Searched:" << endl;
+    clog << params.toString();
+    clog << "Time per trial: " << simT << " ms" << endl;
+    clog << "C: " << simC;
+    clog << "\tgL: " << defs.gL;
+    clog << "\tEL: " << defs.EL;
+    clog << "\ta: " << defs.a;
+    clog << "\tb: " << defs.b;
+    clog << "\tdT: " << defs.dT;
+    clog << "\tVT: " << defs.VT;
+	clog << "\tVr: " << defs.Vr;
+    clog << "\ttau_w: " << defs.tau_w;
+    clog << endl;
+    clog << "Spreadsheet results below" << endl;
+    clog << "=========================" << endl;
+    clog << "gMaxOn,gMaxOff,gMaxSus,tauOn,tauOff,dOn,dOff,dSus";
+    for (unsigned int i = 0; i < stimuli.size(); ++i) 
     {
-        std::clog << ","<<i;
+        clog << ","<< stimuli[i];
     }
-    std::clog << std::endl;
-    std::clog << ",,,,,,," << bp.print() << std::endl;
+    clog << endl;
 
-    long numSims; 
     long done;
     ptime start;
-    std::map<double,double> trialResults;
-    std::map<double,double>::iterator it_trialResults;
+    map<double,double> trialResults;
+    map<double,double>::iterator it_trialResults;
 
     int networkID = 0;
-    std::vector<int> goodTrials; // Any searches that yield results store here
+    vector<int> goodTrials; // Any searches that yield results store here
 
     printw("Running simulations...\n");
     refresh();
@@ -289,7 +185,6 @@ int main(int argc, char* argv[])
 
     bool searchMode;
     bool goodNetwork = false;
-    int actrepeats = 1;
     int numsimsinbundle = 0;
     int simsperbundle;
     int numNetworks = 0;
@@ -300,15 +195,12 @@ int main(int argc, char* argv[])
 
         if (searchMode) 
         {
-            numSims = (bp.numsearchedfor()) * params.size();
             numNetworks = params.size();
             simsperbundle = nThreads * 50;
         }
         if (!searchMode) 
         {
-            numSims = repeats * ((sE-sS)/sI+1) * goodTrials.size();
             numNetworks = goodTrials.size();
-            actrepeats = repeats;
             simsperbundle = nThreads * 50;
         }
         start = second_clock::local_time();
@@ -316,63 +208,50 @@ int main(int argc, char* argv[])
         done = 0;
         numsimsinbundle = 0;
         params.reset();
-        progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,true);
+        progress(start,done,numNetworks,goodTrials.size(),searchMode,row,true);
 
         for (; !params.done(); params++)
         {
-            goodNetwork = searchMode || std::find(goodTrials.begin(), goodTrials.end(), networkID) != goodTrials.end();
+            ++done;
+            goodNetwork = searchMode || find(goodTrials.begin(), goodTrials.end(), networkID) != goodTrials.end();
             if (goodNetwork)
             {
                 durations.clear();
-                gMaxOn = params.val("gMaxOn");
-                gMaxOff = params.val("gMaxOff");;
-                gMaxS = params.val("gMaxI");;
-                tOn1 = tOn2 = params.val("tauOn");
-                tOff1 = tOff2 = params.val("tauOff");
-                dOn = params.val("dOn");
-                dOff = params.val("dOff");
-                dIOn = params.val("dIOn");
-                for (int i = sS; i <= sE; i+=sI)
+                for (stim_it = stimuli.begin(); stim_it != stimuli.end(); stim_it++)
                 {
                     sims.clear();
-                    for (int repeat = 0; repeat < actrepeats; ++repeat)
+                    for (int repeat = 0; repeat < repeats; ++repeat)
                     {
-                        if (!searchMode || bp.useinsearch(i))
+                        if (!searchMode || bp.useinsearch(*stim_it))
                         {
                             Simulation sim;
                             sim.C = simC;
                             sim.useVoltage = false;
                             sim.defaultparams();
                             sim.T = simT; 
-                            if (searchMode) sim.dt = 0.25;
+                            if (searchMode) sim.dt = 0.10;
                             else sim.dt = 0.10;
 
                             Synapse OnE;
                             Synapse OffE;
                             Synapse SusI;
-                            OnE.gMax = gMaxOn;
-                            OnE.tau1 = tOn1;
-                            OnE.tau2 = tOn2;
-                            OnE.del = dOn;
-                            OffE.gMax = gMaxOff;
-                            OffE.tau1 = tOff1;
-                            OffE.tau2 = tOff2;
-                            OffE.del = dOff;
+                            OnE.gMax = params.val("gMaxOn");
+                            OnE.tau1 = params.val("tauOn");
+                            OnE.tau2 = params.val("tauOn");
+                            OnE.del = params.val("dOn");
+                            OffE.gMax = params.val("gMaxOff");
+                            OffE.tau1 = params.val("tauOff");
+                            OffE.tau2 = params.val("tauOff");
+                            OffE.del = params.val("dOff");
                             SusI.E = -75;
-                            SusI.del = dIOn;
-                            SusI.tau1 = tS1;
-                            SusI.tau2 = tS2;
-                            SusI.gMax = gMaxS;
+                            SusI.del = params.val("dSus");
+                            SusI.tau1 = params.val("tauS");
+                            SusI.tau2 = params.val("tauS");
+                            SusI.gMax = params.val("gMaxS");
 
-                            if (!searchMode && actrepeats > 1)
-                            {
-                                OnE.spikes.push_back(0+var_nor());
-                                OffE.spikes.push_back(i+var_nor());
-                            } else {
-                                OnE.spikes.push_back(0);
-                                OffE.spikes.push_back(i);
-                            }
-                            for (int j = 0; j<=+i; ++j)
+                            OnE.spikes.push_back(0+jitter[repeat]);
+                            OffE.spikes.push_back(*stim_it);
+                            for (int j = 0; j<=+*stim_it; ++j)
                             {
                                 SusI.spikes.push_back(j);
                             }
@@ -383,9 +262,9 @@ int main(int argc, char* argv[])
                             numsimsinbundle++;
                         }
                     }
-                    if (!searchMode || bp.useinsearch(i))
+                    if (!searchMode || bp.useinsearch(*stim_it))
                     {
-                        durations[i] = sims;
+                        durations[*stim_it] = sims;
                     }
                 }
                 simbundle[networkID] = durations;
@@ -403,9 +282,8 @@ int main(int argc, char* argv[])
                             {
                                 threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
                                 ++count;
-                                ++done;
                                 if (count >= simsperbundle) {
-                                    progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,false);
+                                    progress(start,done,numNetworks,goodTrials.size(),searchMode,row,false);
                                     threads.wait();
                                     count = 0;
                                 }
@@ -426,7 +304,7 @@ int main(int argc, char* argv[])
                             {
                                 spikes += simit->spikes().size();
                             }
-                            spikes /= actrepeats;
+                            spikes /= repeats;
                             trialResults[simsimit->first] = spikes;
                         }
 
@@ -440,16 +318,16 @@ int main(int argc, char* argv[])
                         else if (goodNetwork)
                         {
                             int netID = bundleit->first;
-                            std::clog << std::setiosflags(std::ios::fixed) << std::setprecision(2);
-                            std::clog << params.val("gMaxOn", netID) << "," <<  params.val("gMaxOff", netID) << "," <<  params.val("gMaxI", netID) << ",";
-                            std::clog << params.val("tauOn",netID) << "," << params.val("tauOff",netID) << "," << params.val("dOn",netID) << "," << params.val("dOff",netID) << "," << dIOn ;
+                            clog << setiosflags(ios::fixed) << setprecision(2);
+                            clog << params.val("gMaxOn", netID) << "," <<  params.val("gMaxOff", netID) << "," <<  params.val("gMaxS", netID) << ",";
+                            clog << params.val("tauOn",netID) << "," << params.val("tauOff",netID) << "," << params.val("dOn",netID) << "," << params.val("dOff",netID) << "," << params.val("dSus") ;
                             // Print it out
                             for (it_trialResults = trialResults.begin(); it_trialResults != trialResults.end(); it_trialResults++)
                             {
-                                std::clog << "," << it_trialResults->second;
+                                clog << "," << it_trialResults->second;
                             }
-                            std::clog << std::endl;
-                            std::clog << std::flush;
+                            clog << endl;
+                            clog << flush;
                         }
                     }
                     simbundle.clear();
@@ -458,7 +336,7 @@ int main(int argc, char* argv[])
             ++networkID;
         }
     }
-    progress(start,done*(numNetworks/(1.0*numSims)),numNetworks,goodTrials.size(),searchMode,row,true);
+    progress(start,done,numNetworks,goodTrials.size(),searchMode,row,true);
     printw("\nNetwork search completed.\n");
     endwin();
 
@@ -480,7 +358,7 @@ void progress(ptime start, long done, long total, int found, bool searchMode, in
     spinpos++;
     if (spinpos == 8) spinpos = 0;
 
-    std::string endTime, timeLeft, timeElapsed;
+    string endTime, timeLeft, timeElapsed;
     double percent = ((double)done/(double)(total+0.000001));
     long seconds_left = 0;
 
@@ -545,4 +423,3 @@ void progress(ptime start, long done, long total, int found, bool searchMode, in
     move(++row,0);
     refresh();
 }
-
