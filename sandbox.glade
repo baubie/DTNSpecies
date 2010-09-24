@@ -1,82 +1,82 @@
 <?xml version="1.0"?>
-<glade-interface>
-  <!-- interface-requires gtk+ 2.16 -->
+<interface>
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <widget class="GtkWindow" id="MainWindow">
+  <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
     <child>
-      <widget class="GtkVBox" id="vbox1">
+      <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <widget class="GtkToolbar" id="toolbar1">
+          <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkToolButton" id="btnNew">
+              <object class="GtkToolButton" id="btnNew">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">New</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
                 <signal name="clicked" handler="on_btnNew_clicked"/>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkToolButton" id="btnOpen">
+              <object class="GtkToolButton" id="btnOpen">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Open</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
                 <signal name="clicked" handler="on_btnOpen_clicked"/>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkToolButton" id="btnSave">
+              <object class="GtkToolButton" id="btnSave">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
                 <signal name="clicked" handler="on_btnSave_clicked"/>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkToolButton" id="btnQuit">
+              <object class="GtkToolButton" id="btnQuit">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Quit</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-quit</property>
                 <signal name="clicked" handler="on_btnQuit_clicked"/>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
-          </widget>
+          </object>
           <packing>
             <property name="expand">False</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkHBox" id="hboxMain">
+          <object class="GtkHBox" id="hboxMain">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkTreeView" id="tvParameters">
+              <object class="GtkTreeView" id="tvParameters">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-              </widget>
+              </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="position">0</property>
@@ -85,12 +85,12 @@
             <child>
               <placeholder/>
             </child>
-          </widget>
+          </object>
           <packing>
             <property name="position">1</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>

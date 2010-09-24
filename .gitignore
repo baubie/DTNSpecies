@@ -5,6 +5,7 @@ CMakeFiles
 CMakeCache.txt
 Makefile
 dtns
+sandbox
 *.pdf
 cmake_install.cmake
 logs
