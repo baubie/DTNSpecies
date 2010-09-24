@@ -1,8 +1,8 @@
 link_directories(
-    ${GTKMM_LIBRARY_DIRS} )
+    ${GTKMM_LIBRARY_DIRS} ${PLOTMM_LIBRARY_DIRS})
 
 include_directories(
-    ${GTKMM_INCLUDE_DIRS} )
+    ${GTKMM_INCLUDE_DIRS} ${PLOTMM_INCLUDE_DIRS})
 
 include(${Boost_INCLUDE_DIR})
 
@@ -16,4 +16,4 @@ add_executable (dtns ${SRC})
 add_executable (sandbox ${SRCSANDBOX})
 
 target_link_libraries(dtns ${Boost_LIBRARIES} ncurses)
-target_link_libraries(sandbox ${Boost_LIBRARIES} ${GTKMM_LIBRARIES})
+target_link_libraries(sandbox ${Boost_LIBRARIES} ${GTKMM_LIBRARIES} ${PLOTMM_LIBRARIES})
