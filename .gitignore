@@ -9,3 +9,5 @@ sandbox
 *.pdf
 cmake_install.cmake
 logs
+callgrind.*
+*.log

@@ -1,11 +1,10 @@
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/bind.hpp>
-#include "boost/threadpool.hpp"
-#include <boost/math/distributions/normal.hpp>
+
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
 #include <vector>
@@ -19,6 +18,19 @@
 #include "synapse.h"
 #include "tuning.h"
 #include "vectors.h"
+
+
+//#define THREADS
+
+
+
+#ifdef THREADS
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/bind.hpp>
+#include "boost/threadpool.hpp"
+#endif
+
 
 namespace po = boost::program_options;
 using namespace boost::posix_time;
@@ -53,6 +65,7 @@ int main(int argc, char* argv[])
 
 
     vector<double> param;
+    /*
     for (double i = 1.0; i <= 4; i+=1) param.push_back(i);
     params.add("tauOn", param);
     params.add("tauOff", param);
@@ -75,11 +88,28 @@ int main(int argc, char* argv[])
     param.push_back(2);
     params.add("tauS", param);
     param.clear();
+    */
 
+    param.push_back(1);
+    param.push_back(2);
+    params.add("tauOn", param);
+    params.add("tauOff", param);
+    params.add("dOn", param);
+    params.add("dOff", param);
+    params.add("dSus", param);
+    params.add("gMaxS", param);
+    params.add("tauS", param);
+    param.push_back(12);
+    param.push_back(13);
+    param.push_back(14);
+    params.add("gMaxOn", param);
+    params.add("gMaxOff", param);
+    param.clear();
 
 
     double jitter[] = {-0.3,-0.1,0,0.1,0.3};
     int repeats = sizeof(jitter)/sizeof(double);
+    bool quiet = false;
 
 
 
@@ -92,8 +122,11 @@ int main(int argc, char* argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "produce help message")
+#ifdef THREADS
         ("threads,t", po::value<int>(), "set number of concurrent events")
+#endif
         ("logfile,l", po::value<string>(), "log file")
+        ("quiet,q", "log file")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -101,6 +134,9 @@ int main(int argc, char* argv[])
     if(vm.count("help")) {
         cout << desc << endl;
         return 1;
+    }
+    if(vm.count("quiet")) {
+        quiet = true;
     }
     if(vm.count("threads")) {
         nThreads = vm["threads"].as<int>();
@@ -111,6 +147,7 @@ int main(int argc, char* argv[])
     /**********************************************************************/
 
 
+    if (!quiet) {
     // Setup NCURSES
     initscr();
     start_color();
@@ -119,15 +156,20 @@ int main(int argc, char* argv[])
 
     printw("Network Iterator - Version 1.0\n");
     refresh();
+    }
 
     ofstream oflog(logFile.c_str());
     clog.rdbuf(oflog.rdbuf());
     clog << setiosflags(ios::fixed) << setprecision(2);
 
+    if (!quiet) {
     printw("Logging results in %s\n", logFile.c_str());
     printw("Initializing simulations...\n");
     refresh();
+    }
+#ifdef THREADS
     boost::threadpool::thread_pool<> threads(nThreads);
+#endif
 
     // Define iterators for use later
     vector<Simulation>::iterator simit;
@@ -177,8 +219,10 @@ int main(int argc, char* argv[])
     int networkID = 0;
     vector<int> goodTrials; // Any searches that yield results store here
 
+    if (!quiet) {
     printw("Running simulations...\n");
     refresh();
+    }
 
     int row,col;
     getyx(stdscr,row,col);
@@ -208,7 +252,9 @@ int main(int argc, char* argv[])
         done = 0;
         numsimsinbundle = 0;
         params.reset();
+        if (!quiet) {
         progress(start,done,numNetworks,goodTrials.size(),searchMode,row,true);
+        }
 
         for (; !params.done(); params++)
         {
@@ -273,24 +319,38 @@ int main(int argc, char* argv[])
                 {
                     numsimsinbundle = 0;
                     // Schedule all of the simulations to run
+#ifdef THREADS
                     int count = 0;
+#endif
                     for (bundleit = simbundle.begin(); bundleit != simbundle.end(); bundleit++)
                     {
                         for (simsimit = bundleit->second.begin(); simsimit != bundleit->second.end(); simsimit++)
                         {
                             for (simit = simsimit->second.begin(); simit != simsimit->second.end(); simit++)
                             {
+#ifdef THREADS
                                 threads.schedule(boost::bind(&Simulation::runSim,&(*simit)));
                                 ++count;
                                 if (count >= simsperbundle) {
+                                    if (!quiet) {
                                     progress(start,done,numNetworks,goodTrials.size(),searchMode,row,false);
+                                    }
                                     threads.wait();
                                     count = 0;
                                 }
+#else
+                                
+                                simit->runSim();
+                                if (!quiet) {
+                                progress(start,done,numNetworks,goodTrials.size(),searchMode,row,false);
+                                }
+#endif
                             }
                         }
                     }
+#ifdef THREADS
                     threads.wait();
+#endif
 
                     // Extract results
                     double spikes;
@@ -336,8 +396,10 @@ int main(int argc, char* argv[])
             ++networkID;
         }
     }
+    if (!quiet) {
     progress(start,done,numNetworks,goodTrials.size(),searchMode,row,true);
     printw("\nNetwork search completed.\n");
+    }
     endwin();
 
     return 0;

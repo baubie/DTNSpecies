@@ -50,7 +50,7 @@ class SandboxGTK
             }
 
             Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
-            voltageCurve->set_data(cV,ct,V.size());
+            voltageCurve->set_data(ct,cV,V.size());
             this->m_pPlot->scale(PlotMM::AXIS_BOTTOM)->set_range(0,500,false);
             this->m_pPlot->scale(PlotMM::AXIS_LEFT)->set_range(-75,50,false);
             this->m_pPlot->add_curve(voltageCurve);
