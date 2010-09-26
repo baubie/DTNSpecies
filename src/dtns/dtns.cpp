@@ -15,7 +15,7 @@
 #include <ncurses.h>
 #include <utility>
 
-#include "simulation.h"
+#include <simulation.h>
 #include "tuning.h"
 #include "vectors.h"
 

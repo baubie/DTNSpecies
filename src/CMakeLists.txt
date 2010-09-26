@@ -1,6 +1,6 @@
 
 
-SET(CMAKE_INCLUDE_PATH "${CMAKE_INCLUDE_PATH}:../common")
+include_directories("common")
 
 SET (SRCCOMMON ../common/simulation.cpp ../common/synapse.cpp)
 

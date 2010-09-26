@@ -9,6 +9,6 @@ include(${Boost_INCLUDE_DIR})
 add_definitions (-Wall -W)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -funroll-loops -ffast-math")
 
-set (SRCSANDBOX sandbox.cpp)
+set (SRCSANDBOX sandbox.cpp SandboxGTK.cpp)
 add_executable (sandbox ${SRCSANDBOX} ${SRCCOMMON})
 target_link_libraries(sandbox ${Boost_LIBRARIES} ${GTKMM_LIBRARIES} ${PLOTMM_LIBRARIES})
