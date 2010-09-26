@@ -3,31 +3,38 @@
 
 #include <math.h>
 #include <vector>
-#include "fastexp.h"
+#include <boost/unordered_map.hpp>
+#include <utility>
+
+#include <iostream>
 
 class Synapse
 {
 	public:
-		// Constructor
-		Synapse();
+            // Constructor
+            Synapse();
 
-		// Parameters
-		double tau1;
-		double tau2;
-		double gMax;
-		double del;
-		double E;
+            // Parameters
+            double tau1;
+            double tau2;
+            double gMax;
+            double del;
+            double E;
 
-		// Get Conductance 
-		double g(double t);
-		double I(double t,double V);
+            // Get Conductance 
+            double g(double t);
+            double I(double t,double V);
 
-		std::vector<double> spikes;
+            static void prepare(double tau1, double tau2);
+            static double dt;
+
+            std::vector<double> spikes;
 
 	private:
-        // Synapatic alpha function
-        double alpha(double t);
-
+            // Synapatic alpha function
+            double alpha(double t);
+            static boost::unordered_map<double,double> cache;
 };
+
 
 #endif

@@ -13,9 +13,9 @@
 #include <algorithm>
 #include <math.h>
 #include <ncurses.h>
+#include <utility>
 
 #include "simulation.h"
-#include "synapse.h"
 #include "tuning.h"
 #include "vectors.h"
 
@@ -38,6 +38,8 @@ using namespace boost::gregorian;
 using namespace std;
 
 
+
+
 void progress(ptime start, long done, long total, int found, bool searchMode, int row, bool force);
 vector<double> makeDurations();
 
@@ -54,12 +56,14 @@ int main(int argc, char* argv[])
 
 
     vectors<double> params;
-    double simC, simT;
-    simC = 180; simT = 50;
+    double simC, simT, dt;
+    simC = 180; simT = 50; dt = 0.1;
+
+    Synapse::dt = dt;
 
     Tuning bp;
-    bp.define("Shortpass1", 1, -1, 3);
-    //bp.define("Shortpass2", 1, -1, 5);
+    //bp.define("Shortpass1", 1, -1, 3);
+    bp.define("Shortpass2", 1, -1, 5);
     //bp.define("Shortpass3", 1, -1, 10);
     bp.check(10);
 
@@ -105,6 +109,7 @@ int main(int argc, char* argv[])
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
     param.clear();
+
 
 
     double jitter[] = {-0.3,-0.1,0,0.1,0.3};
@@ -162,11 +167,16 @@ int main(int argc, char* argv[])
     clog.rdbuf(oflog.rdbuf());
     clog << setiosflags(ios::fixed) << setprecision(2);
 
-    if (!quiet) {
-    printw("Logging results in %s\n", logFile.c_str());
-    printw("Initializing simulations...\n");
-    refresh();
+    // Precompute synapses
+    if (!quiet)
+    {
+        printw("Logging results in %s\n", logFile.c_str());
+        printw("Precomputing synaptic conductances...\n");
+        refresh();
     }
+
+    Synapse::prepare(1,1);
+    Synapse::prepare(2,2);
 #ifdef THREADS
     boost::threadpool::thread_pool<> threads(nThreads);
 #endif
@@ -258,10 +268,10 @@ int main(int argc, char* argv[])
 
         for (; !params.done(); params++)
         {
-            ++done;
             goodNetwork = searchMode || find(goodTrials.begin(), goodTrials.end(), networkID) != goodTrials.end();
             if (goodNetwork)
             {
+                ++done;
                 durations.clear();
                 for (stim_it = stimuli.begin(); stim_it != stimuli.end(); stim_it++)
                 {
@@ -275,8 +285,7 @@ int main(int argc, char* argv[])
                             sim.defaultparams();
                             sim.C = simC;
                             sim.T = simT; 
-                            if (searchMode) sim.dt = 0.10;
-                            else sim.dt = 0.10;
+                            sim.dt = dt;
 
                             Synapse OnE;
                             Synapse OffE;
@@ -294,7 +303,6 @@ int main(int argc, char* argv[])
                             SusI.tau1 = params.val("tauS");
                             SusI.tau2 = params.val("tauS");
                             SusI.gMax = params.val("gMaxS");
-
                             OnE.spikes.push_back(0+jitter[repeat]);
                             OffE.spikes.push_back(*stim_it);
                             for (int j = 0; j<=+*stim_it; ++j)

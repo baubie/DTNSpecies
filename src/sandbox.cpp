@@ -30,13 +30,18 @@ class SandboxGTK
             Simulation sim;
             sim.defaultparams();
             sim.useVoltage = true;
+            sim.C = 120;
 
             Synapse AMPA;
-            AMPA.gMax = 20; // nS
+            AMPA.gMax = 25; // nS
             AMPA.tau1 = 0.8; // ms
             AMPA.tau2 = 3; // ms
-            AMPA.del = 0; // ms
+            AMPA.del = 25; // ms
+            AMPA.E = 0;
             AMPA.spikes.push_back(0);
+
+            Synapse::dt = sim.dt;
+            Synapse::prepare(0.8,3);
 
             sim.synapses.push_back(AMPA);
             sim.runSim();
@@ -47,7 +52,10 @@ class SandboxGTK
             {
                 cV[i] = V[i];
                 ct[i] = t[i];
+                if (i < 300)
+                std::cout << cV[i] << std::endl;
             }
+
 
             Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
             voltageCurve->set_data(ct,cV,V.size());
