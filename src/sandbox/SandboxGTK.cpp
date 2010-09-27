@@ -515,6 +515,8 @@ void SandboxGTK::runSim()
 
 
         onset_spikes_glu = onset_spikes_glu == -1 ? duration/onset_interval_glu : onset_spikes_glu;
+        offset_spikes_glu = offset_spikes_glu == -1 ? duration/offset_interval_glu : offset_spikes_glu;
+        onset_spikes_GABA = onset_spikes_GABA == -1 ? duration/onset_interval_GABA : onset_spikes_GABA;
         double start = 0;
         for (int c = 0; c < count; ++c)
         {
@@ -540,8 +542,8 @@ void SandboxGTK::runSim()
         }
 
         Simulation sim = getSimulation();
-        sim.synapses.push_back(AMPA);
-        sim.synapses.push_back(NMDA);
+      //  sim.synapses.push_back(AMPA);
+      //  sim.synapses.push_back(NMDA);
         sim.synapses.push_back(GABA_A);
         sim.runSim();
         std::vector<double> V = sim.voltagetrace();

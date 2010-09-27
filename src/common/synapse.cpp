@@ -42,7 +42,7 @@ void Synapse::prepare(double tau1, double tau2)
 
 double Synapse::I(double t, double V)
 {
-	return this->g(t)*(V-this->E);
+	return -1*this->g(t)*(V-this->E);
 }
 
 double Synapse::g(double t)
@@ -65,7 +65,7 @@ double Synapse::alpha(double t)
         double tt = t/tau1;
         return gMax*(tt)*exp(1-tt);
     } else {
-        return gMax*(exp(-t/tau1)-exp(-t/tau2));
+        return gMax*(exp(-t/tau2)-exp(-t/tau1));
     }
 }
 

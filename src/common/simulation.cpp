@@ -53,7 +53,7 @@ void Simulation::runSim()
             k2 = this->dV(V+0.5*dt*k1,I);
             k3 = this->dV(V+0.5*dt*k2,I);
             k4 = this->dV(V+dt*k3,I);
-            V = V + dt*(k1+2*k2+2*k3+k4)*0.16666666;
+            V = V + dt*(k1+2*k2+2*k3+k4)*0.16666666666;
 
             k1 = this->dw(w);
             k2 = this->dw(w+0.5*dt*k1);
