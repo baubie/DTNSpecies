@@ -45,6 +45,7 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         sim.defaultparams();
         sim.T = 150;
         sim.dt = 0.01;
+        sim.C = 80;
         Gtk::TreeModel::Row row;
         Gtk::TreeModel::Row childrow;
 
@@ -542,8 +543,8 @@ void SandboxGTK::runSim()
         }
 
         Simulation sim = getSimulation();
-      //  sim.synapses.push_back(AMPA);
-      //  sim.synapses.push_back(NMDA);
+        sim.synapses.push_back(AMPA);
+        sim.synapses.push_back(NMDA);
         sim.synapses.push_back(GABA_A);
         sim.runSim();
         std::vector<double> V = sim.voltagetrace();
