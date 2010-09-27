@@ -20,7 +20,7 @@
 #include "vectors.h"
 
 
-//#define THREADS
+#define THREADS
 
 
 
@@ -28,7 +28,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
-#include "boost/threadpool.hpp"
+#include <boost/threadpool.hpp>
 #endif
 
 
@@ -57,9 +57,7 @@ int main(int argc, char* argv[])
 
     vectors<double> params;
     double simC, simT, dt;
-    simC = 180; simT = 50; dt = 0.1;
 
-    Synapse::dt = dt;
 
     Tuning bp;
     //bp.define("Shortpass1", 1, -1, 3);
@@ -69,12 +67,13 @@ int main(int argc, char* argv[])
 
 
     vector<double> param;
-    /*
+    simC = 80; simT = 50; dt = 0.1;
+
     for (double i = 1.0; i <= 4; i+=1) param.push_back(i);
     params.add("tauOn", param);
     params.add("tauOff", param);
     param.clear();
-    for (double i = 1; i <= 10; i+=1) param.push_back(i);
+    for (double i = 5; i <= 15; i+=1) param.push_back(i);
     params.add("dOn", param);
     param.clear();
     param.push_back(5);
@@ -83,31 +82,14 @@ int main(int argc, char* argv[])
     param.push_back(1);
     params.add("dSus", param);
     param.clear();
-    for (double i = 0; i <= 4; i+=2) param.push_back(i);
+    for (double i = 0; i <= 4; i+=1) param.push_back(i);
     params.add("gMaxS", param);
-    for (double i = 6; i <= 16; i+=2) param.push_back(i);
+    for (double i = 5; i <= 8; i+=1) param.push_back(i);
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
     param.clear();
     param.push_back(2);
     params.add("tauS", param);
-    param.clear();
-    */
-
-    param.push_back(1);
-    param.push_back(2);
-    params.add("tauOn", param);
-    params.add("tauOff", param);
-    params.add("dOn", param);
-    params.add("dOff", param);
-    params.add("dSus", param);
-    params.add("gMaxS", param);
-    params.add("tauS", param);
-    param.push_back(12);
-    param.push_back(13);
-    param.push_back(14);
-    params.add("gMaxOn", param);
-    params.add("gMaxOff", param);
     param.clear();
 
 
@@ -177,6 +159,7 @@ int main(int argc, char* argv[])
 
     Synapse::prepare(1,1);
     Synapse::prepare(2,2);
+
 #ifdef THREADS
     boost::threadpool::thread_pool<> threads(nThreads);
 #endif
