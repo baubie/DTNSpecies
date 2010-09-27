@@ -7,7 +7,7 @@ std::vector<double> Simulation::timesteps()
 	r.resize(steps,0);
 
 	for (int i = 0; i < steps; ++i)
-		r[i] = i*dt; 
+		r[i] = i*dt-del; 
 
 	return r;
 }
@@ -43,33 +43,33 @@ void Simulation::runSim()
 	std::vector<Synapse>::iterator synit;
 	for (int i = 0; i < steps; ++i)
 	{
-		I = 0;
-		for(synit = this->synapses.begin(); synit < this->synapses.end(); synit++)
-		{
-			I += synit->I(i*dt,V);
-		}
+            I = 0;
+            for(synit = this->synapses.begin(); synit < this->synapses.end(); synit++)
+            {
+                    I += synit->I(i*dt-del,V);
+            }
 
-        k1 = this->dV(V,I);
-        k2 = this->dV(V+0.5*dt*k1,I);
-        k3 = this->dV(V+0.5*dt*k2,I);
-        k4 = this->dV(V+dt*k3,I);
-        V = V + dt*(k1+2*k2+2*k3+k4)*0.16666666;
+            k1 = this->dV(V,I);
+            k2 = this->dV(V+0.5*dt*k1,I);
+            k3 = this->dV(V+0.5*dt*k2,I);
+            k4 = this->dV(V+dt*k3,I);
+            V = V + dt*(k1+2*k2+2*k3+k4)*0.16666666;
 
-        k1 = this->dw(w);
-        k2 = this->dw(w+0.5*dt*k1);
-        k3 = this->dw(w+0.5*dt*k2);
-        k4 = this->dw(w+dt*k3);
-        w = w + dt*(k1+2*k2+2*k3+k4)*0.166666666666;
+            k1 = this->dw(w);
+            k2 = this->dw(w+0.5*dt*k1);
+            k3 = this->dw(w+0.5*dt*k2);
+            k4 = this->dw(w+dt*k3);
+            w = w + dt*(k1+2*k2+2*k3+k4)*0.166666666666;
 
-		if (V > 0)
-		{
-			if (this->useVoltage) this->m_Vstored.push_back(40);
-			this->m_Spikes.push_back(i*dt);
-			V = Vr;
-			w = w + b;
-		} else {
-			if (this->useVoltage) this->m_Vstored.push_back(V);
-		}
+            if (V > 0)
+            {
+                    if (this->useVoltage) this->m_Vstored.push_back(40);
+                    this->m_Spikes.push_back(i*dt);
+                    V = Vr;
+                    w = w + b;
+            } else {
+                    if (this->useVoltage) this->m_Vstored.push_back(V);
+            }
 
 	}
 }

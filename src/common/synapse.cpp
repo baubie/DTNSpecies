@@ -29,7 +29,7 @@ void Synapse::prepare(double tau1, double tau2)
     std::pair<double,double> tau(tau1,tau2);
     for (double t = 0; t < 11*tau2; t+=Synapse::dt)
     {
-        double key = t+10000*tau1+10000000*tau2;
+        double key = tau1+1000*tau2+1000000*t;
         if (tau1 == tau2) 
         {
             double tt = t/tau1;
@@ -60,23 +60,12 @@ double Synapse::alpha(double t)
 {
     if (t < 0 || t > 10*tau2) return 0;
 
-/*
-        if (tau1 == tau2) 
-        {
-            double tt = t/tau1;
-            return gMax*(tt)*exp(1-tt);
-        } else {
-            return gMax*(exp(-t/tau1)-exp(-t/tau2));
-        }
-        */
-    
-    double key = t+10000*tau1+10000000*tau2;
-    /*
-    if (Synapse::cache.find(key) == Synapse::cache.end())
+    if (tau1 == tau2) 
     {
-        std::cout << std::endl << "Cache unavailable: (" << tau1 << "," << tau2 << ") :: " << t << " key: " << key << std::flush;
+        double tt = t/tau1;
+        return gMax*(tt)*exp(1-tt);
+    } else {
+        return gMax*(exp(-t/tau1)-exp(-t/tau2));
     }
-    */
-    return gMax*Synapse::cache[key];
 }
 

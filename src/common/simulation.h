@@ -34,14 +34,14 @@ class Simulation
 		double VT;
 		double Vr;
 		double T;
+        // Simulation parameters
+		double del;
         double dt;
         double tau_w;
 		bool useVoltage;
 
     private:
 
-        // Simulation parameters
-		double del;
 
         // Model state variables
         double V;
