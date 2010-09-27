@@ -26,6 +26,7 @@ class Synapse
             double I(double t,double V);
 
             static void prepare(double tau1, double tau2);
+            static void reset();
             static double dt;
 
             std::vector<double> spikes;

@@ -19,6 +19,11 @@ Synapse::Synapse()
 	this->del = 0;
 }
 
+void Synapse::reset()
+{
+    Synapse::cache.clear();
+}
+
 void Synapse::prepare(double tau1, double tau2)
 {
     std::pair<double,double> tau(tau1,tau2);
