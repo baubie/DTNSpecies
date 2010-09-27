@@ -60,16 +60,17 @@ int main(int argc, char* argv[])
 
 
     Tuning bp;
-    //bp.define("Shortpass1", 1, -1, 3);
-    bp.define("Shortpass2", 1, -1, 5);
-    //bp.define("Shortpass3", 1, -1, 10);
-    bp.check(10);
+    bp.define("Bandpass", 5, 1, 10);
+    bp.define("Shortpass", 1, -1, 10);
+    bp.check(20);
+    bp.check(2);
+    bp.check(8);
 
 
     vector<double> param;
     simC = 80; simT = 50; dt = 0.1;
 
-    for (double i = 1.0; i <= 4; i+=1) param.push_back(i);
+    for (double i = 1.0; i <= 11; i+=2) param.push_back(i);
     params.add("tauOn", param);
     params.add("tauOff", param);
     param.clear();
@@ -81,9 +82,10 @@ int main(int argc, char* argv[])
     param.clear();
     param.push_back(1);
     params.add("dSus", param);
+    params.add("gMaxS", param);
     param.clear();
     for (double i = 0; i <= 4; i+=1) param.push_back(i);
-    params.add("gMaxS", param);
+
     for (double i = 5; i <= 8; i+=1) param.push_back(i);
     params.add("gMaxOn", param);
     params.add("gMaxOff", param);
@@ -157,9 +159,6 @@ int main(int argc, char* argv[])
         refresh();
     }
 
-    Synapse::prepare(1,1);
-    Synapse::prepare(2,2);
-
 #ifdef THREADS
     boost::threadpool::thread_pool<> threads(nThreads);
 #endif
@@ -172,8 +171,6 @@ int main(int argc, char* argv[])
     map<int,map<double,vector<Simulation> > > simbundle;
     map< int, map< double, vector<Simulation> > >::iterator bundleit;
     vector<Simulation> sims;
-
-
 
 
 
