@@ -25,7 +25,7 @@ class SandboxGTK : public Gtk::Window
     protected:
         // Signal handlers
         void on_btnQuit_clicked();
-        void on_btnRefresh_clicked();
+        void on_btnRunStimuli_clicked();
 
         // Child Widgets (from glade file)
         Glib::RefPtr<Gtk::Builder> m_refGlade;

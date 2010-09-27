@@ -12,21 +12,9 @@
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
             <child>
-              <object class="GtkToolButton" id="btnNew">
+              <object class="GtkToolButton" id="btnOpenNetwork">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">New</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-new</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="btnOpen">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Open</property>
+                <property name="label" translatable="yes">Open Network</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
                 <signal name="clicked" handler="on_btnOpen_clicked"/>
@@ -37,9 +25,21 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnSave">
+              <object class="GtkToolButton" id="btnOpenStimuli">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Save</property>
+                <property name="label" translatable="yes">Open Stimuli</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnSaveNetwork">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Save Network</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
                 <signal name="clicked" handler="on_btnSave_clicked"/>
@@ -50,11 +50,35 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnRefresh">
+              <object class="GtkToolButton" id="btnSaveStimuli">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Refresh</property>
+                <property name="label" translatable="yes">Save Stimuli</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-refresh</property>
+                <property name="stock_id">gtk-save</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnRunStimuli">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Run Stimuli</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-redo</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnRunDTN">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Run DTN</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-goto-last</property>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -88,7 +88,7 @@ void Simulation::defaultparams()
 	this->dT = 2;
 	this->a = 2;
 	this->tau_w = 120;
-	this->b = 100;
+	this->b = 10;
 	this->Vr = -46;
 
 	this->V = this->EL;
