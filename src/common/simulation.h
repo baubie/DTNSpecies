@@ -2,6 +2,8 @@
 #define SIMULATION_H
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <math.h>
 #include <boost/thread.hpp>
 #include <vector>
@@ -10,49 +12,45 @@
 class Simulation
 {
     public:
-		// Setup
-		void defaultparams();
+        void defaultparams();
         void runSim();
 
-		// Generate timestep vector
-		std::vector<double> timesteps();
+        // Generate timestep vector
+        std::vector<double> timesteps();
 
-		// Generate voltage trace vector
-		std::vector<double> voltagetrace();
-		std::vector<double> spikes();
+        // Generate voltage trace vector
+        std::vector<double> voltagetrace();
+        std::vector<double> spikes();
 
-		// Synapses
-		std::vector<Synapse> synapses;
+        // Synapses
+        std::vector<Synapse> synapses;
 
         // Model neuron parameters
-		double gL;
-		double EL;
+        double gL;
+        double EL;
         double a;
         double b;
         double C;
         double dT;
-		double VT;
-		double Vr;
-		double T;
-        // Simulation parameters
-		double del;
-        double dt;
+        double VT;
+        double Vr;
         double tau_w;
-		bool useVoltage;
+
+        double T;
+        double del;
+        double dt;
+        bool useVoltage;
 
     private:
-
-
         // Model state variables
         double V;
         double w;
-		std::vector<double> m_Vstored;
-		std::vector<double> m_Spikes;
-
+        std::vector<double> m_Vstored;
+        std::vector<double> m_Spikes;
 
         // V = V + dt*dV
         double dV(double V, double I);
-		double dw(double w);
+        double dw(double w);
 
 };
 

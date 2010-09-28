@@ -16,6 +16,27 @@
 #include "synapse.h"
 #include "simulation.h"
 
+struct NetworkFile
+{
+    Simulation sim;
+    Synapse AMPA;
+    Synapse NMDA;
+    Synapse GABA_A;
+};
+
+struct Stimulus
+{
+    double dur;
+    int count;
+    double interval;
+};
+
+struct StimulusFile
+{
+    int numStimuli;
+    Stimulus* stimuli;
+};
+
 class SandboxGTK : public Gtk::Window
 {
     public:
@@ -26,11 +47,15 @@ class SandboxGTK : public Gtk::Window
         // Signal handlers
         void on_btnQuit_clicked();
         void on_btnRunStimuli_clicked();
+        void on_btnSaveNetwork_clicked();
+        void on_btnOpenNetwork_clicked();
 
         // Child Widgets (from glade file)
         Glib::RefPtr<Gtk::Builder> m_refGlade;
         Gtk::ToolButton* m_pBtnQuit;
         Gtk::ToolButton* m_pBtnRefresh;
+        Gtk::ToolButton* m_pBtnSaveNetwork;
+        Gtk::ToolButton* m_pBtnOpenNetwork;
         Gtk::HBox* m_pHBoxMain;
 
         // Child Widgets (created in c++)
@@ -58,8 +83,7 @@ class SandboxGTK : public Gtk::Window
         {
             public:
                 StimulusColumns()
-                { add(m_col_name); add(m_col_dur); add(m_col_count); add(m_col_gap); }
-                Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+                { add(m_col_dur); add(m_col_count); add(m_col_gap); }
                 Gtk::TreeModelColumn<int> m_col_dur;
                 Gtk::TreeModelColumn<int> m_col_count;
                 Gtk::TreeModelColumn<float> m_col_gap;
@@ -76,7 +100,10 @@ class SandboxGTK : public Gtk::Window
     private:
         void runSim();
         Simulation getSimulation();
+        Synapse getSynapse(const std::string& name);
         void deletePlots();
+        void populateNetworkTree(const NetworkFile &nf);
+        void populateStimulusTree(const StimulusFile &sf);
 };
 
 

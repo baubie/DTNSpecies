@@ -21,6 +21,13 @@ class Synapse
             double del;
             double E;
 
+            double onsetDel;
+            double onsetCount;
+            double onsetInterval;
+            double offsetDel;
+            double offsetCount;
+            double offsetInterval;
+
             // Get Conductance 
             double g(double t);
             double I(double t,double V);

@@ -1,6 +1,5 @@
 #include "SandboxGTK.h"
 
-
 SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade)
 : Gtk::Window(cobject),
   m_refGlade(refGlade),
@@ -18,6 +17,14 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     m_refGlade->get_widget("btnRunStimuli", m_pBtnRefresh);
     if (m_pBtnRefresh)
         m_pBtnRefresh->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnRunStimuli_clicked));
+
+    m_refGlade->get_widget("btnSaveNetwork", m_pBtnSaveNetwork);
+    if (m_pBtnSaveNetwork)
+        m_pBtnSaveNetwork->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnSaveNetwork_clicked));
+
+    m_refGlade->get_widget("btnOpenNetwork", m_pBtnOpenNetwork);
+    if (m_pBtnOpenNetwork)
+        m_pBtnOpenNetwork->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnOpenNetwork_clicked));
 
     // Setup the Main Window
     m_refGlade->get_widget("hboxMain", m_pHBoxMain);
@@ -39,193 +46,18 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
             sigc::mem_fun(*this, &SandboxGTK::networktree_value_on_edited) );
 
 
-
-        // Add default options to tree view
-        Simulation sim;
-        sim.defaultparams();
-        sim.T = 150;
-        sim.dt = 0.01;
-        sim.C = 80;
-        Gtk::TreeModel::Row row;
-        Gtk::TreeModel::Row childrow;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "Simulation";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "T";
-        childrow[m_NetworkColumns.m_col_value] = sim.T;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "dt";
-        childrow[m_NetworkColumns.m_col_value] = sim.dt;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "delay";
-        childrow[m_NetworkColumns.m_col_value] = sim.del;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "DTN";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "C";
-        childrow[m_NetworkColumns.m_col_value] = sim.C;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "gL";
-        childrow[m_NetworkColumns.m_col_value] = sim.gL;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "EL";
-        childrow[m_NetworkColumns.m_col_value] = sim.EL;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "VT";
-        childrow[m_NetworkColumns.m_col_value] = sim.VT;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "dT";
-        childrow[m_NetworkColumns.m_col_value] = sim.dT;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "a";
-        childrow[m_NetworkColumns.m_col_value] = sim.a;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tauw";
-        childrow[m_NetworkColumns.m_col_value] = sim.tau_w;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "b";
-        childrow[m_NetworkColumns.m_col_value] = sim.b;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Vr";
-        childrow[m_NetworkColumns.m_col_value] = sim.Vr;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "OnsetGlu";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Spikes";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Interval";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "OffsetGlu";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Spikes";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Interval";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "OnsetGABA";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Spikes";
-        childrow[m_NetworkColumns.m_col_value] = -1;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Interval";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "AMPA";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "gMax";
-        childrow[m_NetworkColumns.m_col_value] = 12;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau1";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau2";
-        childrow[m_NetworkColumns.m_col_value] = 5;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "E";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "NMDA";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "gMax";
-        childrow[m_NetworkColumns.m_col_value] = 6;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau1";
-        childrow[m_NetworkColumns.m_col_value] = 4;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau2";
-        childrow[m_NetworkColumns.m_col_value] = 20;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "E";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 5;
-
-        row = *(m_refNetworkTree->append());
-        row[m_NetworkColumns.m_col_name] = "GABA_A";
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "gMax";
-        childrow[m_NetworkColumns.m_col_value] = 3;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau1";
-        childrow[m_NetworkColumns.m_col_value] = 1;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "tau2";
-        childrow[m_NetworkColumns.m_col_value] = 5;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "E";
-        childrow[m_NetworkColumns.m_col_value] = -75;
-        childrow = *(m_refNetworkTree->append(row.children()));
-        childrow[m_NetworkColumns.m_col_name] = "Delay";
-        childrow[m_NetworkColumns.m_col_value] = 0;
-
-
         // Create stimulus TreeView
         m_refStimulusTree = Gtk::ListStore::create(m_StimulusColumns);
         m_StimulusList.set_model(m_refStimulusTree);
-        m_StimulusList.append_column("Name", m_StimulusColumns.m_col_name);
         m_StimulusList.append_column_editable("Dur", m_StimulusColumns.m_col_dur);
         m_StimulusList.append_column_editable("Count", m_StimulusColumns.m_col_count);
         m_StimulusList.append_column_editable("Gap", m_StimulusColumns.m_col_gap);
 
-
-        // Add stimuli
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "1 ms";
-        row[m_StimulusColumns.m_col_dur] = 1;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "5 ms";
-        row[m_StimulusColumns.m_col_dur] = 5;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
-
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "10 ms";
-        row[m_StimulusColumns.m_col_dur] = 10;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
-
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "15 ms";
-        row[m_StimulusColumns.m_col_dur] = 15;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
-
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "25 ms";
-        row[m_StimulusColumns.m_col_dur] = 25;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
-
-        row = *(m_refStimulusTree->append());
-        row[m_StimulusColumns.m_col_name] = "50 ms";
-        row[m_StimulusColumns.m_col_dur] = 50;
-        row[m_StimulusColumns.m_col_count] = 1;
-        row[m_StimulusColumns.m_col_gap] = 0;
+        NetworkFile nf;
+        nf.sim.defaultparams();
+        StimulusFile sf;
+        populateNetworkTree(nf);
+        populateStimulusTree(sf);
 
         // Add Fill left VBox 
         m_VBoxLeft.pack_start(m_NetworkList);
@@ -241,8 +73,198 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     show_all_children();
 
 }
+void SandboxGTK::populateStimulusTree(const StimulusFile &sf)
+{
+    // Add stimuli
+    Gtk::TreeModel::Row row;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 1;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 5;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 10;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 15;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 25;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 50;
+    row[m_StimulusColumns.m_col_count] = 1;
+    row[m_StimulusColumns.m_col_gap] = 0;
+}
 
+void SandboxGTK::populateNetworkTree(const NetworkFile &nf)
+{
 
+    // Add default options to tree view
+    Gtk::TreeModel::Row row;
+    Gtk::TreeModel::Row childrow;
+
+    row = *(m_refNetworkTree->append());
+    row[m_NetworkColumns.m_col_name] = "Simulation";
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "T";
+    childrow[m_NetworkColumns.m_col_value] = nf.sim.T;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "dt";
+    childrow[m_NetworkColumns.m_col_value] = nf.sim.dt;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "delay";
+    childrow[m_NetworkColumns.m_col_value] = nf.sim.del;
+
+    row = *(m_refNetworkTree->append());
+    row[m_NetworkColumns.m_col_name] = "DTN";
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "C";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.C;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "gL";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.gL;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "EL";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.EL;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "VT";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.VT;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "dT";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.dT;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "a";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.a;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "tauw";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.tau_w;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "b";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.b;
+    childrow = *(m_refNetworkTree->append(row.children()));
+    childrow[m_NetworkColumns.m_col_name] = "Vr";
+    childrow[m_NetworkColumns.m_col_value] =nf.sim.Vr;
+
+    std::vector<std::string> syns;
+    syns.push_back("AMPA"); syns.push_back("NMDA"); syns.push_back("GABA_A");
+
+    for(std::vector<std::string>::iterator i = syns.begin(); i != syns.end(); i++)
+    {
+        Synapse syn;
+        if (*i == "AMPA") syn = nf.AMPA;
+        if (*i == "NMDA") syn = nf.NMDA;
+        if (*i == "GABA_A") syn = nf.GABA_A;
+        row = *(m_refNetworkTree->append());
+        row[m_NetworkColumns.m_col_name] = *i;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "gMax";
+        childrow[m_NetworkColumns.m_col_value] = syn.gMax;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "tau1";
+        childrow[m_NetworkColumns.m_col_value] = syn.tau1;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "tau2";
+        childrow[m_NetworkColumns.m_col_value] = syn.tau2;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "E";
+        childrow[m_NetworkColumns.m_col_value] = syn.E;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Onset Delay";
+        childrow[m_NetworkColumns.m_col_value] = syn.onsetDel;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Onset Count";
+        childrow[m_NetworkColumns.m_col_value] = syn.onsetCount;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Onset Interval";
+        childrow[m_NetworkColumns.m_col_value] = syn.onsetInterval;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Offset Delay";
+        childrow[m_NetworkColumns.m_col_value] = syn.offsetDel;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Offset Count";
+        childrow[m_NetworkColumns.m_col_value] = syn.offsetCount;
+        childrow = *(m_refNetworkTree->append(row.children()));
+        childrow[m_NetworkColumns.m_col_name] = "Offset Interval";
+        childrow[m_NetworkColumns.m_col_value] = syn.offsetInterval;
+    }
+
+}
+
+void SandboxGTK::on_btnSaveNetwork_clicked()
+{
+
+    Gtk::FileChooserDialog dialog("Select a Network File",
+        Gtk::FILE_CHOOSER_ACTION_SAVE);
+    dialog.set_transient_for(*this);
+
+    // Add response buttons to the dialog:
+    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+
+    // Add filters
+    Gtk::FileFilter filter_text;
+    filter_text.set_name("Network Files");
+    filter_text.add_pattern("*.network");
+
+    // Show the dialog
+    int result = dialog.run();
+
+    switch(result)
+    {
+        case(Gtk::RESPONSE_OK):
+            NetworkFile nf;
+            nf.sim = getSimulation();
+            nf.AMPA = getSynapse("AMPA");
+            nf.NMDA = getSynapse("NMDA");
+            nf.GABA_A = getSynapse("GABA_A");
+            std::string filename = dialog.get_filename();
+            std::ofstream out(filename.c_str(), std::ios::binary);
+            if (out.good())
+            {
+                out.write(reinterpret_cast<char*>(&nf), sizeof(nf));
+            }
+            break;
+    }
+}
+
+void SandboxGTK::on_btnOpenNetwork_clicked()
+{
+    Gtk::FileChooserDialog dialog("Select a Network File",
+        Gtk::FILE_CHOOSER_ACTION_OPEN);
+    dialog.set_transient_for(*this);
+
+    // Add response buttons to the dialog:
+    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+    // Add filters
+    Gtk::FileFilter filter_text;
+    filter_text.set_name("Network Files");
+    filter_text.add_pattern("*.network");
+
+    // Show the dialog
+    int result = dialog.run();
+
+    switch(result)
+    {
+        case(Gtk::RESPONSE_OK):
+            NetworkFile nf;
+            std::string filename = dialog.get_filename();
+            std::ifstream in(filename.c_str(), std::ios::binary);
+            if (in.good())
+            {
+                in.read(reinterpret_cast<char*>(&nf), sizeof(nf));
+            }
+            break;
+    }
+}
 
 
 SandboxGTK::~SandboxGTK()
@@ -309,6 +331,49 @@ void SandboxGTK::on_btnRunStimuli_clicked()
     runSim();
 }
 
+Synapse SandboxGTK::getSynapse(const std::string& name)
+{
+    Synapse r;
+    typedef Gtk::TreeModel::Children type_children;
+    type_children children = m_refNetworkTree->children();
+    for (type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
+    {
+        Gtk::TreeModel::Row row = *iter;
+        Glib::ustring parent = row[m_NetworkColumns.m_col_name];
+        for (type_children::iterator iter2 = row.children().begin(); iter2 != row.children().end(); ++iter2)
+        {
+            Gtk::TreeModel::Row childrow = *iter2;
+            Glib::ustring child = childrow[m_NetworkColumns.m_col_name];
+            double value = childrow[m_NetworkColumns.m_col_value];
+            if (name.c_str() == parent)
+            {
+                if(child == "gMax")
+                        r.gMax = value;
+                if(child == "tau1")
+                        r.tau1 = value;
+                if(child == "tau2")
+                        r.tau2 = value;
+                if(child == "E")
+                        r.E = value;
+                if(child == "Onset Delay")
+                        r.onsetDel = value;
+                if(child == "Offset Delay")
+                        r.offsetDel = value;
+                if(child == "Onset Count")
+                        r.onsetCount = value;
+                if(child == "Offset Count")
+                        r.offsetCount = value;
+                if(child == "Onset Interval")
+                        r.onsetInterval = value;
+                if(child == "Offset Interval")
+                        r.offsetInterval = value;
+            }
+        }
+    }
+
+    return r;
+}
+
 Simulation SandboxGTK::getSimulation()
 {
     Simulation sim;
@@ -367,124 +432,13 @@ Simulation SandboxGTK::getSimulation()
 void SandboxGTK::runSim()
 {
 
-    int onset_spikes_glu = 0;
-    int offset_spikes_glu = 0;
-    int onset_spikes_GABA = 0;
-    double onset_delay_glu = 0;
-    double offset_delay_glu = 0;
-    double onset_delay_GABA = 0;
-    double onset_interval_GABA = 0;
-    double onset_interval_glu = 0;
-    double offset_interval_glu = 0;
-
-
-    double AMPA_gMax = 0;
-    double AMPA_tau1 = 0;
-    double AMPA_tau2 = 0;
-    double AMPA_E = 0;
-    double AMPA_del = 0;
-
-    double NMDA_gMax = 0;
-    double NMDA_tau1 = 0;
-    double NMDA_tau2 = 0;
-    double NMDA_E = 0;
-    double NMDA_del = 0;
-
-    double GABA_gMax = 0;
-    double GABA_tau1 = 0;
-    double GABA_tau2 = 0;
-    double GABA_E = 0;
-    double GABA_del = 0;
-
     deletePlots();
 
+    double jitter[] = {-0.3,-0.15,0,0.15,0.3};
+    int sJitter = sizeof(jitter)/sizeof(double);
+
     typedef Gtk::TreeModel::Children type_children;
-    type_children children = m_refNetworkTree->children();
-    for (type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
-    {
-        Gtk::TreeModel::Row row = *iter;
-        Glib::ustring parent = row[m_NetworkColumns.m_col_name];
-        for (type_children::iterator iter2 = row.children().begin(); iter2 != row.children().end(); ++iter2)
-        {
-            Gtk::TreeModel::Row childrow = *iter2;
-            Glib::ustring child = childrow[m_NetworkColumns.m_col_name];
-            double value = childrow[m_NetworkColumns.m_col_value];
-            if (parent == "OnsetGlu")
-            {
-                if(child == "Spikes")
-                        onset_spikes_glu = value;
-
-                if(child == "Delay")
-                        onset_delay_glu = value;
-
-                if(child == "Interval")
-                        onset_interval_glu = value;
-            }
-            if (parent == "OffsetGlu")
-            {
-                if(child == "Spikes")
-                        offset_spikes_glu = value;
-
-                if(child == "Delay")
-                        offset_delay_glu = value;
-
-                if(child == "Interval")
-                        offset_interval_glu = value;
-            }
-            if (parent == "OnsetGABA")
-            {
-                if(child == "Spikes")
-                        onset_spikes_GABA = value;
-
-                if(child == "Delay")
-                        onset_delay_GABA = value;
-
-                if(child == "Interval")
-                        onset_interval_GABA = value;
-            }
-            if (parent == "AMPA")
-            {
-                if(child == "gMax")
-                        AMPA_gMax = value;
-                if(child == "tau1")
-                        AMPA_tau1 = value;
-                if(child == "tau2")
-                        AMPA_tau2 = value;
-                if(child == "E")
-                        AMPA_E = value;
-                if(child == "Delay")
-                        AMPA_del = value;
-            }
-            if (parent == "NMDA")
-            {
-                if(child == "gMax")
-                        NMDA_gMax = value;
-                if(child == "tau1")
-                        NMDA_tau1 = value;
-                if(child == "tau2")
-                        NMDA_tau2 = value;
-                if(child == "E")
-                        NMDA_E = value;
-                if(child == "Delay")
-                        NMDA_del = value;
-            }
-            if (parent == "GABA_A")
-            {
-                if(child == "gMax")
-                        GABA_gMax = value;
-                if(child == "tau1")
-                        GABA_tau1 = value;
-                if(child == "tau2")
-                        GABA_tau2 = value;
-                if(child == "E")
-                        GABA_E = value;
-                if(child == "Delay")
-                        GABA_del = value;
-            }
-        }
-    }
-
-    children = m_refStimulusTree->children();
+    type_children children = m_refStimulusTree->children();
     for (type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
     {
         Gtk::TreeModel::Row row = *iter;
@@ -493,67 +447,74 @@ void SandboxGTK::runSim()
         int count = row[m_StimulusColumns.m_col_count];
         double gap = row[m_StimulusColumns.m_col_gap];
         
-        Synapse AMPA;
-        AMPA.gMax = AMPA_gMax; // nS
-        AMPA.tau1 = AMPA_tau1; // ms
-        AMPA.tau2 = AMPA_tau2; // ms
-        AMPA.del = AMPA_del; // ms
-        AMPA.E = AMPA_E;
-
-        Synapse NMDA;
-        NMDA.gMax = NMDA_gMax; // nS
-        NMDA.tau1 = NMDA_tau1; // ms
-        NMDA.tau2 = NMDA_tau2; // ms
-        NMDA.del = NMDA_del; // ms
-        NMDA.E = NMDA_E;
-
-        Synapse GABA_A;
-        GABA_A.gMax = GABA_gMax; // nS
-        GABA_A.tau1 = GABA_tau1; // ms
-        GABA_A.tau2 = GABA_tau2; // ms
-        GABA_A.del = GABA_del; // ms
-        GABA_A.E = GABA_E;
-
-
-        onset_spikes_glu = onset_spikes_glu == -1 ? duration/onset_interval_glu : onset_spikes_glu;
-        offset_spikes_glu = offset_spikes_glu == -1 ? duration/offset_interval_glu : offset_spikes_glu;
-        onset_spikes_GABA = onset_spikes_GABA == -1 ? duration/onset_interval_GABA : onset_spikes_GABA;
-        double start = 0;
-        for (int c = 0; c < count; ++c)
+        std::vector< std::vector<double> > Vs;
+        std::vector< std::vector<double> >::iterator it_Vs;
+        std::vector<double> t;
+        std::vector<double> V;
+        for (int j = 0; j < sJitter; j++)
         {
-            for (double onsets = 0; onsets < onset_spikes_glu; onsets+=onset_interval_glu)
+            Synapse AMPA = getSynapse("AMPA");
+            Synapse NMDA = getSynapse("NMDA");
+            Synapse GABA_A = getSynapse("GABA_A");
+
+            AMPA.onsetCount = AMPA.onsetCount == -1 ? duration/AMPA.onsetInterval : AMPA.onsetCount;
+            NMDA.onsetCount = NMDA.onsetCount == -1 ? duration/NMDA.onsetInterval : NMDA.onsetCount;
+            GABA_A.onsetCount = GABA_A.onsetCount == -1 ? duration/GABA_A.onsetInterval : GABA_A.onsetCount;
+            double start = 0;
+            for (int c = 0; c < count; ++c)
             {
-                AMPA.spikes.push_back(start+onset_delay_glu+onsets);
-                NMDA.spikes.push_back(start+onset_delay_glu+onsets);
+                for (double onsets = 0; onsets < AMPA.onsetCount; onsets+=AMPA.onsetInterval)
+                {
+                    AMPA.spikes.push_back(start+AMPA.onsetDel+onsets+jitter[j]);
+                }
+                for (double onsets = 0; onsets < NMDA.onsetCount; onsets+=NMDA.onsetInterval)
+                {
+                    NMDA.spikes.push_back(start+NMDA.onsetDel+onsets+jitter[j]);
+                }
+                for (double onsets = 0; onsets < GABA_A.onsetCount; onsets+=GABA_A.onsetInterval)
+                {
+                    GABA_A.spikes.push_back(start+GABA_A.onsetDel+onsets+jitter[j]);
+                }
+                for (int offsets = 0; offsets < AMPA.offsetCount; offsets+=AMPA.offsetInterval)
+                {
+                    AMPA.spikes.push_back(start+duration+AMPA.offsetDel+offsets);
+                }
+                for (int offsets = 0; offsets < NMDA.offsetCount; offsets+=NMDA.offsetInterval)
+                {
+                    NMDA.spikes.push_back(start+duration+NMDA.offsetDel+offsets);
+                }
+                start += duration+gap;
             }
 
-
-            for (double i = 0; i < onset_spikes_GABA; i+=onset_interval_GABA)
-            {
-                GABA_A.spikes.push_back(start+onset_delay_GABA+i);
-            }
-
-            for (int offsets = 0; offsets < offset_spikes_glu; offsets+=offset_interval_glu)
-            {
-                AMPA.spikes.push_back(start-gap+offset_delay_glu+offsets);
-                NMDA.spikes.push_back(start-gap+offset_delay_glu+offsets);
-            }
-
-            start += duration+gap;
+            Simulation sim = getSimulation();
+            sim.synapses.push_back(AMPA);
+            sim.synapses.push_back(NMDA);
+            sim.synapses.push_back(GABA_A);
+            sim.runSim();
+            V = sim.voltagetrace();
+            Vs.push_back(V);
+            t = sim.timesteps();
         }
-
-        Simulation sim = getSimulation();
-        sim.synapses.push_back(AMPA);
-        sim.synapses.push_back(NMDA);
-        sim.synapses.push_back(GABA_A);
-        sim.runSim();
-        std::vector<double> V = sim.voltagetrace();
-        std::vector<double> t = sim.timesteps();
-        double cV[V.size()],ct[t.size()];
-        for (unsigned int i = 0; i < V.size(); ++i) 
+        double cV[t.size()],ct[t.size()],cStimX[2],cStimY[2];
+        cStimX[0] = 0;
+        cStimX[1] = duration;
+        cStimY[0] = -75;
+        cStimY[1] = -75;
+        for (unsigned int i = 0; i < t.size(); ++i) 
         {
-            cV[i] = V[i];
-            ct[i] = t[i];
+            cV[i] = 0;
+        }
+        for (it_Vs = Vs.begin(); it_Vs != Vs.end(); it_Vs++)
+        {
+            for (unsigned int i = 0; i < t.size(); ++i) 
+            {
+                cV[i] += ((*it_Vs)[i])/sJitter;
+            }
+        }
+        for (unsigned int i = 0; i < t.size(); ++i) 
+        {
+            if (cV[i] > -20) cV[i] = -20;
+                ct[i] = t[i];
         }
 
         // Cheat for graph size
@@ -567,8 +528,11 @@ void SandboxGTK::runSim()
         plot->scale(PlotMM::AXIS_TOP)->set_enabled(false);
         m_VBoxRight.pack_start(*plot, Gtk::PACK_EXPAND_WIDGET, 0);
         Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
-        voltageCurve->set_data(ct,cV,V.size());
+        voltageCurve->set_data(ct,cV,t.size());
+        Glib::RefPtr<PlotMM::Curve> stimulusCurve(new PlotMM::Curve("Stimulus"));
+        stimulusCurve->set_data(cStimX,cStimY,2);
         plot->add_curve(voltageCurve);
+        plot->add_curve(stimulusCurve);
         plot->scale(PlotMM::AXIS_BOTTOM)->set_range(ct[0],ct[t.size()-1],false);
         plot->scale(PlotMM::AXIS_LEFT)->set_range(-80,-20,false);
         plot->replot();
