@@ -11,10 +11,11 @@
         <child>
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
+            <property name="icon_size">2</property>
             <child>
               <object class="GtkToolButton" id="btnOpenNetwork">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Open Network</property>
+                <property name="label" translatable="yes">Network</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-open</property>
                 <signal name="clicked" handler="on_btnOpen_clicked"/>
@@ -25,21 +26,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnOpenStimuli">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Open Stimuli</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-open</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkToolButton" id="btnSaveNetwork">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Save Network</property>
+                <property name="label" translatable="yes">Network</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
                 <signal name="clicked" handler="on_btnSave_clicked"/>
@@ -50,9 +39,30 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton1">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="btnOpenStimuli">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Stimuli</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="btnSaveStimuli">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Save Stimuli</property>
+                <property name="label" translatable="yes">Stimuli</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
               </object>
@@ -62,9 +72,18 @@
               </packing>
             </child>
             <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="btnRunStimuli">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Run Stimuli</property>
+                <property name="label" translatable="yes">Simulations</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-redo</property>
               </object>
@@ -74,11 +93,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnRunDTN">
+              <object class="GtkSeparatorToolItem" id="toolbutton3">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Run DTN</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-goto-last</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -105,6 +121,9 @@
           </packing>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
           <object class="GtkHBox" id="hboxMain">
             <property name="visible">True</property>
             <child>
@@ -115,7 +134,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

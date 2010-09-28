@@ -28,14 +28,10 @@ struct Stimulus
 {
     double dur;
     int count;
-    double interval;
+    double gap;
 };
 
-struct StimulusFile
-{
-    int numStimuli;
-    Stimulus* stimuli;
-};
+typedef std::vector<Stimulus> Stimuli;
 
 class SandboxGTK : public Gtk::Window
 {
@@ -49,6 +45,10 @@ class SandboxGTK : public Gtk::Window
         void on_btnRunStimuli_clicked();
         void on_btnSaveNetwork_clicked();
         void on_btnOpenNetwork_clicked();
+        void on_btnSaveStimuli_clicked();
+        void on_btnOpenStimuli_clicked();
+        void on_btnAddStimulus_clicked();
+        void on_btnDeleteStimulus_clicked();
 
         // Child Widgets (from glade file)
         Glib::RefPtr<Gtk::Builder> m_refGlade;
@@ -56,17 +56,27 @@ class SandboxGTK : public Gtk::Window
         Gtk::ToolButton* m_pBtnRefresh;
         Gtk::ToolButton* m_pBtnSaveNetwork;
         Gtk::ToolButton* m_pBtnOpenNetwork;
+        Gtk::ToolButton* m_pBtnSaveStimuli;
+        Gtk::ToolButton* m_pBtnOpenStimuli;
+
+        Gtk::ToggleToolButton* m_pBtnShowSummary;
+        Gtk::ToggleToolButton* m_pBtnJitterSpikes;
+
         Gtk::HBox* m_pHBoxMain;
 
         // Child Widgets (created in c++)
         std::vector<PlotMM::Plot*> m_pPlot;
         Gtk::VBox m_VBoxLeft;
         Gtk::VBox m_VBoxRight;
+        Gtk::HBox m_HBoxStimEdit;
         Gtk::ScrolledWindow m_LeftScrollWindow;
         Gtk::TreeView m_NetworkList;
         Gtk::TreeView m_StimulusList;
+        Gtk::Button m_btnAddStimulus;
+        Gtk::Button m_btnDeleteStimulus;
         Glib::RefPtr<Gtk::TreeStore> m_refNetworkTree;
         Glib::RefPtr<Gtk::ListStore> m_refStimulusTree;
+        Glib::RefPtr<Gtk::TreeSelection> m_refStimulusSelection;
 
 
         // Network Tree Model Columns
@@ -103,7 +113,8 @@ class SandboxGTK : public Gtk::Window
         Synapse getSynapse(const std::string& name);
         void deletePlots();
         void populateNetworkTree(const NetworkFile &nf);
-        void populateStimulusTree(const StimulusFile &sf);
+        void populateStimulusTree(const Stimuli &sf);
+        void updateStimDeleteButton();
 };
 
 

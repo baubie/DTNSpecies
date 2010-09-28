@@ -4,7 +4,9 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
 : Gtk::Window(cobject),
   m_refGlade(refGlade),
   m_pBtnQuit(0),
-  m_pBtnRefresh(0)
+  m_pBtnRefresh(0),
+  m_btnAddStimulus(Gtk::Stock::ADD),
+  m_btnDeleteStimulus(Gtk::Stock::DELETE)
 {
 
     set_title("Duration-Tuned Neuron Sandbox (Version 0.3)");
@@ -25,6 +27,14 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     m_refGlade->get_widget("btnOpenNetwork", m_pBtnOpenNetwork);
     if (m_pBtnOpenNetwork)
         m_pBtnOpenNetwork->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnOpenNetwork_clicked));
+
+    m_refGlade->get_widget("btnSaveStimuli", m_pBtnSaveStimuli);
+    if (m_pBtnSaveStimuli)
+        m_pBtnSaveStimuli->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnSaveStimuli_clicked));
+
+    m_refGlade->get_widget("btnOpenStimuli", m_pBtnOpenStimuli);
+    if (m_pBtnOpenStimuli)
+        m_pBtnOpenStimuli->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnOpenStimuli_clicked));
 
     // Setup the Main Window
     m_refGlade->get_widget("hboxMain", m_pHBoxMain);
@@ -53,15 +63,67 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         m_StimulusList.append_column_editable("Count", m_StimulusColumns.m_col_count);
         m_StimulusList.append_column_editable("Gap", m_StimulusColumns.m_col_gap);
 
+        // Default network
         NetworkFile nf;
         nf.sim.defaultparams();
-        StimulusFile sf;
+        nf.AMPA.onsetCount = 1;
+        nf.AMPA.offsetCount = 1;
+        nf.AMPA.onsetDel = 15;
+        nf.AMPA.offsetDel = 15;
+        nf.AMPA.onsetInterval = 1;
+        nf.AMPA.offsetInterval = 1;
+        nf.AMPA.tau1 = 0.01;
+        nf.AMPA.tau2 = 2;
+        nf.AMPA.gMax = 6;
+        nf.AMPA.E = 0;
+        nf.NMDA.onsetCount = 1;
+        nf.NMDA.offsetCount = 1;
+        nf.NMDA.onsetDel = 20;
+        nf.NMDA.offsetDel = 20;
+        nf.NMDA.onsetInterval = 1;
+        nf.NMDA.offsetInterval = 1;
+        nf.NMDA.tau1 = 2;
+        nf.NMDA.tau2 = 5;
+        nf.NMDA.gMax = 3;
+        nf.NMDA.E = -10;
+        nf.GABA_A.onsetCount = -1;
+        nf.GABA_A.offsetCount = 0;
+        nf.GABA_A.onsetDel = 0;
+        nf.GABA_A.onsetInterval = 1;
+        nf.GABA_A.offsetInterval = 1;
+        nf.GABA_A.tau1 = 0.01;
+        nf.GABA_A.tau2 = 2;
+        nf.GABA_A.gMax = 3;
+        nf.GABA_A.E = -80;
+
+        // Default stimuli
+        Stimuli sf;
+        Stimulus s;
+        for (int i = 1; i < 10; i++)
+        {
+            s.dur = i;
+            s.count = 1;
+            sf.push_back(s);
+        }
+
         populateNetworkTree(nf);
         populateStimulusTree(sf);
 
+        // Add Stimulus Buttons
+        m_btnAddStimulus.signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnAddStimulus_clicked));
+        m_btnDeleteStimulus.signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnDeleteStimulus_clicked));
+        m_btnDeleteStimulus.set_sensitive(false);
+        m_HBoxStimEdit.pack_start(m_btnAddStimulus);
+        m_HBoxStimEdit.pack_start(m_btnDeleteStimulus);
+        m_refStimulusSelection = m_StimulusList.get_selection();
+        m_refStimulusSelection->signal_changed().connect(
+            sigc::mem_fun(*this, &SandboxGTK::updateStimDeleteButton)
+        );
+
         // Add Fill left VBox 
-        m_VBoxLeft.pack_start(m_NetworkList);
-        m_VBoxLeft.pack_start(m_StimulusList);
+        m_VBoxLeft.pack_start(m_NetworkList,false,false);
+        m_VBoxLeft.pack_start(m_StimulusList,false,false);
+        m_VBoxLeft.pack_start(m_HBoxStimEdit,false,false);
         m_LeftScrollWindow.add(m_VBoxLeft);
         m_LeftScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
@@ -73,34 +135,26 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     show_all_children();
 
 }
-void SandboxGTK::populateStimulusTree(const StimulusFile &sf)
+
+void SandboxGTK::updateStimDeleteButton()
+{
+    Gtk::TreeModel::iterator iter = m_refStimulusSelection->get_selected();
+    if(iter) m_btnDeleteStimulus.set_sensitive(true);
+    else m_btnDeleteStimulus.set_sensitive(false);
+}
+
+void SandboxGTK::populateStimulusTree(const Stimuli &sf)
 {
     // Add stimuli
+    m_refStimulusTree->clear();
     Gtk::TreeModel::Row row;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 1;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 5;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 10;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 15;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 25;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
-    row = *(m_refStimulusTree->append());
-    row[m_StimulusColumns.m_col_dur] = 50;
-    row[m_StimulusColumns.m_col_count] = 1;
-    row[m_StimulusColumns.m_col_gap] = 0;
+    for (Stimuli::const_iterator i = sf.begin(); i != sf.end(); i++)
+    {
+        row = *(m_refStimulusTree->append());
+        row[m_StimulusColumns.m_col_dur] = i->dur;
+        row[m_StimulusColumns.m_col_count] = i->count;
+        row[m_StimulusColumns.m_col_gap] = i->gap;
+    }
 }
 
 void SandboxGTK::populateNetworkTree(const NetworkFile &nf)
@@ -109,7 +163,7 @@ void SandboxGTK::populateNetworkTree(const NetworkFile &nf)
     // Add default options to tree view
     Gtk::TreeModel::Row row;
     Gtk::TreeModel::Row childrow;
-
+    m_refNetworkTree->clear();
     row = *(m_refNetworkTree->append());
     row[m_NetworkColumns.m_col_name] = "Simulation";
     childrow = *(m_refNetworkTree->append(row.children()));
@@ -197,6 +251,24 @@ void SandboxGTK::populateNetworkTree(const NetworkFile &nf)
 
 }
 
+void SandboxGTK::on_btnAddStimulus_clicked()
+{
+    Gtk::TreeModel::Row row;
+    row = *(m_refStimulusTree->append());
+    row[m_StimulusColumns.m_col_dur] = 0;
+    row[m_StimulusColumns.m_col_count] = 0;
+    row[m_StimulusColumns.m_col_gap] = 0;
+}
+
+void SandboxGTK::on_btnDeleteStimulus_clicked()
+{
+    Gtk::TreeModel::iterator iter = m_refStimulusSelection->get_selected();
+    if(iter)
+    {
+       m_refStimulusTree->erase(iter);
+    }
+}
+
 void SandboxGTK::on_btnSaveNetwork_clicked()
 {
 
@@ -261,6 +333,91 @@ void SandboxGTK::on_btnOpenNetwork_clicked()
             if (in.good())
             {
                 in.read(reinterpret_cast<char*>(&nf), sizeof(nf));
+                populateNetworkTree(nf);
+            }
+            break;
+    }
+}
+
+void SandboxGTK::on_btnSaveStimuli_clicked()
+{
+
+    Gtk::FileChooserDialog dialog("Select a Stimuli File",
+        Gtk::FILE_CHOOSER_ACTION_SAVE);
+    dialog.set_transient_for(*this);
+
+    // Add response buttons to the dialog:
+    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+
+    // Add filters
+    Gtk::FileFilter filter_text;
+    filter_text.set_name("Stimulus Files");
+    filter_text.add_pattern("*.stimuli");
+
+    // Show the dialog
+    int result = dialog.run();
+
+    switch(result)
+    {
+        case(Gtk::RESPONSE_OK):
+            std::string filename = dialog.get_filename();
+            std::ofstream out(filename.c_str(), std::ios::binary);
+            if (out.good())
+            {
+                typedef Gtk::TreeModel::Children type_children;
+                type_children children = m_refStimulusTree->children();
+                unsigned int num = children.size();
+                out.write(reinterpret_cast<char*>(&num), sizeof(num));
+                for (type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
+                {
+                    Gtk::TreeModel::Row row = *iter;
+                    Stimulus stim;
+                    stim.dur = row[m_StimulusColumns.m_col_dur];
+                    stim.count = row[m_StimulusColumns.m_col_count];
+                    stim.gap = row[m_StimulusColumns.m_col_gap];
+                    out.write(reinterpret_cast<char*>(&stim), sizeof(stim));
+                }
+            }
+            break;
+    }
+}
+
+void SandboxGTK::on_btnOpenStimuli_clicked()
+{
+    Gtk::FileChooserDialog dialog("Select a Stimuli File",
+        Gtk::FILE_CHOOSER_ACTION_OPEN);
+    dialog.set_transient_for(*this);
+
+    // Add response buttons to the dialog:
+    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button(Gtk::Stock::OPEN, Gtk::RESPONSE_OK);
+
+    // Add filters
+    Gtk::FileFilter filter_text;
+    filter_text.set_name("Stimuli Files");
+    filter_text.add_pattern("*.stimuli");
+
+    // Show the dialog
+    int result = dialog.run();
+
+    switch(result)
+    {
+        case(Gtk::RESPONSE_OK):
+            Stimuli sf;
+            unsigned int num;
+            std::string filename = dialog.get_filename();
+            std::ifstream in(filename.c_str(), std::ios::binary);
+            if (in.good())
+            {
+                in.read(reinterpret_cast<char*>(&num), sizeof(num));
+                for (unsigned int i = 0; i < num; ++i)
+                {
+                    Stimulus s;
+                    in.read(reinterpret_cast<char*>(&s), sizeof(s));
+                    sf.push_back(s);
+                }
+                populateStimulusTree(sf);
             }
             break;
     }
@@ -370,7 +527,8 @@ Synapse SandboxGTK::getSynapse(const std::string& name)
             }
         }
     }
-
+    if (r.onsetCount == 1) r.onsetInterval = 1;
+    if (r.offsetCount == 1) r.offsetInterval = 1;
     return r;
 }
 
@@ -485,7 +643,6 @@ void SandboxGTK::runSim()
                 }
                 start += duration+gap;
             }
-
             Simulation sim = getSimulation();
             sim.synapses.push_back(AMPA);
             sim.synapses.push_back(NMDA);
