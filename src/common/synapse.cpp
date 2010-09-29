@@ -58,7 +58,7 @@ double Synapse::g(double t)
 
 double Synapse::alpha(double t)
 {
-    if (t < 0 || t > 10*tau2) return 0;
+    if (t < 0 || t > 10) return 0;
 
     if (tau1 == tau2) 
     {

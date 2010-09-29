@@ -62,6 +62,7 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         // Create stimulus TreeView
         m_refStimulusTree = Gtk::ListStore::create(m_StimulusColumns);
         m_StimulusList.set_model(m_refStimulusTree);
+        m_StimulusList.append_column_editable("Show", m_StimulusColumns.m_col_voltage);
         m_StimulusList.append_column_editable("Dur", m_StimulusColumns.m_col_dur);
         m_StimulusList.append_column_editable("Count", m_StimulusColumns.m_col_count);
         m_StimulusList.append_column_editable("Gap", m_StimulusColumns.m_col_gap);
@@ -104,6 +105,7 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         Stimulus s;
         for (int i = 1; i < 10; i++)
         {
+            s.voltage = true;
             s.dur = i;
             s.count = 1;
             sf.push_back(s);
@@ -154,6 +156,7 @@ void SandboxGTK::populateStimulusTree(const Stimuli &sf)
     for (Stimuli::const_iterator i = sf.begin(); i != sf.end(); i++)
     {
         row = *(m_refStimulusTree->append());
+        row[m_StimulusColumns.m_col_voltage] = i->voltage;
         row[m_StimulusColumns.m_col_dur] = i->dur;
         row[m_StimulusColumns.m_col_count] = i->count;
         row[m_StimulusColumns.m_col_gap] = i->gap;
@@ -612,18 +615,27 @@ void SandboxGTK::runSim()
 
     typedef Gtk::TreeModel::Children type_children;
     type_children children = m_refStimulusTree->children();
+    double cSummaryX[children.size()];
+    double cSummaryY[children.size()];
+    int stimNumber = 0;
+    double maxSummary = 0;
     for (type_children::iterator iter = children.begin(); iter != children.end(); ++iter)
     {
         Gtk::TreeModel::Row row = *iter;
 
+        bool showVoltage = row[m_StimulusColumns.m_col_voltage];
         double duration = row[m_StimulusColumns.m_col_dur];
         int count = row[m_StimulusColumns.m_col_count];
         double gap = row[m_StimulusColumns.m_col_gap];
+
         
         std::vector< std::vector<double> > Vs;
         std::vector< std::vector<double> >::iterator it_Vs;
         std::vector<double> t;
         std::vector<double> V;
+
+
+        double meanSpikes = 0;
         for (unsigned int j = 0; j < jitter.size(); j++)
         {
             Synapse AMPA = getSynapse("AMPA");
@@ -666,6 +678,7 @@ void SandboxGTK::runSim()
             V = sim.voltagetrace();
             Vs.push_back(V);
             t = sim.timesteps();
+            meanSpikes += (double)sim.spikes().size()/(double)jitter.size();
         }
         double cV[t.size()],ct[t.size()],cStimX[2],cStimY[2];
         cStimX[0] = 0;
@@ -688,25 +701,47 @@ void SandboxGTK::runSim()
             if (cV[i] > -20) cV[i] = -20;
                 ct[i] = t[i];
         }
+        cSummaryX[stimNumber] = duration;
+        cSummaryY[stimNumber] = meanSpikes;
+        maxSummary = meanSpikes > maxSummary ? meanSpikes : maxSummary;
+        stimNumber++;
 
         // Cheat for graph size
         cV[0] = -80;
         cV[1] = -20;
 
-        // Add plot window
+        if (showVoltage) 
+        {
+            // Add plot window
+            m_pPlot.push_back(new PlotMM::Plot );
+            PlotMM::Plot* plot = m_pPlot.back();
+            plot->scale(PlotMM::AXIS_RIGHT)->set_enabled(false);
+            plot->scale(PlotMM::AXIS_TOP)->set_enabled(false);
+            m_VBoxRight.pack_end(*plot, Gtk::PACK_EXPAND_WIDGET, 0);
+            Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
+            voltageCurve->set_data(ct,cV,t.size());
+            Glib::RefPtr<PlotMM::Curve> stimulusCurve(new PlotMM::Curve("Stimulus"));
+            stimulusCurve->set_data(cStimX,cStimY,2);
+            plot->add_curve(voltageCurve);
+            plot->add_curve(stimulusCurve);
+            plot->scale(PlotMM::AXIS_BOTTOM)->set_range(ct[0],ct[t.size()-1],false);
+            plot->scale(PlotMM::AXIS_LEFT)->set_range(-80,-20,false);
+            plot->replot();
+        }
+    }
+    if (m_pBtnSummary->get_active())
+    {
+        // Add summary plot window
         m_pPlot.push_back(new PlotMM::Plot );
         PlotMM::Plot* plot = m_pPlot.back();
         plot->scale(PlotMM::AXIS_RIGHT)->set_enabled(false);
         plot->scale(PlotMM::AXIS_TOP)->set_enabled(false);
         m_VBoxRight.pack_start(*plot, Gtk::PACK_EXPAND_WIDGET, 0);
-        Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
-        voltageCurve->set_data(ct,cV,t.size());
-        Glib::RefPtr<PlotMM::Curve> stimulusCurve(new PlotMM::Curve("Stimulus"));
-        stimulusCurve->set_data(cStimX,cStimY,2);
+        Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Mean Spikes"));
+        voltageCurve->set_data(cSummaryX,cSummaryY,stimNumber);
+        plot->scale(PlotMM::AXIS_BOTTOM)->set_range(cSummaryX[0],cSummaryX[stimNumber-1],false);
+        plot->scale(PlotMM::AXIS_LEFT)->set_range(0,maxSummary+0.5,false);
         plot->add_curve(voltageCurve);
-        plot->add_curve(stimulusCurve);
-        plot->scale(PlotMM::AXIS_BOTTOM)->set_range(ct[0],ct[t.size()-1],false);
-        plot->scale(PlotMM::AXIS_LEFT)->set_range(-80,-20,false);
         plot->replot();
     }
 }

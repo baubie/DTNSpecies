@@ -26,6 +26,7 @@ struct NetworkFile
 
 struct Stimulus
 {
+    bool voltage;
     double dur;
     int count;
     double gap;
@@ -93,7 +94,8 @@ class SandboxGTK : public Gtk::Window
         {
             public:
                 StimulusColumns()
-                { add(m_col_dur); add(m_col_count); add(m_col_gap); }
+                { add(m_col_voltage); add(m_col_dur); add(m_col_count); add(m_col_gap); }
+                Gtk::TreeModelColumn<bool> m_col_voltage;
                 Gtk::TreeModelColumn<int> m_col_dur;
                 Gtk::TreeModelColumn<int> m_col_count;
                 Gtk::TreeModelColumn<float> m_col_gap;
