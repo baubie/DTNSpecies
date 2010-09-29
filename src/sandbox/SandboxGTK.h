@@ -59,8 +59,8 @@ class SandboxGTK : public Gtk::Window
         Gtk::ToolButton* m_pBtnSaveStimuli;
         Gtk::ToolButton* m_pBtnOpenStimuli;
 
-        Gtk::ToggleToolButton* m_pBtnShowSummary;
-        Gtk::ToggleToolButton* m_pBtnJitterSpikes;
+        Gtk::ToggleToolButton* m_pBtnSummary;
+        Gtk::ToggleToolButton* m_pBtnJitter;
 
         Gtk::HBox* m_pHBoxMain;
 

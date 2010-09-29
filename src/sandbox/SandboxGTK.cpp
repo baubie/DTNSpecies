@@ -36,6 +36,9 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     if (m_pBtnOpenStimuli)
         m_pBtnOpenStimuli->signal_clicked().connect(sigc::mem_fun(*this, &SandboxGTK::on_btnOpenStimuli_clicked));
 
+    m_refGlade->get_widget("btnSummary", m_pBtnSummary);
+    m_refGlade->get_widget("btnJitter", m_pBtnJitter);
+
     // Setup the Main Window
     m_refGlade->get_widget("hboxMain", m_pHBoxMain);
     if (m_pHBoxMain)
@@ -580,7 +583,7 @@ Simulation SandboxGTK::getSimulation()
                 if(child == "b")
                         sim.b = value;
                 if(child == "Vr")
-                        sim.VT = value;
+                        sim.Vr = value;
             }
         }
 
@@ -592,8 +595,20 @@ void SandboxGTK::runSim()
 
     deletePlots();
 
-    double jitter[] = {-0.3,-0.15,0,0.15,0.3};
-    int sJitter = sizeof(jitter)/sizeof(double);
+    
+    std::vector<double> jitter;
+    if (m_pBtnJitter->get_active())
+    {
+        jitter.push_back(-0.2);
+        jitter.push_back(0.2);
+        jitter.push_back(-0.1);
+        jitter.push_back(0.1);
+        jitter.push_back(0);
+    }
+    else
+    {
+        jitter.push_back(0);
+    }
 
     typedef Gtk::TreeModel::Children type_children;
     type_children children = m_refStimulusTree->children();
@@ -609,7 +624,7 @@ void SandboxGTK::runSim()
         std::vector< std::vector<double> >::iterator it_Vs;
         std::vector<double> t;
         std::vector<double> V;
-        for (int j = 0; j < sJitter; j++)
+        for (unsigned int j = 0; j < jitter.size(); j++)
         {
             Synapse AMPA = getSynapse("AMPA");
             Synapse NMDA = getSynapse("NMDA");
@@ -665,7 +680,7 @@ void SandboxGTK::runSim()
         {
             for (unsigned int i = 0; i < t.size(); ++i) 
             {
-                cV[i] += ((*it_Vs)[i])/sJitter;
+                cV[i] += ((*it_Vs)[i])/jitter.size();
             }
         }
         for (unsigned int i = 0; i < t.size(); ++i) 

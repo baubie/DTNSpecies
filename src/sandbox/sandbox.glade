@@ -102,6 +102,39 @@
               </packing>
             </child>
             <child>
+              <object class="GtkToggleToolButton" id="btnSummary">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Summary</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-about</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleToolButton" id="btnJitter">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Jitter</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-dnd-multiple</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton4">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="btnQuit">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Quit</property>
@@ -119,9 +152,6 @@
             <property name="expand">False</property>
             <property name="position">0</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
         <child>
           <object class="GtkHBox" id="hboxMain">
