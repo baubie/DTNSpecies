@@ -68,9 +68,11 @@ class SandboxGTK : public Gtk::Window
         // Child Widgets (created in c++)
         std::vector<PlotMM::Plot*> m_pPlot;
         Gtk::VBox m_VBoxLeft;
+        Gtk::VBox m_VBoxMiddle;
         Gtk::VBox m_VBoxRight;
         Gtk::HBox m_HBoxStimEdit;
         Gtk::ScrolledWindow m_LeftScrollWindow;
+        Gtk::ScrolledWindow m_RightScrollWindow;
         Gtk::TreeView m_NetworkList;
         Gtk::TreeView m_StimulusList;
         Gtk::Button m_btnAddStimulus;

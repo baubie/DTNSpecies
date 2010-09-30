@@ -126,15 +126,18 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         );
 
         // Add Fill left VBox 
-        m_VBoxLeft.pack_start(m_NetworkList,false,false);
-        m_VBoxLeft.pack_start(m_StimulusList,false,false);
-        m_VBoxLeft.pack_start(m_HBoxStimEdit,false,false);
+        m_VBoxLeft.pack_start(m_NetworkList,true,true);
         m_LeftScrollWindow.add(m_VBoxLeft);
-        m_LeftScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+        m_LeftScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
+        m_VBoxRight.pack_end(m_HBoxStimEdit,false,false);
+        m_VBoxRight.pack_end(m_StimulusList,true,true);
+        m_RightScrollWindow.add(m_VBoxRight);
+        m_RightScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
         // Add VBoxes to main window
         m_pHBoxMain->pack_start(m_LeftScrollWindow, Gtk::PACK_SHRINK, 0);
-        m_pHBoxMain->pack_start(m_VBoxRight, Gtk::PACK_EXPAND_WIDGET, 0);
+        m_pHBoxMain->pack_start(m_VBoxMiddle, Gtk::PACK_EXPAND_WIDGET, 0);
+        m_pHBoxMain->pack_start(m_RightScrollWindow, Gtk::PACK_SHRINK, 0);
     }
 
     show_all_children();
@@ -717,7 +720,7 @@ void SandboxGTK::runSim()
             PlotMM::Plot* plot = m_pPlot.back();
             plot->scale(PlotMM::AXIS_RIGHT)->set_enabled(false);
             plot->scale(PlotMM::AXIS_TOP)->set_enabled(false);
-            m_VBoxRight.pack_end(*plot, Gtk::PACK_EXPAND_WIDGET, 0);
+            m_VBoxMiddle.pack_end(*plot, Gtk::PACK_EXPAND_WIDGET, 0);
             Glib::RefPtr<PlotMM::Curve> voltageCurve(new PlotMM::Curve("Voltage"));
             voltageCurve->set_data(ct,cV,t.size());
             Glib::RefPtr<PlotMM::Curve> stimulusCurve(new PlotMM::Curve("Stimulus"));

@@ -107,6 +107,7 @@
                 <property name="label" translatable="yes">Summary</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-about</property>
+                <property name="active">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -119,6 +120,7 @@
                 <property name="label" translatable="yes">Jitter</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-dnd-multiple</property>
+                <property name="active">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -156,6 +158,9 @@
         <child>
           <object class="GtkHBox" id="hboxMain">
             <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
             <child>
               <placeholder/>
             </child>
