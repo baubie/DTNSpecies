@@ -126,9 +126,9 @@ SandboxGTK::SandboxGTK(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         );
 
         // Add Fill left VBox 
-        m_VBoxLeft.pack_start(m_NetworkList,true,true);
+        m_VBoxLeft.pack_start(m_NetworkList,false,false);
         m_LeftScrollWindow.add(m_VBoxLeft);
-        m_LeftScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
+        m_LeftScrollWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
         m_VBoxRight.pack_end(m_HBoxStimEdit,false,false);
         m_VBoxRight.pack_end(m_StimulusList,true,true);
         m_RightScrollWindow.add(m_VBoxRight);
@@ -164,6 +164,7 @@ void SandboxGTK::populateStimulusTree(const Stimuli &sf)
         row[m_StimulusColumns.m_col_count] = i->count;
         row[m_StimulusColumns.m_col_gap] = i->gap;
     }
+    m_refStimulusTree->set_sort_column(m_StimulusColumns.m_col_dur,Gtk::SORT_ASCENDING);
 }
 
 void SandboxGTK::populateNetworkTree(const NetworkFile &nf)
@@ -267,6 +268,7 @@ void SandboxGTK::on_btnAddStimulus_clicked()
     row[m_StimulusColumns.m_col_dur] = 0;
     row[m_StimulusColumns.m_col_count] = 0;
     row[m_StimulusColumns.m_col_gap] = 0;
+    m_refStimulusTree->set_sort_column(m_StimulusColumns.m_col_dur,Gtk::SORT_ASCENDING);
 }
 
 void SandboxGTK::on_btnDeleteStimulus_clicked()
@@ -663,11 +665,11 @@ void SandboxGTK::runSim()
                 {
                     GABA_A.spikes.push_back(start+GABA_A.onsetDel+onsets+jitter[j]);
                 }
-                for (int offsets = 0; offsets < AMPA.offsetCount; offsets+=AMPA.offsetInterval)
+                for (double offsets = 0; offsets < AMPA.offsetCount; offsets+=AMPA.offsetInterval)
                 {
                     AMPA.spikes.push_back(start+duration+AMPA.offsetDel+offsets);
                 }
-                for (int offsets = 0; offsets < NMDA.offsetCount; offsets+=NMDA.offsetInterval)
+                for (double offsets = 0; offsets < NMDA.offsetCount; offsets+=NMDA.offsetInterval)
                 {
                     NMDA.spikes.push_back(start+duration+NMDA.offsetDel+offsets);
                 }

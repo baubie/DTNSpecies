@@ -13,7 +13,7 @@
             <property name="visible">True</property>
             <property name="icon_size">2</property>
             <child>
-              <object class="GtkToolButton" id="btnOpenNetwork">
+              <object class="GtkMenuToolButton" id="btnOpenNetwork">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Network</property>
                 <property name="use_underline">True</property>
@@ -48,7 +48,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="btnOpenStimuli">
+              <object class="GtkMenuToolButton" id="btnOpenStimuli">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Stimuli</property>
                 <property name="use_underline">True</property>
