@@ -4,14 +4,16 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="MainWindow">
     <property name="visible">True</property>
+    <property name="default_width">750</property>
+    <property name="default_height">600</property>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
-            <property name="icon_size">2</property>
+            <property name="toolbar_style">both</property>
+            <property name="icon_size">4</property>
             <child>
               <object class="GtkMenuToolButton" id="btnOpenNetwork">
                 <property name="visible">True</property>

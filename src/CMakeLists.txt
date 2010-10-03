@@ -1,5 +1,3 @@
-
-
 include_directories("common")
 
 SET (SRCCOMMON ../common/simulation.cpp ../common/synapse.cpp)
