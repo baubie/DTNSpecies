@@ -1,25 +1,18 @@
 /*----------------------------------------------------------------------------
 
-    Simplified kinetic synapse mechanism
-    ------------------------------------
-
-    Demo file to show the behavior of a synaptic currents mediated by
-    glutamate AMPA/kainate receptors, modeled using a minimal two-state 
-    kinetic model.
-
-    Kinetic model from Destexhe, A., Mainen, Z.F. and Sejnowski, T.J.
-    Neural Computation, 6: 14-18, 1994.
-
-  See details in:
+  Models if IC neurons with kinetic models of AMPA, NMDA and GABA_A receptors
+  based on:
 
   Destexhe, A., Mainen, Z.F. and Sejnowski, T.J.  Kinetic models of 
   synaptic transmission.  In: Methods in Neuronal Modeling (2nd edition; 
   edited by Koch, C. and Segev, I.), MIT press, Cambridge, 1998, pp. 1-25.
 
-  (electronic copy available at http://cns.iaf.cnrs-gif.fr)
 
-
+  This file was originally written by:
   Written by Alain Destexhe, Laval University, 1995
+
+  Modified to add extra receptors with other modifications by:
+  Brandon Aubie, 2010
 
 ----------------------------------------------------------------------------*/
 
@@ -59,19 +52,24 @@ if(ismenu==0) {
 //----------------------------------------------------------------------------
 
 dt=0.025
-tstop = 40      // 15 for single psp, 25 for train
+tstop = 100      // 15 for single psp, 25 for train
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
-v_init = -70
+v_init = -68
 
-
+onset_delay = 0
+tone_onset = 2
+tone_duration = 20
+trial_delay = 10
+objectvar synAMPA[10]
+objectvar synNMDA[10]
 
 //----------------------------------------------------------------------------
 //  create compartments and insert passive properties
 //----------------------------------------------------------------------------
 
-create PRE,POST
+create PREON,PREOFF,PREINH,POST,dend
 forall {
   diam=10
   L=10
@@ -80,55 +78,129 @@ forall {
   e_pas=v_init
 }
 
+dend {
+    nseg = 1
+    diam = 2
+    L = 1000
+    Ra = 123
+}
+
+access POST
+e_pas = -61
+
+connect dend(0), POST(0)
+
 
 
 //----------------------------------------------------------------------------
 //  insert presynaptic mechanisms
 //----------------------------------------------------------------------------
 
-access PRE      // insert Hodgk-Hux. Na+ and K+ currents for spikes
+access PREON       // insert Hodgk-Hux. Na+ and K+ currents for spikes
 insert hh2
 ek = -90
 gnabar_hh2 = 0.1
 gkbar_hh2 = 0.03
 
 objectvar stim      // insert current injection
-PRE stim = new IClamp(.5)
+PREON stim = new IClamp(.5)
 // note: for older versions of neuron, use PulseStim instead of IClamp
-stim.del = 2
-stim.dur = 10        // 2 ms for single psp, 10 ms for train of psps
+stim.del = trial_delay+onset_delay+tone_onset 
+stim.dur = 2        // 2 ms for single psp, 10 ms for train of psps
 stim.amp = 0.1
 
+access PREOFF       // insert Hodgk-Hux. Na+ and K+ currents for spikes
+insert hh2
+ek = -90
+gnabar_hh2 = 0.1
+gkbar_hh2 = 0.03
+objectvar stim2
 
+PREOFF stim2 = new IClamp(.5)
+stim2.del = trial_delay+tone_onset+tone_duration 
+stim2.dur = 8
+stim2.amp = 0//.1
+
+
+access PREINH       // insert Hodgk-Hux. Na+ and K+ currents for spikes
+insert hh2
+ek = -90
+gnabar_hh2 = 0.1
+gkbar_hh2 = 0.03
+objectvar stim3
+
+PREINH stim3 = new IClamp(.5)
+stim3.del = trial_delay+tone_onset
+stim3.dur = tone_duration
+stim3.amp = 0.1
 
 
 //----------------------------------------------------------------------------
 //  insert postsynaptic mechansisms
 //----------------------------------------------------------------------------
 
+POST {
+    insert hh2 // insert Hodgkin-Huxley Na+ and K+ currents for spikes
+    ek = -90
+    gnabar_hh2 = 0.1
+    gkbar_hh2 = 0.03
+}
+
+
+for i = 0, 1 {
+    synAMPA[i] = new AMPA()          // create synapse
+    POST synAMPA[i].loc(0.5)         // assign postsynaptic compartment
+    Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
+    Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
+    Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
+    Erev_AMPA   = 0 //  (mV)         reversal potential
+    Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
+    synAMPA[i].gmax      = 0.0004 // (umho)       maximum conductance
+
+    synNMDA[i] = new NMDA()          // create synapse
+    POST synNMDA[i].loc(0.5)         // assign postsynaptic compartment
+    Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
+    Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_NMDA  = 0.072 //  (/ms mM)     forward (binding) rate
+    Beta_NMDA   = 0.0066 // (/ms)        backward (unbinding) rate
+    Erev_NMDA   = 0 //  (mV)         reversal potential
+    Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
+    mg_NMDA     = 1 //  (mM)    physiological extracell magnesium
+    synNMDA[i].gmax      = 0.0001 // (umho)       maximum conductance
+}
+
 objectvar c
-c = new AMPA()          // create synapse
+c = new GABAa()          // create synapse
 POST c.loc(0.5)         // assign postsynaptic compartment
-setpointer c.pre, PRE.v(0.5)    // assign presynaptic compartment
+setpointer c.pre, PREINH.v(0.5)    // assign presynaptic compartment
+Cmax_GABAa  = 1 //  (mM)     max transmitter concentration
+Cdur_GABAa  = 2 //  (ms)     transmitter duration (rising phase)
+Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
+Beta_GABAa  = 0.18  //  (/ms)        backward (unbinding) rate
+Erev_GABAa  = -80   //  (mV)         reversal potential
+Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
+Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
+c.gmax      = 0.0010 // (umho)       maximum conductance
 
-Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
-Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
-Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
-Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
-Erev_AMPA   = 0 //  (mV)         reversal potential
-Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
-Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-c.gmax      = 0.0001 // (umho)       maximum conductance
+dend synAMPA[0].loc(1)         // assign postsynaptic compartment
+dend synNMDA[0].loc(1)         // assign postsynaptic compartment
+synAMPA[0].gmax = 0.01 // (umho)
 
-
+setpointer synAMPA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
+setpointer synNMDA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
+setpointer synAMPA[1].pre, PREOFF.v(0.5)    // assign presynaptic compartment
+setpointer synNMDA[1].pre, PREOFF.v(0.5)    // assign presynaptic compartment
 
 //----------------------------------------------------------------------------
 //  add graphs
 //----------------------------------------------------------------------------
 
-addgraph("PRE.v(0.5)",-90,40)
-addgraph("c.C",0,1)
-g[1].addvar("c.R",1,0)
-
-addgraph("c.i",-0.005,0.00001)
-addgraph("POST.v(0.5)",v_init-2,v_init+80)
+addgraph("PREON.v(0.5)",-90,40)
+addgraph("PREOFF.v(0.5)",-90,40)
+addgraph("PREINH.v(0.5)",-90,40)
+addgraph("POST.v(0.5)",-70,-60)
+addgraph("dend.v(1)",-80,40)
+addgraph("dend.v(0.5)",-80,40)
