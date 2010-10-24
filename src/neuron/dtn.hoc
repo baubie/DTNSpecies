@@ -1,28 +1,8 @@
-/*----------------------------------------------------------------------------
-
-  Models if IC neurons with kinetic models of AMPA, NMDA and GABA_A receptors
-  based on:
-
-  Destexhe, A., Mainen, Z.F. and Sejnowski, T.J.  Kinetic models of 
-  synaptic transmission.  In: Methods in Neuronal Modeling (2nd edition; 
-  edited by Koch, C. and Segev, I.), MIT press, Cambridge, 1998, pp. 1-25.
-
-
-  This file was originally written by:
-  Written by Alain Destexhe, Laval University, 1995
-
-  Modified to add extra receptors with other modifications by:
-  Brandon Aubie, 2010
-
-----------------------------------------------------------------------------*/
-
 
 
 //----------------------------------------------------------------------------
 //  load and define general graphical procedures
 //----------------------------------------------------------------------------
-
-// xopen("$(NEURONHOME)/lib/hoc/stdrun.hoc")
 
 objectvar g[20]         // max 20 graphs
 ngraph = 0
@@ -52,23 +32,102 @@ if(ismenu==0) {
 //----------------------------------------------------------------------------
 
 dt=0.025
-tstop = 100      // 15 for single psp, 25 for train
+tstop = 100
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
-v_init = -68
+v_init = -55
 
-onset_delay = 0
-tone_onset = 2
 tone_duration = 20
 trial_delay = 10
-objectvar synAMPA[10]
-objectvar synNMDA[10]
+
+nCN = 20
+CN_smallest = 10
+CN_largest = 25
+
+nON = 10
+ON_smallest= 10
+ON_largest= 15
+
 
 //----------------------------------------------------------------------------
-//  create compartments and insert passive properties
+//  create sustained CN neuron
 //----------------------------------------------------------------------------
 
+create CN[nCN]
+objectvar stim[nCN]
+
+for i = 0, nCN-1 CN[i] {
+    diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+    L=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+    insert pas
+    insert hh2
+    g_pas=1/3000
+    e_pas=-55 
+    gnabar_hh2 = 0.1
+    gkbar_hh2 = 0.03
+    vtraub_hh2 = -55 
+
+    stim[i] = new IClamp(.5)
+    stim[i].del = trial_delay 
+    stim[i].dur = tone_duration
+    stim[i].amp = 0.1
+}
+
+addgraph("CN[0].v(0.5)",-90,40)
+
+
+//----------------------------------------------------------------------------
+//  create onset neurons
+//----------------------------------------------------------------------------
+
+create ON[nON]
+objectvar ON_AMPA[nON][nCN]
+
+for i = 0, nON-1 {
+
+    ON[i] {
+        diam=ON_smallest+(ON_largest-ON_smallest)*(i/(nON-1))
+        L=ON_smallest+(ON_largest-ON_smallest)*(i/(nON-1))
+
+        // Setup passive, Na+ and K+ channels
+        insert pas
+        insert na
+        insert klt
+        insert kht
+        g_pas=1/3000
+        e_pas=-55 
+        gnabar_na = 0.15
+        ena = 50
+    }
+
+    for j = 0, nCN-1{
+        ON_AMPA[i][j] = new AMPA()          // create synapse
+        ON[i] ON_AMPA[i][j].loc(0.5)         // assign postsynaptic compartment
+        Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
+        Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
+        Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
+        Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
+        Erev_AMPA   = 0 //  (mV)         reversal potential
+        Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
+        Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
+        ON_AMPA[i][j].gmax      = 0.00200 // (umho)       maximum conductance
+    }
+}
+
+addgraph("ON[0].v(0.5)",-90,40)
+//addgraph("ON[0].gklt_klt(0.5)",0,0.01)
+//addgraph("ON[0].gkht_kht(0.5)",0,0.01)
+
+
+for i = 0, nON-1 {
+    for j = 0, nCN-1 {
+        setpointer ON_AMPA[i][j].pre, CN[j].v(0.5)    // assign presynaptic compartment
+    }
+}
+
+
+/*
 create PREON,PREOFF,PREINH,POST,dend
 forall {
   diam=10
@@ -79,14 +138,11 @@ forall {
 }
 
 dend {
-    nseg = 1
-    diam = 2
-    L = 1000
-    Ra = 123
+    nseg = 5
+    diam = 3
+    L = 700
+    Ra = 100
 }
-
-access POST
-e_pas = -61
 
 connect dend(0), POST(0)
 
@@ -97,16 +153,17 @@ connect dend(0), POST(0)
 //----------------------------------------------------------------------------
 
 access PREON       // insert Hodgk-Hux. Na+ and K+ currents for spikes
-insert hh2
+insert na
+insert klt
+insert kht
 ek = -90
-gnabar_hh2 = 0.1
-gkbar_hh2 = 0.03
+ena = 0
 
 objectvar stim      // insert current injection
 PREON stim = new IClamp(.5)
 // note: for older versions of neuron, use PulseStim instead of IClamp
 stim.del = trial_delay+onset_delay+tone_onset 
-stim.dur = 2        // 2 ms for single psp, 10 ms for train of psps
+stim.dur = tone_duration        // 2 ms for single psp, 10 ms for train of psps
 stim.amp = 0.1
 
 access PREOFF       // insert Hodgk-Hux. Na+ and K+ currents for spikes
@@ -118,7 +175,7 @@ objectvar stim2
 
 PREOFF stim2 = new IClamp(.5)
 stim2.del = trial_delay+tone_onset+tone_duration 
-stim2.dur = 8
+stim2.dur = 2
 stim2.amp = 0//.1
 
 
@@ -132,7 +189,7 @@ objectvar stim3
 PREINH stim3 = new IClamp(.5)
 stim3.del = trial_delay+tone_onset
 stim3.dur = tone_duration
-stim3.amp = 0.1
+stim3.amp = 0.05
 
 
 //----------------------------------------------------------------------------
@@ -140,6 +197,12 @@ stim3.amp = 0.1
 //----------------------------------------------------------------------------
 
 POST {
+    insert hh2 // insert Hodgkin-Huxley Na+ and K+ currents for spikes
+    ek = -90
+    gnabar_hh2 = 0.1
+    gkbar_hh2 = 0.03
+}
+dend {
     insert hh2 // insert Hodgkin-Huxley Na+ and K+ currents for spikes
     ek = -90
     gnabar_hh2 = 0.1
@@ -157,7 +220,7 @@ for i = 0, 1 {
     Erev_AMPA   = 0 //  (mV)         reversal potential
     Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
     Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-    synAMPA[i].gmax      = 0.0004 // (umho)       maximum conductance
+    synAMPA[i].gmax      = 0.0050 // (umho)       maximum conductance
 
     synNMDA[i] = new NMDA()          // create synapse
     POST synNMDA[i].loc(0.5)         // assign postsynaptic compartment
@@ -168,8 +231,8 @@ for i = 0, 1 {
     Erev_NMDA   = 0 //  (mV)         reversal potential
     Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
     Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
-    mg_NMDA     = 1 //  (mM)    physiological extracell magnesium
-    synNMDA[i].gmax      = 0.0001 // (umho)       maximum conductance
+    mg_NMDA     = 0.5 //  (mM)    physiological extracell magnesium
+    synNMDA[i].gmax      = 0.0100 // (umho)       maximum conductance
 }
 
 objectvar c
@@ -177,17 +240,16 @@ c = new GABAa()          // create synapse
 POST c.loc(0.5)         // assign postsynaptic compartment
 setpointer c.pre, PREINH.v(0.5)    // assign presynaptic compartment
 Cmax_GABAa  = 1 //  (mM)     max transmitter concentration
-Cdur_GABAa  = 2 //  (ms)     transmitter duration (rising phase)
+Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
 Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
 Beta_GABAa  = 0.18  //  (/ms)        backward (unbinding) rate
 Erev_GABAa  = -80   //  (mV)         reversal potential
 Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
 Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-c.gmax      = 0.0010 // (umho)       maximum conductance
+c.gmax      = 0.0100 // (umho)       maximum conductance
 
 dend synAMPA[0].loc(1)         // assign postsynaptic compartment
 dend synNMDA[0].loc(1)         // assign postsynaptic compartment
-synAMPA[0].gmax = 0.01 // (umho)
 
 setpointer synAMPA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
 setpointer synNMDA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
@@ -201,6 +263,5 @@ setpointer synNMDA[1].pre, PREOFF.v(0.5)    // assign presynaptic compartment
 addgraph("PREON.v(0.5)",-90,40)
 addgraph("PREOFF.v(0.5)",-90,40)
 addgraph("PREINH.v(0.5)",-90,40)
-addgraph("POST.v(0.5)",-70,-60)
-addgraph("dend.v(1)",-80,40)
-addgraph("dend.v(0.5)",-80,40)
+addgraph("POST.v(0.5)",-80,40)
+*/
