@@ -32,13 +32,12 @@ if(ismenu==0) {
 //----------------------------------------------------------------------------
 
 dt=0.025
-tstop = 100
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
 v_init = -55
 
-tone_duration = 20
+tone_duration = 2
 trial_delay = 10
 
 nCN = 20
@@ -49,6 +48,7 @@ nON = 10
 ON_smallest= 10
 ON_largest= 15
 
+tstop = tone_duration+trial_delay+100
 
 //----------------------------------------------------------------------------
 //  create sustained CN neuron
@@ -97,7 +97,7 @@ for i = 0, nON-1 {
         insert kht
         g_pas=1/3000
         e_pas=-55 
-        gnabar_na = 0.15
+        gnabar_na = 0.20
         ena = 50
     }
 
@@ -115,16 +115,103 @@ for i = 0, nON-1 {
     }
 }
 
-addgraph("ON[0].v(0.5)",-90,40)
-//addgraph("ON[0].gklt_klt(0.5)",0,0.01)
-//addgraph("ON[0].gkht_kht(0.5)",0,0.01)
-
-
 for i = 0, nON-1 {
     for j = 0, nCN-1 {
         setpointer ON_AMPA[i][j].pre, CN[j].v(0.5)    // assign presynaptic compartment
     }
 }
+
+addgraph("ON[0].v(0.5)",-90,40)
+
+
+
+//----------------------------------------------------------------------------
+//  create inferior colliculus neuron
+//----------------------------------------------------------------------------
+
+create IC
+create IC_dend
+connect IC_dend(0), IC(0)
+
+objectvar IC_GABAa[nCN]
+objectvar IC_dend_AMPA[nON]
+objectvar IC_dend_NMDA[nON]
+
+IC {
+    diam=10
+    L=10
+
+    // Setup passive, Na+ and K+ channels
+    insert pas
+    insert na
+    insert klt
+    insert kht
+    g_pas=1/3000
+    e_pas=-55 
+    gnabar_na = 0.20
+    ena = 50
+}
+
+IC_dend {
+    diam=1
+    L=7000021
+
+    insert pas
+    g_pas=1/3000
+    e_pas=-55 
+}
+
+for j = 0, nON-1{
+    IC_dend_AMPA[j] = new AMPA()          // create synapse
+    IC IC_dend_AMPA[j].loc(1.0)         // assign postsynaptic compartment
+    Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
+    Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
+    Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
+    Erev_AMPA   = 0 //  (mV)         reversal potential
+    Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
+    IC_dend_AMPA[j].gmax      = 0.00020 // (umho)       maximum conductance
+}
+for j = 0, nON-1{
+    IC_dend_NMDA[j] = new NMDA()          // create synapse
+    IC IC_dend_NMDA[j].loc(1.0)         // assign postsynaptic compartment
+    Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
+    Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_NMDA  = 1.1   //  (/ms mM)     forward (binding) rate
+    Beta_NMDA   = 0.19  //  (/ms)        backward (unbinding) rate
+    Erev_NMDA   = 0 //  (mV)         reversal potential
+    Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
+    IC_dend_NMDA[j].gmax      = 0.00020 // (umho)       maximum conductance
+}
+
+for j = 0, nCN-1{
+    IC_GABAa[j] = new GABAa()          // create synapse
+    IC IC_GABAa[j].loc(0.5)         // assign postsynaptic compartment
+    Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
+    Beta_GABAa  = 0.18  //  (/ms)        backward (unbinding) rate
+    Erev_GABAa  = -80   //  (mV)         reversal potential
+    Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
+    Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
+    IC_GABAa[j].gmax      = 0.001 // (umho)       maximum conductance
+}
+
+for i = 0, nON-1 {
+    setpointer IC_dend_AMPA[i].pre, ON[i].v(0.5)    // assign presynaptic compartment
+    setpointer IC_dend_NMDA[i].pre, ON[i].v(0.5)    // assign presynaptic compartment
+}
+for i = 0, nCN-1 {
+    setpointer IC_GABAa[i].pre, CN[i].v(0.5)    // assign presynaptic compartment
+}
+
+addgraph("IC.v(0.5)",-90,40)
+addgraph("IC_dend.v(1.0)",-90,40)
+addgraph("IC_dend.v(0.0)",-90,40)
+
+
+
 
 
 /*
