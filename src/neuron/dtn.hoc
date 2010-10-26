@@ -37,7 +37,7 @@ steps_per_ms = 1/dt
 celsius = 36
 v_init = -55
 
-tone_duration = 2
+tone_duration = 50
 trial_delay = 10
 
 nCN = 20
@@ -45,8 +45,8 @@ CN_smallest = 10
 CN_largest = 25
 
 nON = 10
-ON_smallest= 10
-ON_largest= 15
+ON_smallest= 20
+ON_largest= 25
 
 tstop = tone_duration+trial_delay+100
 
@@ -146,24 +146,27 @@ IC {
     insert na
     insert klt
     insert kht
-    g_pas=1/3000
+	insert hcno
+	eh_hcno=-38
+	gbar_hcno=0.01
+    g_pas=1/5000
     e_pas=-55 
     gnabar_na = 0.20
     ena = 50
 }
 
 IC_dend {
-    diam=1
-    L=7000021
+    diam=2
+    L=500
 
     insert pas
-    g_pas=1/3000
+    g_pas=1/5000
     e_pas=-55 
 }
 
 for j = 0, nON-1{
     IC_dend_AMPA[j] = new AMPA()          // create synapse
-    IC IC_dend_AMPA[j].loc(1.0)         // assign postsynaptic compartment
+    IC_dend IC_dend_AMPA[j].loc(1.0)         // assign postsynaptic compartment
     Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
     Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
     Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
@@ -171,11 +174,11 @@ for j = 0, nON-1{
     Erev_AMPA   = 0 //  (mV)         reversal potential
     Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
     Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-    IC_dend_AMPA[j].gmax      = 0.00020 // (umho)       maximum conductance
+    IC_dend_AMPA[j].gmax      = 0//.00050 // (umho)       maximum conductance
 }
 for j = 0, nON-1{
     IC_dend_NMDA[j] = new NMDA()          // create synapse
-    IC IC_dend_NMDA[j].loc(1.0)         // assign postsynaptic compartment
+    IC_dend IC_dend_NMDA[j].loc(1.0)         // assign postsynaptic compartment
     Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
     Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
     Alpha_NMDA  = 1.1   //  (/ms mM)     forward (binding) rate
@@ -183,7 +186,7 @@ for j = 0, nON-1{
     Erev_NMDA   = 0 //  (mV)         reversal potential
     Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
     Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
-    IC_dend_NMDA[j].gmax      = 0.00020 // (umho)       maximum conductance
+    IC_dend_NMDA[j].gmax      = 0//.00020 // (umho)       maximum conductance
 }
 
 for j = 0, nCN-1{
@@ -195,7 +198,7 @@ for j = 0, nCN-1{
     Erev_GABAa  = -80   //  (mV)         reversal potential
     Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
     Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa[j].gmax      = 0.001 // (umho)       maximum conductance
+    IC_GABAa[j].gmax      = 0.0005 // (umho)       maximum conductance
 }
 
 for i = 0, nON-1 {
@@ -207,8 +210,8 @@ for i = 0, nCN-1 {
 }
 
 addgraph("IC.v(0.5)",-90,40)
-addgraph("IC_dend.v(1.0)",-90,40)
-addgraph("IC_dend.v(0.0)",-90,40)
+//addgraph("IC_dend.v(1.0)",-90,40)
+//addgraph("IC_dend.v(0.0)",-90,40)
 
 
 
