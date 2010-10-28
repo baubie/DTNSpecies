@@ -37,26 +37,36 @@ steps_per_ms = 1/dt
 celsius = 36
 v_init = -55
 
-tone_duration = 10
 trial_delay = 10
-CN2_delay = 15
+CN2_delay = 2
+CN3_delay = 4
 
-nCN = 20
+trials = 25
+minTrial = 1
+dTrial = 1
+trial_dur = 100
+
+
+nCN = 25
 CN_smallest = 10
-CN_largest = 25
+CN_largest = 15
+CN2_smallest = 10
+CN2_largest = 25
+CN3_smallest = 10
+CN3_largest = 25
 
-nON = 10
+nON = 20
 ON_smallest= 20
 ON_largest= 25
 
-tstop = tone_duration+trial_delay+100
+tstop = trial_dur*trials
 
 //----------------------------------------------------------------------------
 //  create sustained CN neuron
 //----------------------------------------------------------------------------
 
 create CN[nCN]
-objectvar stim[nCN]
+objectvar stim[trials][nCN]
 
 for i = 0, nCN-1 CN[i] {
     diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
@@ -69,19 +79,21 @@ for i = 0, nCN-1 CN[i] {
     gkbar_hh2 = 0.03
     vtraub_hh2 = -55 
 
-    stim[i] = new IClamp(.5)
-    stim[i].del = trial_delay 
-    stim[i].dur = tone_duration
-    stim[i].amp = 0.1
+	for j = 0, trials-1 {
+		stim[j][i] = new IClamp(.5)
+		stim[j][i].del = trial_delay+trial_dur*j
+		stim[j][i].dur = minTrial+dTrial*j
+		stim[j][i].amp = 0.1
+	}
 }
 
 addgraph("CN[0].v(0.5)",-90,40)
 
 create CN2[nCN]
-objectvar stim2[nCN]
+objectvar stim2[trials][nCN]
 for i = 0, nCN-1 CN2[i] {
-    diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
-    L=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+    diam=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
+    L=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
     insert pas
     insert hh2
     g_pas=1/3000
@@ -90,19 +102,21 @@ for i = 0, nCN-1 CN2[i] {
     gkbar_hh2 = 0.03
     vtraub_hh2 = -55 
 
-    stim2[i] = new IClamp(.5)
-    stim2[i].del = trial_delay+CN2_delay
-    stim2[i].dur = tone_duration
-    stim2[i].amp = 0.1
+	for j = 0,trials-1 {
+		stim2[j][i] = new IClamp(.5)
+		stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
+		stim2[j][i].dur = minTrial+dTrial*j
+		stim2[j][i].amp = 0.1
+	}
 }
 
 addgraph("CN2[0].v(0.5)",-90,40)
 
 create CN3[nCN]
-objectvar stim3[nCN]
+objectvar stim3[trials][nCN]
 for i = 0, nCN-1 CN3[i] {
-    diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
-    L=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+    diam=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
+    L=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
     insert pas
     insert hh2
     g_pas=1/3000
@@ -111,10 +125,12 @@ for i = 0, nCN-1 CN3[i] {
     gkbar_hh2 = 0.03
     vtraub_hh2 = -55 
 
-    stim3[i] = new IClamp(.5)
-    stim3[i].del = trial_delay+CN3_delay
-    stim3[i].dur = tone_duration
-    stim3[i].amp = 0.1
+	for j = 0, trials-1 {
+		stim3[j][i] = new IClamp(.5)
+		stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
+		stim3[j][i].dur = minTrial+dTrial*j
+		stim3[j][i].amp = 0.1
+	}
 }
 
 addgraph("CN3[0].v(0.5)",-90,40)
@@ -161,7 +177,7 @@ for i = 0, nON-1 {
 
 for i = 0, nON-1 {
     for j = 0, nCN-1 {
-        setpointer ON_AMPA[i][j].pre, CN2[j].v(0.5)    // assign presynaptic compartment
+        setpointer ON_AMPA[i][j].pre, CN3[j].v(0.5)    // assign presynaptic compartment
     }
 }
 
@@ -180,7 +196,7 @@ connect IC_dend(0), IC(0)
 objectvar IC_GABAa[nCN]
 objectvar IC_dend_AMPA[nON]
 objectvar IC_dend_NMDA[nON]
-objectvar IC_AMPA[nON]
+objectvar IC_AMPA[nCN]
 objectvar IC_NMDA[nCN]
 
 IC {
@@ -189,16 +205,12 @@ IC {
 
     // Setup passive, Na+ and K+ channels
     insert pas
-    insert na
-    insert klt
-    insert kht
-	insert hcno
-	eh_hcno=-38
-	gbar_hcno=0.01
     g_pas=1/5000
-    e_pas=-55 
-    gnabar_na = 0.20
-    ena = 50
+    e_pas=-55
+	insert hh2
+    gnabar_hh2 = 0.1
+    gkbar_hh2 = 0.03
+    vtraub_hh2 = -57 
 }
 
 IC_dend {
@@ -220,7 +232,7 @@ for j = 0, nON-1{
     Erev_AMPA   = 0 //  (mV)         reversal potential
     Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
     Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-    IC_dend_AMPA[j].gmax      = 0.00500 // (umho)       maximum conductance
+    IC_dend_AMPA[j].gmax      = 0.00015 // (umho)       maximum conductance
 }
 for j = 0, nON-1{
     IC_dend_NMDA[j] = new NMDA()          // create synapse
@@ -232,7 +244,8 @@ for j = 0, nON-1{
     Erev_NMDA   = 0 //  (mV)         reversal potential
     Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
     Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
-    IC_dend_NMDA[j].gmax      = 0.00500 // (umho)       maximum conductance
+	mg_NMDA = 1.0
+    IC_dend_NMDA[j].gmax      = 0.00015 // (umho)       maximum conductance
 }
 
 for j = 0, nCN-1{
@@ -244,7 +257,33 @@ for j = 0, nCN-1{
     Erev_GABAa  = -80   //  (mV)         reversal potential
     Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
     Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa[j].gmax      = 0.0005 // (umho)       maximum conductance
+    IC_GABAa[j].gmax      = 0.00015 // (umho)       maximum conductance
+}
+
+for j = 0, nCN-1{
+    IC_AMPA[j] = new AMPA()          // create synapse
+    IC IC_AMPA[j].loc(1.0)         // assign postsynaptic compartment
+    Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
+    Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
+    Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
+    Erev_AMPA   = 0 //  (mV)         reversal potential
+    Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
+    IC_AMPA[j].gmax      = 0.00010 // (umho)       maximum conductance
+}
+for j = 0, nCN-1{
+    IC_NMDA[j] = new NMDA()          // create synapse
+    IC IC_NMDA[j].loc(1.0)         // assign postsynaptic compartment
+    Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
+    Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
+    Alpha_NMDA  = 1.1   //  (/ms mM)     forward (binding) rate
+    Beta_NMDA   = 0.19  //  (/ms)        backward (unbinding) rate
+    Erev_NMDA   = 0 //  (mV)         reversal potential
+    Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
+    Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
+	mg_NMDA = 1.8
+    IC_NMDA[j].gmax      = 0.00100 // (umho)       maximum conductance
 }
 
 for i = 0, nON-1 {
@@ -253,6 +292,8 @@ for i = 0, nON-1 {
 }
 for i = 0, nCN-1 {
     setpointer IC_GABAa[i].pre, CN[i].v(0.5)    // assign presynaptic compartment
+    setpointer IC_AMPA[i].pre, CN2[i].v(0.5)    // assign presynaptic compartment
+    setpointer IC_NMDA[i].pre, CN2[i].v(0.5)    // assign presynaptic compartment
 }
 
 addgraph("IC.v(0.5)",-90,40)
@@ -260,144 +301,3 @@ addgraph("IC.v(0.5)",-90,40)
 //addgraph("IC_dend.v(0.0)",-90,40)
 
 
-
-
-
-/*
-create PREON,PREOFF,PREINH,POST,dend
-forall {
-  diam=10
-  L=10
-  insert pas
-  g_pas=1/5000
-  e_pas=v_init
-}
-
-dend {
-    nseg = 5
-    diam = 3
-    L = 700
-    Ra = 100
-}
-
-connect dend(0), POST(0)
-
-
-
-//----------------------------------------------------------------------------
-//  insert presynaptic mechanisms
-//----------------------------------------------------------------------------
-
-access PREON       // insert Hodgk-Hux. Na+ and K+ currents for spikes
-insert na
-insert klt
-insert kht
-ek = -90
-ena = 0
-
-objectvar stim      // insert current injection
-PREON stim = new IClamp(.5)
-// note: for older versions of neuron, use PulseStim instead of IClamp
-stim.del = trial_delay+onset_delay+tone_onset 
-stim.dur = tone_duration        // 2 ms for single psp, 10 ms for train of psps
-stim.amp = 0.1
-
-access PREOFF       // insert Hodgk-Hux. Na+ and K+ currents for spikes
-insert hh2
-ek = -90
-gnabar_hh2 = 0.1
-gkbar_hh2 = 0.03
-objectvar stim2
-
-PREOFF stim2 = new IClamp(.5)
-stim2.del = trial_delay+tone_onset+tone_duration 
-stim2.dur = 2
-stim2.amp = 0//.1
-
-
-access PREINH       // insert Hodgk-Hux. Na+ and K+ currents for spikes
-insert hh2
-ek = -90
-gnabar_hh2 = 0.1
-gkbar_hh2 = 0.03
-objectvar stim3
-
-PREINH stim3 = new IClamp(.5)
-stim3.del = trial_delay+tone_onset
-stim3.dur = tone_duration
-stim3.amp = 0.05
-
-
-//----------------------------------------------------------------------------
-//  insert postsynaptic mechansisms
-//----------------------------------------------------------------------------
-
-POST {
-    insert hh2 // insert Hodgkin-Huxley Na+ and K+ currents for spikes
-    ek = -90
-    gnabar_hh2 = 0.1
-    gkbar_hh2 = 0.03
-}
-dend {
-    insert hh2 // insert Hodgkin-Huxley Na+ and K+ currents for spikes
-    ek = -90
-    gnabar_hh2 = 0.1
-    gkbar_hh2 = 0.03
-}
-
-
-for i = 0, 1 {
-    synAMPA[i] = new AMPA()          // create synapse
-    POST synAMPA[i].loc(0.5)         // assign postsynaptic compartment
-    Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
-    Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
-    Beta_AMPA   = 0.19  //  (/ms)        backward (unbinding) rate
-    Erev_AMPA   = 0 //  (mV)         reversal potential
-    Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
-    Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-    synAMPA[i].gmax      = 0.0050 // (umho)       maximum conductance
-
-    synNMDA[i] = new NMDA()          // create synapse
-    POST synNMDA[i].loc(0.5)         // assign postsynaptic compartment
-    Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
-    Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_NMDA  = 0.072 //  (/ms mM)     forward (binding) rate
-    Beta_NMDA   = 0.0066 // (/ms)        backward (unbinding) rate
-    Erev_NMDA   = 0 //  (mV)         reversal potential
-    Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
-    Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
-    mg_NMDA     = 0.5 //  (mM)    physiological extracell magnesium
-    synNMDA[i].gmax      = 0.0100 // (umho)       maximum conductance
-}
-
-objectvar c
-c = new GABAa()          // create synapse
-POST c.loc(0.5)         // assign postsynaptic compartment
-setpointer c.pre, PREINH.v(0.5)    // assign presynaptic compartment
-Cmax_GABAa  = 1 //  (mM)     max transmitter concentration
-Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
-Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
-Beta_GABAa  = 0.18  //  (/ms)        backward (unbinding) rate
-Erev_GABAa  = -80   //  (mV)         reversal potential
-Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
-Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-c.gmax      = 0.0100 // (umho)       maximum conductance
-
-dend synAMPA[0].loc(1)         // assign postsynaptic compartment
-dend synNMDA[0].loc(1)         // assign postsynaptic compartment
-
-setpointer synAMPA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
-setpointer synNMDA[0].pre, PREON.v(0.5)    // assign presynaptic compartment
-setpointer synAMPA[1].pre, PREOFF.v(0.5)    // assign presynaptic compartment
-setpointer synNMDA[1].pre, PREOFF.v(0.5)    // assign presynaptic compartment
-
-//----------------------------------------------------------------------------
-//  add graphs
-//----------------------------------------------------------------------------
-
-addgraph("PREON.v(0.5)",-90,40)
-addgraph("PREOFF.v(0.5)",-90,40)
-addgraph("PREINH.v(0.5)",-90,40)
-addgraph("POST.v(0.5)",-80,40)
-*/
