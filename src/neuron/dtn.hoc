@@ -39,11 +39,11 @@ v_init = -55
 
 trial_delay = 10
 CN2_delay = 2
-CN3_delay = 4
+CN3_delay = 15
 
-trials = 25
+trials = 5
 minTrial = 1
-dTrial = 1
+dTrial = 4
 trial_dur = 100
 
 
@@ -257,7 +257,7 @@ for j = 0, nCN-1{
     Erev_GABAa  = -80   //  (mV)         reversal potential
     Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
     Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa[j].gmax      = 0.00015 // (umho)       maximum conductance
+    IC_GABAa[j].gmax      = 0.00018 // (umho)       maximum conductance
 }
 
 for j = 0, nCN-1{
