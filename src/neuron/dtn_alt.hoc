@@ -32,6 +32,7 @@ if(ismenu==0) {
 //----------------------------------------------------------------------------
 
 dt=0.025
+dt=0.005
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
@@ -44,9 +45,9 @@ CN3_delay = 10
 // SETUP THE TRIALS
 PEmode = 0
 
-trials = 10
+trials = 25
 minTrial = 1
-dTrial = 2 
+dTrial = 1 
 trial_dur = 333
 
 PEdur = 1
@@ -206,7 +207,7 @@ IC {
     e_pas=-55
 	insert hh2
     gnabar_hh2 = 0.030
-    gkbar_hh2 = 0.030
+    gkbar_hh2 = 0.005
     vtraub_hh2 = -55
     v_init = -55
 }
@@ -220,7 +221,7 @@ for j = 0, nCN-1{
     Erev_GABAa  = -80   //  (mV)         reversal potential
     Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
     Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa[j].gmax      = 0.00010 // (umho)       maximum conductance
+    IC_GABAa[j].gmax      = 0.00014 // (umho)       maximum conductance
 }
 
 for j = 0, nCN-1{
@@ -232,7 +233,7 @@ for j = 0, nCN-1{
     Erev_GABAa  = -80   //  (mV)         reversal potential
     Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
     Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa2[j].gmax      = 0.00010 // (umho)       maximum conductance
+    IC_GABAa2[j].gmax      = 0.00030 // (umho)       maximum conductance
 }
 
 for j = 0, nCN-1{
@@ -253,15 +254,15 @@ for j = 0, nCN-1{
     IC IC_NMDA[j].loc(1.0)         // assign postsynaptic compartment
     Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
     Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_NMDA  = 0.5 //  (/ms mM)     forward (binding) rate
-    Beta_NMDA   = 0.0066 // (/ms)        backward (unbinding) rate
+    Alpha_NMDA  = 0.3 //  (/ms mM)     forward (binding) rate
+    Beta_NMDA   = 0.066 // (/ms)        backward (unbinding) rate
     Alpha_NMDA  = 0.1 //  (/ms mM)     forward (binding) rate
     Beta_NMDA   = 0.03 // (/ms)        backward (unbinding) rate
     Erev_NMDA   = 0 //  (mV)         reversal potential
     Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
     Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
 	mg_NMDA = 0.0
-    IC_NMDA[j].gmax = 0.00004 // (umho)       maximum conductance
+    IC_NMDA[j].gmax = 0.00010 // (umho)       maximum conductance
 }
 
 for i = 0, nCN-1 {
