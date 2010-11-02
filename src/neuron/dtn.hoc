@@ -38,15 +38,15 @@ celsius = 36
 
 trial_delay = 20
 CN_delay = 0
-CN2_delay = 10
+CN2_delay = 3
 CN3_delay = 10
 
 // SETUP THE TRIALS
 PEmode = 0
 
-trials = 4
-minTrial = 5
-dTrial = 5 
+trials = 5
+minTrial = 1
+dTrial = 4 
 trial_dur = 333
 
 PEdur = 1
@@ -76,9 +76,12 @@ tstop = trial_dur*trials
 //  create sustained CN neuron
 //----------------------------------------------------------------------------
 
+meanCur = 0.10
+
 create CN[nCN]
 objectvar stim[trials][nCN]
 objectvar stimE[trials][nCN]
+objref r[trials][nCN]
 
 for i = 0, nCN-1 CN[i] {
     diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
@@ -97,6 +100,9 @@ for i = 0, nCN-1 CN[i] {
             stim[j][i] = new IClamp(.5)
             stim[j][i].del = trial_delay+CN_delay+trial_dur*j
             stim[j][i].dur = minTrial+dTrial*j
+            r[j][i] = new Random()
+            r[j][i].poisson(meanCur)
+     //       r[j][i].play(&stim[j][i].amp)
             stim[j][i].amp = 0.1
         }
         if(PEmode == 1) {
@@ -116,6 +122,8 @@ for i = 0, nCN-1 CN[i] {
 create CN2[nCN]
 objectvar stim2[trials][nCN]
 objectvar stim2E[trials][nCN]
+objref r2[trials][nCN]
+
 for i = 0, nCN-1 CN2[i] {
     diam=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
     L=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
@@ -133,6 +141,9 @@ for i = 0, nCN-1 CN2[i] {
             stim2[j][i] = new IClamp(.5)
             stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
             stim2[j][i].dur = minTrial+dTrial*j
+            r2[j][i] = new Random()
+            r2[j][i].poisson(meanCur)
+  //          r2[j][i].play(&stim2[j][i].amp)
             stim2[j][i].amp = 0.1
         }
         if(PEmode == 1){
@@ -152,6 +163,8 @@ for i = 0, nCN-1 CN2[i] {
 create CN3[nCN]
 objectvar stim3[trials][nCN]
 objectvar stim3E[trials][nCN]
+objref r3[trials][nCN]
+
 for i = 0, nCN-1 CN3[i] {
     diam=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
     L=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
@@ -169,7 +182,10 @@ for i = 0, nCN-1 CN3[i] {
             stim3[j][i] = new IClamp(.5)
             stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
             stim3[j][i].dur = minTrial+dTrial*j
-            stim3[j][i].amp = 0.1
+            r3[j][i] = new Random()
+            r3[j][i].poisson(meanCur)
+            r3[j][i].play(&stim3[j][i].amp)
+     //       stim3[j][i].amp = 0.1
         }
         if(PEmode == 1) {
             stim3[j][i] = new IClamp(.5)
@@ -242,10 +258,11 @@ for i = 0, nON-1 {
 //  create offset neurons
 //----------------------------------------------------------------------------
 
+nCN_OFF = 4
 create OFF[nOFF]
-objectvar OFF_AMPA[nOFF][nCN]
-objectvar OFF_NMDA[nOFF][nCN]
-objectvar OFF_GABAa[nOFF][nCN]
+objectvar OFF_AMPA[nOFF][nCN_OFF]
+objectvar OFF_NMDA[nOFF][nCN_OFF]
+objectvar OFF_GABAa[nOFF][nCN_OFF]
 
 for i = 0, nOFF-1 {
 
@@ -269,7 +286,7 @@ for i = 0, nOFF-1 {
         v_init = -55
     }
 
-    for j = 0, nCN-1{
+    for j = 0, nCN_OFF-1{
         OFF_AMPA[i][j] = new AMPA()          // create synapse
         OFF[i] OFF_AMPA[i][j].loc(0.5)         // assign postsynaptic compartment
         Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
@@ -279,7 +296,7 @@ for i = 0, nOFF-1 {
         Erev_AMPA   = 0 //  (mV)         reversal potential
         Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
         Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-        OFF_AMPA[i][j].gmax      = 0.00010 // (umho)       maximum conductance
+        OFF_AMPA[i][j].gmax      = 0.00040 // (umho)       maximum conductance
 
         OFF_NMDA[i][j] = new NMDA()          // create synapse
         OFF[i] OFF_NMDA[i][j].loc(1.0)         // assign postsynaptic compartment
@@ -293,7 +310,7 @@ for i = 0, nOFF-1 {
         Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
         Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
         mg_NMDA = 0.0
-        OFF_NMDA[i][j].gmax = 0.00004 // (umho)       maximum conductance
+        OFF_NMDA[i][j].gmax = 0.00000 // (umho)       maximum conductance
 
         OFF_GABAa[i][j] = new GABAa()          // create synapse
         OFF[i] OFF_GABAa[i][j].loc(0.5)         // assign postsynaptic compartment
@@ -308,7 +325,7 @@ for i = 0, nOFF-1 {
 }
 
 for i = 0, nOFF-1 {
-    for j = 0, nCN-1 {
+    for j = 0, nCN_OFF-1 {
         setpointer OFF_AMPA[i][j].pre, CN2[j].v(0.5)    // assign presynaptic compartment
         setpointer OFF_NMDA[i][j].pre, CN2[j].v(0.5)    // assign presynaptic compartment
         setpointer OFF_GABAa[i][j].pre, CN[j].v(0.5)    // assign presynaptic compartment
