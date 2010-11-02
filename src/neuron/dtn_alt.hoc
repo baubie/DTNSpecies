@@ -31,8 +31,7 @@ if(ismenu==0) {
 //  general parameters
 //----------------------------------------------------------------------------
 
-dt=0.025
-dt=0.005
+dt=0.100
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
@@ -43,15 +42,15 @@ CN2_delay = 20
 CN3_delay = 10
 
 // SETUP THE TRIALS
-PEmode = 0
+PEmode = 1
 
-trials = 25
+trials = 5
 minTrial = 1
 dTrial = 1 
 trial_dur = 333
 
 PEdur = 1
-PEmindel = 5
+PEmindel = 1
 PEddel = 1
 
 nCN = 20
@@ -153,6 +152,8 @@ for i = 0, nCN-1 CN2[i] {
 create CN3[nCN]
 objectvar stim3[trials][nCN]
 objectvar stim3E[trials][nCN]
+objref r[trials][nCN]
+
 for i = 0, nCN-1 CN3[i] {
     diam=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
     L=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
@@ -170,7 +171,10 @@ for i = 0, nCN-1 CN3[i] {
             stim3[j][i] = new IClamp(.5)
             stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
             stim3[j][i].dur = minTrial+dTrial*j
-            stim3[j][i].amp = 0.1
+			r[j][i] = new Random()
+			r.poisson(0.1)
+			r.play(&stim3[j][i].amp)
+            //stim3[j][i].amp = 0.1
         }
         if(PEmode == 1) {
             stim3[j][i] = new IClamp(.5)
