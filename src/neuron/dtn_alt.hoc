@@ -33,7 +33,7 @@ if(ismenu==0) {
 //  general parameters
 //----------------------------------------------------------------------------
 
-dt=0.025
+dt=0.1
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
@@ -43,20 +43,20 @@ CN_delay = 0
 CN2_delay = 20
 CN3_delay = 12
 
-random_seed = 14234
-random_seed_echo = 52343
+random_seed = 243232
+random_seed_echo = 131
 
 // SETUP THE TRIALS
-PEmode = 1
+PEmode = 0
 trial_dur = 333
 trials = 25
+stimAmp = 0.10
+PEechoAmp = 0.08
 
 minTrial = 1
 dTrial = 1 
-stimAmp = 0.08
 
 PEdur = 1
-PEechoAmp = 0.08
 
 
 nCN = 20
@@ -345,7 +345,7 @@ make_network()
 
 objref output
 output = new File()
-output.wopen("dtn_80.out")
+output.wopen("dtn.out")
 output.printf("%d,%d,%d,%4.2f,%4.2f,%d,%d\n",trial_delay,trial_dur,trials,minTrial,dTrial,random_seed,random_seed_echo)
 
 for curTrial=1,20 {

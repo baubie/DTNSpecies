@@ -1,0 +1,52 @@
+size 5.4 4.3
+set font psh
+set hei 0.3000
+set lwidth 0.02
+
+include "color.gle"
+begin graph
+nobox
+scale auto
+xtitle "Stimulus Duration (ms)"
+ytitle "Spikes per Stimulus"
+yaxis hei 0.25
+xaxis hei 0.25
+xaxis min 0 max 20
+yaxis min -0.05 max 3
+xaxis dticks 5
+xaxis dsubticks 1
+yaxis dsubticks 0.5
+xticks length -0.1
+yticks length -0.1
+x2axis off
+y2axis off
+key compact pos tr offset 0.48 0.54 nobox hei 0.2
+
+
+data "dtn.dat"
+d1 line color CVTRGB(0,0,0) lwidth 0.02
+d1 marker fcircle msize 0.17 key  "+10 dB"
+d1 nomiss
+d1 err d2
+
+data "bandpass20.dat"
+d3 line color CVTRGB(0,0,0) lwidth 0.02
+d3 marker wsquare msize 0.17 key  "+20 dB"
+d3 nomiss
+d3 err d4
+
+data "bandpass30.dat"
+d5 line color CVTRGB(0,0,0) lwidth 0.02
+d5 marker ftriangle msize 0.17 key  "+30 dB"
+d5 nomiss
+d5 err d6
+
+end graph
+
+set hei 0.2
+amove 3.55 4.0
+text MU005.3
+rmove 0 -0.2
+text Freq = 32 kHz
+rmove 0 -0.2
+text Thresh = 55 dB SPL
