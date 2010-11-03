@@ -20,18 +20,20 @@ proc addgraph() { local ii  // define subroutine to add a new graph
     graphList[0].append(g[ii])
 }
 
+/*
 if(ismenu==0) {
   nrnmainmenu()         // create main menu
   nrncontrolmenu()      // crate control menu
   ismenu=1
 }
+*/
 
 
 //----------------------------------------------------------------------------
 //  general parameters
 //----------------------------------------------------------------------------
 
-dt=0.100
+dt=0.025
 runStopAt = tstop
 steps_per_ms = 1/dt
 celsius = 36
@@ -39,19 +41,23 @@ celsius = 36
 trial_delay = 20
 CN_delay = 0
 CN2_delay = 20
-CN3_delay = 10
+CN3_delay = 12
+
+random_seed = 14234
+random_seed_echo = 52343
 
 // SETUP THE TRIALS
 PEmode = 1
+trial_dur = 333
+trials = 25
 
-trials = 5
 minTrial = 1
 dTrial = 1 
-trial_dur = 333
+stimAmp = 0.08
 
 PEdur = 1
-PEmindel = 1
-PEddel = 1
+PEechoAmp = 0.08
+
 
 nCN = 20
 
@@ -62,226 +68,312 @@ CN2_largest = 25
 CN3_smallest = 10
 CN3_largest = 25
 
-nON = 1
-ON_smallest= 20
-ON_largest= 25
-
-nOFF = 1
-OFF_smallest= 20
-OFF_largest= 25
-
 tstop = trial_dur*trials
 
-//----------------------------------------------------------------------------
-//  create sustained CN neuron
-//----------------------------------------------------------------------------
-
 create CN[nCN]
+create CN2[nCN]
+create CN3[nCN]
+create IC
+
 objectvar stim[trials][nCN]
 objectvar stimE[trials][nCN]
-
-for i = 0, nCN-1 CN[i] {
-    diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
-    L=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
-    insert pas
-    insert hh2
-    g_pas=1/5000
-    e_pas=-55 
-    gnabar_hh2 = 0.1
-    gkbar_hh2 = 0.03
-    vtraub_hh2 = -55 
-    v_init = -55
-
-	for j = 0, trials-1 {
-        if(PEmode == 0) {
-            stim[j][i] = new IClamp(.5)
-            stim[j][i].del = trial_delay+CN_delay+trial_dur*j
-            stim[j][i].dur = minTrial+dTrial*j
-            stim[j][i].amp = 0.1
-        }
-        if(PEmode == 1) {
-            stim[j][i] = new IClamp(.5)
-            stim[j][i].del = trial_delay+CN_delay+trial_dur*j
-            stim[j][i].dur = PEdur 
-            stim[j][i].amp = 0.1
-            stimE[j][i] = new IClamp(.5)
-            stimE[j][i].del = trial_delay+CN_delay+trial_dur*j + PEmindel+PEddel*j
-            stimE[j][i].dur = PEdur 
-            stimE[j][i].amp = 0.1
-        }
-	}
-}
-
-
-create CN2[nCN]
 objectvar stim2[trials][nCN]
 objectvar stim2E[trials][nCN]
-for i = 0, nCN-1 CN2[i] {
-    diam=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
-    L=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
-    insert pas
-    insert hh2
-    g_pas=1/3000
-    e_pas=-55 
-    gnabar_hh2 = 0.1
-    gkbar_hh2 = 0.03
-    vtraub_hh2 = -55 
-    v_init = -55
-
-	for j = 0,trials-1 {
-        if(PEmode == 0){
-            stim2[j][i] = new IClamp(.5)
-            stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
-            stim2[j][i].dur = minTrial+dTrial*j
-            stim2[j][i].amp = 0.1
-        }
-        if(PEmode == 1){
-            stim2[j][i] = new IClamp(.5)
-            stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
-            stim2[j][i].dur = PEdur
-            stim2[j][i].amp = 0.1
-            stim2E[j][i] = new IClamp(.5)
-            stim2E[j][i].del = trial_delay+CN2_delay+trial_dur*j + PEmindel+PEddel*j
-            stim2E[j][i].dur = PEdur
-            stim2E[j][i].amp = 0.1
-        }
-	}
-}
-
-
-create CN3[nCN]
 objectvar stim3[trials][nCN]
 objectvar stim3E[trials][nCN]
+
 objref r[trials][nCN]
-
-for i = 0, nCN-1 CN3[i] {
-    diam=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
-    L=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
-    insert pas
-    insert hh2
-    g_pas=1/3000
-    e_pas=-55 
-    gnabar_hh2 = 0.1
-    gkbar_hh2 = 0.03
-    vtraub_hh2 = -55 
-    v_init = -55
-
-	for j = 0, trials-1 {
-        if(PEmode == 0) {
-            stim3[j][i] = new IClamp(.5)
-            stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
-            stim3[j][i].dur = minTrial+dTrial*j
-			r[j][i] = new Random()
-			r.poisson(0.1)
-			r.play(&stim3[j][i].amp)
-            //stim3[j][i].amp = 0.1
-        }
-        if(PEmode == 1) {
-            stim3[j][i] = new IClamp(.5)
-            stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
-            stim3[j][i].dur = PEdur
-            stim3[j][i].amp = 0.1
-            stim3E[j][i] = new IClamp(.5)
-            stim3E[j][i].del = trial_delay+CN3_delay+trial_dur*j+PEmindel+PEddel*j
-            stim3E[j][i].dur = PEdur
-            stim3E[j][i].amp = 0.1
-        }
-	}
-}
-
-
-//----------------------------------------------------------------------------
-//  create inferior colliculus neuron
-//----------------------------------------------------------------------------
-
-create IC
+objref r2[trials][nCN]
+objref r3[trials][nCN]
+objref rE[trials][nCN]
+objref r2E[trials][nCN]
+objref r3E[trials][nCN]
 
 objectvar IC_GABAa[nCN]
 objectvar IC_GABAa2[nCN]
 objectvar IC_AMPA[nCN]
 objectvar IC_NMDA[nCN]
 
-IC {
-    diam=15
-    L=15
 
-    // Setup passive, Na+ and K+ channels
-    insert pas
-    g_pas=1/5000
-    e_pas=-55
-	insert hh2
-    gnabar_hh2 = 0.030
-    gkbar_hh2 = 0.005
-    vtraub_hh2 = -55
-    v_init = -55
+proc make_network() {
+
+
+    //----------------------------------------------------------------------------
+    //  create sustained CN neuron
+    //----------------------------------------------------------------------------
+
+
+    for i = 0, nCN-1 CN[i] {
+        diam=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+        L=CN_smallest+(CN_largest-CN_smallest)*(i/(nCN-1))
+        insert pas
+        insert hh2
+        g_pas=1/5000
+        e_pas=-55 
+        gnabar_hh2 = 0.1
+        gkbar_hh2 = 0.03
+        vtraub_hh2 = -55 
+        v_init = -55
+
+        for j = 0, trials-1 {
+            if(PEmode == 0) {
+                stim[j][i] = new IClamp(.5)
+                stim[j][i].del = trial_delay+CN_delay+trial_dur*j
+                stim[j][i].dur = minTrial+dTrial*j
+                if (random_seed > 0) {
+                    r[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r.poisson(stimAmp)
+                    r.play(&stim[j][i].amp)
+                } else {
+                    stim[j][i].amp = stimAmp 
+                }
+            }
+            if(PEmode == 1) {
+                stim[j][i] = new IClamp(.5)
+                stim[j][i].del = trial_delay+CN_delay+trial_dur*j
+                stim[j][i].dur = PEdur 
+                if (random_seed > 0) {
+                    r[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r.poisson(stimAmp)
+                    r.play(&stim[j][i].amp)
+                } else {
+                    stim[j][i].amp = stimAmp 
+                }
+                stimE[j][i] = new IClamp(.5)
+                stimE[j][i].del = trial_delay+CN_delay+trial_dur*j + minTrial+dTrial*j
+                stimE[j][i].dur = PEdur 
+                if (random_seed > 0) {
+                    rE[j][i] = new Random(random_seed_echo + i*1000 + j + 3)
+                    rE.poisson(PEechoAmp)
+                    rE.play(&stimE[j][i].amp)
+                } else {
+                    stimE[j][i].amp = PEechoAmp 
+                }
+            }
+        }
+    }
+
+
+    for i = 0, nCN-1 CN2[i] {
+        diam=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
+        L=CN2_smallest+(CN2_largest-CN2_smallest)*(i/(nCN-1))
+        insert pas
+        insert hh2
+        g_pas=1/3000
+        e_pas=-55 
+        gnabar_hh2 = 0.1
+        gkbar_hh2 = 0.03
+        vtraub_hh2 = -55 
+        v_init = -55
+
+        for j = 0,trials-1 {
+            if(PEmode == 0){
+                stim2[j][i] = new IClamp(.5)
+                stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
+                stim2[j][i].dur = minTrial+dTrial*j
+                if (random_seed > 0) {
+                    r2[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r2.poisson(stimAmp)
+                    r2.play(&stim2[j][i].amp)
+                } else {
+                    stim2[j][i].amp = stimAmp 
+                }
+            }
+            if(PEmode == 1){
+                stim2[j][i] = new IClamp(.5)
+                stim2[j][i].del = trial_delay+CN2_delay+trial_dur*j
+                stim2[j][i].dur = PEdur
+                if (random_seed > 0) {
+                    r2[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r2.poisson(stimAmp)
+                    r2.play(&stim2[j][i].amp)
+                } else {
+                    stim2[j][i].amp = stimAmp 
+                }
+                stim2E[j][i] = new IClamp(.5)
+                stim2E[j][i].del = trial_delay+CN2_delay+trial_dur*j + minTrial+dTrial*j
+                stim2E[j][i].dur = PEdur
+                if (random_seed > 0) {
+                    r2E[j][i] = new Random(random_seed_echo + i*1000 + j + 3)
+                    r2E.poisson(PEechoAmp)
+                    r2E.play(&stim2E[j][i].amp)
+                } else {
+                    stim2E[j][i].amp = PEechoAmp 
+                }
+            }
+        }
+    }
+
+
+
+    for i = 0, nCN-1 CN3[i] {
+        diam=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
+        L=CN_smallest+(CN3_largest-CN3_smallest)*(i/(nCN-1))
+        insert pas
+        insert hh2
+        g_pas=1/3000
+        e_pas=-55 
+        gnabar_hh2 = 0.1
+        gkbar_hh2 = 0.03
+        vtraub_hh2 = -55 
+        v_init = -55
+
+        for j = 0, trials-1 {
+            if(PEmode == 0) {
+                stim3[j][i] = new IClamp(.5)
+                stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
+                stim3[j][i].dur = minTrial+dTrial*j
+                if (random_seed > 0) {
+                    r3[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r3.poisson(stimAmp)
+                    r3.play(&stim3[j][i].amp)
+                } else {
+                    stim3[j][i].amp = stimAmp 
+                }
+            }
+            if(PEmode == 1) {
+                stim3[j][i] = new IClamp(.5)
+                stim3[j][i].del = trial_delay+CN3_delay+trial_dur*j 
+                stim3[j][i].dur = PEdur
+                if (random_seed > 0) {
+                    r3[j][i] = new Random(random_seed + i*1000 + j + 3)
+                    r3.poisson(stimAmp)
+                    r3.play(&stim3[j][i].amp)
+                } else {
+                    stim3[j][i].amp = stimAmp 
+                }
+                stim3E[j][i] = new IClamp(.5)
+                stim3E[j][i].del = trial_delay+CN3_delay+trial_dur*j+minTrial+dTrial*j
+                stim3E[j][i].dur = PEdur
+                if (random_seed > 0) {
+                    r3E[j][i] = new Random(random_seed_echo + i*1000 + j + 3)
+                    r3E.poisson(PEechoAmp)
+                    r3E.play(&stim3E[j][i].amp)
+                } else {
+                    stim3E[j][i].amp = PEechoAmp
+                }
+            }
+        }
+    }
+
+
+    //----------------------------------------------------------------------------
+    //  create inferior colliculus neuron
+    //----------------------------------------------------------------------------
+
+    IC {
+        diam=15
+        L=15
+
+        // Setup passive, Na+ and K+ channels
+        insert pas
+        g_pas=1/5000
+        e_pas=-55
+        insert hh2
+        gnabar_hh2 = 0.030
+        gkbar_hh2 = 0.005
+        vtraub_hh2 = -55
+        v_init = -55
+    }
+
+    for j = 0, nCN-1{
+        IC_GABAa[j] = new GABAa()          // create synapse
+        IC IC_GABAa[j].loc(0.5)         // assign postsynaptic compartment
+        Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
+        Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
+        Beta_GABAa  = 0.1 //0.18  //  (/ms)        backward (unbinding) rate
+        Erev_GABAa  = -80   //  (mV)         reversal potential
+        Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
+        Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
+        IC_GABAa[j].gmax      = 0.00014 // (umho)       maximum conductance
+    }
+
+    for j = 0, nCN-1{
+        IC_GABAa2[j] = new GABAa()          // create synapse
+        IC IC_GABAa2[j].loc(0.5)         // assign postsynaptic compartment
+        Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
+        Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
+        Beta_GABAa  = 0.1 //0.18  //  (/ms)        backward (unbinding) rate
+        Erev_GABAa  = -80   //  (mV)         reversal potential
+        Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
+        Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
+        IC_GABAa2[j].gmax      = 0.00030 // (umho)       maximum conductance
+    }
+
+    for j = 0, nCN-1{
+        IC_AMPA[j] = new AMPA()          // create synapse
+        IC IC_AMPA[j].loc(1.0)         // assign postsynaptic compartment
+        Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
+        Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
+        Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
+        Beta_AMPA   = 0.30 //0.19  //  (/ms)        backward (unbinding) rate
+        Erev_AMPA   = 0 //  (mV)         reversal potential
+        Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
+        Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
+        IC_AMPA[j].gmax = 0.00015 // (umho)       maximum conductance
+
+    }
+    for j = 0, nCN-1{
+        IC_NMDA[j] = new NMDA()          // create synapse
+        IC IC_NMDA[j].loc(1.0)         // assign postsynaptic compartment
+        Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
+        Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
+        Alpha_NMDA  = 0.3 //  (/ms mM)     forward (binding) rate
+        Beta_NMDA   = 0.066 // (/ms)        backward (unbinding) rate
+        Alpha_NMDA  = 0.1 //  (/ms mM)     forward (binding) rate
+        Beta_NMDA   = 0.03 // (/ms)        backward (unbinding) rate
+        Erev_NMDA   = 0 //  (mV)         reversal potential
+        Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
+        Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
+        mg_NMDA = 0.0
+        IC_NMDA[j].gmax = 0.00010 // (umho)       maximum conductance
+    }
+
+    for i = 0, nCN-1 {
+        setpointer IC_GABAa[i].pre, CN[i].v(0.5)    // assign presynaptic compartment
+        setpointer IC_GABAa2[i].pre, CN2[i].v(0.5)    // assign presynaptic compartment
+        setpointer IC_AMPA[i].pre, CN3[i].v(0.5)    // assign presynaptic compartment
+        setpointer IC_NMDA[i].pre, CN3[i].v(0.5)    // assign presynaptic compartment
+    }
+
 }
 
-for j = 0, nCN-1{
-    IC_GABAa[j] = new GABAa()          // create synapse
-    IC IC_GABAa[j].loc(0.5)         // assign postsynaptic compartment
-    Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
-    Beta_GABAa  = 0.1 //0.18  //  (/ms)        backward (unbinding) rate
-    Erev_GABAa  = -80   //  (mV)         reversal potential
-    Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
-    Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa[j].gmax      = 0.00014 // (umho)       maximum conductance
-}
+addgraph("IC.v(0.5)",-70,40)
 
-for j = 0, nCN-1{
-    IC_GABAa2[j] = new GABAa()          // create synapse
-    IC IC_GABAa2[j].loc(0.5)         // assign postsynaptic compartment
-    Cdur_GABAa  = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_GABAa = 5 //  (/ms mM)     forward (binding) rate
-    Beta_GABAa  = 0.1 //0.18  //  (/ms)        backward (unbinding) rate
-    Erev_GABAa  = -80   //  (mV)         reversal potential
-    Prethresh_GABAa = 0     //  (mV)         voltage level nec for release
-    Deadtime_GABAa  = 1 //  (ms)     mimimum time between release events
-    IC_GABAa2[j].gmax      = 0.00030 // (umho)       maximum conductance
-}
+objref vec, netcon, nil
+make_network()
 
-for j = 0, nCN-1{
-    IC_AMPA[j] = new AMPA()          // create synapse
-    IC IC_AMPA[j].loc(1.0)         // assign postsynaptic compartment
-    Cmax_AMPA   = 1 //  (mM)     max transmitter concentration
-    Cdur_AMPA   = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_AMPA  = 1.1   //  (/ms mM)     forward (binding) rate
-    Beta_AMPA   = 0.30 //0.19  //  (/ms)        backward (unbinding) rate
-    Erev_AMPA   = 0 //  (mV)         reversal potential
-    Prethresh_AMPA  = 0     //  (mV)         voltage level nec for release
-    Deadtime_AMPA   = 1 //  (ms)     mimimum time between release events
-    IC_AMPA[j].gmax = 0.00015 // (umho)       maximum conductance
+objref output
+output = new File()
+output.wopen("dtn_80.out")
+output.printf("%d,%d,%d,%4.2f,%4.2f,%d,%d\n",trial_delay,trial_dur,trials,minTrial,dTrial,random_seed,random_seed_echo)
 
-}
-for j = 0, nCN-1{
-    IC_NMDA[j] = new NMDA()          // create synapse
-    IC IC_NMDA[j].loc(1.0)         // assign postsynaptic compartment
-    Cmax_NMDA   = 1 //  (mM)     max transmitter concentration
-    Cdur_NMDA   = 1 //  (ms)     transmitter duration (rising phase)
-    Alpha_NMDA  = 0.3 //  (/ms mM)     forward (binding) rate
-    Beta_NMDA   = 0.066 // (/ms)        backward (unbinding) rate
-    Alpha_NMDA  = 0.1 //  (/ms mM)     forward (binding) rate
-    Beta_NMDA   = 0.03 // (/ms)        backward (unbinding) rate
-    Erev_NMDA   = 0 //  (mV)         reversal potential
-    Prethresh_NMDA  = 0     //  (mV)         voltage level nec for release
-    Deadtime_NMDA   = 1 //  (ms)     mimimum time between release events
-	mg_NMDA = 0.0
-    IC_NMDA[j].gmax = 0.00010 // (umho)       maximum conductance
-}
+for curTrial=1,20 {
+    // Record IC spike times
+    vec = new Vector()
+    IC {
+        netcon = new NetCon(&v(.5), nil)
+        netcon.record(vec)
+    }
+    objref netcon
+    printf("Running simulation %d...\n",curTrial)
+    stdinit()
+    continuerun(tstop)
+    vec.printf("%8.4f\n")
 
-for i = 0, nCN-1 {
-    setpointer IC_GABAa[i].pre, CN[i].v(0.5)    // assign presynaptic compartment
-    setpointer IC_GABAa2[i].pre, CN2[i].v(0.5)    // assign presynaptic compartment
-    setpointer IC_AMPA[i].pre, CN3[i].v(0.5)    // assign presynaptic compartment
-    setpointer IC_NMDA[i].pre, CN3[i].v(0.5)    // assign presynaptic compartment
+    // Save to file
+    vec.printf(output,"%8.4f,")
 }
+output.close()
+quit()
 
+/*
 addgraph("CN[0].v(0.5)",-90,40)
 addgraph("CN2[0].v(0.5)",-90,40)
 addgraph("CN3[0].v(0.5)",-90,40)
-addgraph("IC.v(0.5)",-70,40)
 addgraph("IC_GABAa[0].i",-0.0100,0.0100)
 g[4].addvar("IC_GABAa2[0].i",2,0)
 g[4].addvar("IC_AMPA[0].i",3,0)
 g[4].addvar("IC_NMDA[0].i",4,0)
+*/
 
