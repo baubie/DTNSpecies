@@ -49,10 +49,10 @@ random_seed_echo = 131
 // SETUP THE TRIALS
 PEmode = 0
 trial_dur = 333
-trials = 25
-stimAmp = 0.10
+stimAmp = 0.06
 PEechoAmp = 0.08
 
+trials = 25
 minTrial = 1
 dTrial = 1 
 
@@ -60,7 +60,6 @@ PEdur = 1
 
 
 nCN = 20
-
 CN_smallest = 10
 CN_largest = 15
 CN2_smallest = 10
@@ -345,7 +344,7 @@ make_network()
 
 objref output
 output = new File()
-output.wopen("dtn.out")
+output.wopen("dtn.06.out")
 output.printf("%d,%d,%d,%4.2f,%4.2f,%d,%d\n",trial_delay,trial_dur,trials,minTrial,dTrial,random_seed,random_seed_echo)
 
 for curTrial=1,20 {
