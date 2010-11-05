@@ -21,7 +21,7 @@ yaxis dticks 1
 yaxis dsubticks 1
 xaxis dsubticks 1
 
-data "dtn_80.dat" d1
+data "%%FILENAME%%" d1
 d1 marker dot msize 0.14
 end graph
 

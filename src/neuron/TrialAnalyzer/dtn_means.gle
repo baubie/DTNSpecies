@@ -23,7 +23,7 @@ y2axis off
 key compact pos tr offset 0.48 0.54 nobox hei 0.2
 
 
-data "dtn.dat"
+data "%%FILENAME%%"
 d1 line color CVTRGB(0,0,0) lwidth 0.02
 d1 marker fcircle msize 0.17 key  "+10 dB"
 d1 nomiss

@@ -10,6 +10,7 @@ if len(sys.argv) == 1:
 # Valid modes are:
 #   means   - print out mean spikes for GLE
 #   spikes  - print out spike times for GLE
+#   timeseries  - print out time series with data series
 
 mode = "means"
 
@@ -18,12 +19,13 @@ if len(sys.argv) == 3:
 
 datafile = csv.reader(open(sys.argv[1]), delimiter=',')
 
-
 trial_delay = -1
 trial_dur = -1
 trials = -1
 minTrial = -1
 dTrial = -1
+dt = 0.025
+
 
 runs = 0
 
@@ -53,6 +55,10 @@ for row in datafile:
                     i = floor((float(spike)-trial_delay)/trial_dur)
                     time = float(spike)-i*trial_dur-trial_delay
                     spikes[i][runs-1].append(time)
+
+        if mode == "timeseries":
+            if len(row) == 1:
+                print((runs-1)*dt, row[0])
 
 
 if mode == "means":

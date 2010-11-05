@@ -1,0 +1,32 @@
+size 4 4
+set font psh
+set hei 0.3000
+set lwidth 0.02
+
+include "color.gle"
+begin graph
+scale auto
+nobox
+xtitle "Time (ms)"
+ytitle "Current (nA)"
+yaxis hei 0.25
+xaxis hei 0.25
+xaxis min 1330 max 1540
+yaxis min 0 max 0.0003
+xticks length -0.1
+yticks length -0.1
+x2axis off
+y2axis off
+key compact pos tr offset 0.48 0.54 nobox hei 0.2
+
+
+data "ICAMPAg.dat"
+d1 line color CVTRGB(0,0.8,0) lwidth 0.01
+data "ICNMDAg.dat"
+d2 line color CVTRGB(0,0,0.8) lwidth 0.01
+data "ICGABAg.dat"
+d3 line color CVTRGB(1,0,0) lwidth 0.01
+data "ICGABA2g.dat"
+d4 line color CVTRGB(0,0,0) lwidth 0.01
+
+end graph

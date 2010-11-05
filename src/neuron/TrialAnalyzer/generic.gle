@@ -1,0 +1,39 @@
+size 5.4 4.3
+set font psh
+set hei 0.3000
+set lwidth 0.02
+
+include "color.gle"
+begin graph
+nobox
+scale auto
+xtitle "Time (ms)"
+ytitle "Y AXIS"
+yaxis hei 0.25
+xaxis hei 0.25
+xaxis min 0 max 20
+yaxis min -0.05 max 3
+xaxis dticks 5
+xaxis dsubticks 1
+yaxis dsubticks 0.5
+xticks length -0.1
+yticks length -0.1
+x2axis off
+y2axis off
+key compact pos tr offset 0.48 0.54 nobox hei 0.2
+
+
+data "%%FILENAME%%"
+d1 line color CVTRGB(0,0,0) lwidth 0.01
+d1 nomiss
+d1 err d2
+
+end graph
+
+set hei 0.2
+amove 3.55 4.0
+text MU005.3
+rmove 0 -0.2
+text Freq = 32 kHz
+rmove 0 -0.2
+text Thresh = 55 dB SPL
