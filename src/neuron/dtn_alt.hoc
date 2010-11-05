@@ -47,17 +47,16 @@ random_seed = 243232
 random_seed_echo = 131
 
 // SETUP THE TRIALS
-PEmode = 0
+PEmode = 1
 trial_dur = 333
-stimAmp = 0.06
-PEechoAmp = 0.08
+stimAmp = 0.10
+PEechoAmp = 0.10
 
-trials = 25
-minTrial = 1
-dTrial = 1 
+trials = 50
+minTrial = 0 
+dTrial = 0.5 
 
 PEdur = 1
-
 
 nCN = 20
 CN_smallest = 10
@@ -340,30 +339,35 @@ proc make_network() {
 addgraph("IC.v(0.5)",-70,40)
 
 objref vec, netcon, nil
-make_network()
 
 objref output
-output = new File()
-output.wopen("dtn.06.out")
-output.printf("%d,%d,%d,%4.2f,%4.2f,%d,%d\n",trial_delay,trial_dur,trials,minTrial,dTrial,random_seed,random_seed_echo)
+strdef filename
 
-for curTrial=1,20 {
-    // Record IC spike times
-    vec = new Vector()
-    IC {
-        netcon = new NetCon(&v(.5), nil)
-        netcon.record(vec)
+for (param = 0.01; param >= 0.01; param-=0.01) {
+    PEechoAmp = param
+    make_network()
+    output = new File()
+    sprint(filename, "pe.%d.%d.out", 100*stimAmp, 100*PEechoAmp)
+    output.wopen(filename)
+    output.printf("%d,%d,%d,%4.2f,%4.2f,%d,%d\n",trial_delay,trial_dur,trials,minTrial,dTrial,random_seed,random_seed_echo)
+
+    for curTrial=1,20 {
+        // Record IC spike times
+        vec = new Vector()
+        IC {
+            netcon = new NetCon(&v(.5), nil)
+            netcon.record(vec)
+        }
+        objref netcon
+        printf("Running simulation %d...\n",curTrial)
+        stdinit()
+        continuerun(tstop)
+
+        // Save to file
+        vec.printf(output,"%8.4f,")
     }
-    objref netcon
-    printf("Running simulation %d...\n",curTrial)
-    stdinit()
-    continuerun(tstop)
-    vec.printf("%8.4f\n")
-
-    // Save to file
-    vec.printf(output,"%8.4f,")
+    output.close()
 }
-output.close()
 quit()
 
 /*
