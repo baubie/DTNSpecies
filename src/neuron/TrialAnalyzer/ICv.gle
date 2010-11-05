@@ -1,0 +1,26 @@
+size 8 4
+set font psh
+set hei 0.3000
+set lwidth 0.02
+
+include "color.gle"
+begin graph
+scale auto
+nobox
+xtitle "Time (ms)"
+ytitle "Membrane Potential (mV)"
+yaxis hei 0.25
+xaxis hei 0.25
+xaxis min 0 max 8325
+yaxis min -80 max 40
+xticks length -0.1
+yticks length -0.1
+x2axis off
+y2axis off
+key compact pos tr offset 0.48 0.54 nobox hei 0.2
+
+
+data "ICv.dat"
+d1 line color CVTRGB(0,0,0) lwidth 0.01
+
+end graph
