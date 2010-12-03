@@ -1,29 +1,30 @@
-import cells
 import neuron
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 class Simulation(object):
 
-    def __init__(self, cell, sim_time=100, dt=0.01):
-        self.cell = cell
+    def __init__(self, network, sim_time=100, dt=0.01):
+        self.network = network
         self.sim_time = sim_time
         self.dt = dt
+        self.stim = [[10,50]]
 
-
-    def show(self):
-        x = np.array(self.rec_t)
-        y = np.array(self.cell.soma.rec_v)
-        plt.plot(x,y)
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Voltage (mV")
-        plt.axis(ymin=-90, ymax=50)
+    def set_stim(self):
+        clamps = []
+        for s in self.stim:
+            for c in self.network.cells:
+                if self.network.cells[c].getStim == True:
+                    clamp = neuron.h.IClamp(self.network.cells[c].soma(0.5))
+                    clamp.delay = s[0]
+                    clamp.amp = 0.03
+                    clamp.dur = s[1]-s[0]
+                    clamps.append(clamp)
 
     def run(self,sim_time=None):
-        self.rec_t = neuron.h.Vector()
-        self.rec_t.record(neuron.h._ref_t)
+        self.set_stim()
         neuron.h.dt = self.dt
-        neuron.h.finitialize(self.cell.soma.E)
+        neuron.h.celsius = 36
+        neuron.h.finitialize(-55)
         neuron.init()
         if sim_time:
             neuron.run(sim_time)
