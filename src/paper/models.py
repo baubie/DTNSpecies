@@ -80,7 +80,7 @@ class IC_Dendrite(ModelBase):
         self.diam = 2
 
         self.E = -55
-        self.g = 1.0/2000.0 # tau = 5 ms
+        self.g = 1.0/2000.0 # tau = 2 ms
         self(0.25).pas.e = self.E
         self(0.25).pas.g = self.g
         self(0.50).pas.e = self.E
@@ -101,7 +101,7 @@ class IC_Soma(ModelBase):
         self.insert('pas')
 
         self.E = -55
-        self(0.5).pas.g = 1.0/2000.0 # tau = 5 ms
+        self(0.5).pas.g = 1.0/2000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90

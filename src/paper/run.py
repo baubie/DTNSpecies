@@ -13,12 +13,15 @@ DTN.cells["IC"]["cells"][0].dend.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18,
 # Initialize the simulation with the network
 s = Simulation(DTN)
 
-# Run the simulation
 s.run()
 
-
-# Display the simulation results
+# Run the simulation
+s.run()
 DTN.cells["IC"]["cells"][0].soma.show()
 for c in DTN.cells["DNLL"]["cells"]:
-    c.soma.show()
+        c.soma.show()
 plt.show()
+
+
+
+neuron.h.quit()

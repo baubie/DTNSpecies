@@ -14,7 +14,7 @@ class DTN(object):
 
         self.cells["IC"]["cells"].append(cells.IC_Neuron())
 
-        numDNLL = 2
+        numDNLL = 100
         self.cells["DNLL"]["stim"] = "Poisson"
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
