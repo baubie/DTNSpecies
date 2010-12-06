@@ -13,9 +13,8 @@ DTN.cells["IC"]["cells"][0].dend.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18,
 s.run()
 
 DTN.cells["IC"]["cells"][0].soma.show()
-DTN.cells["IC"]["cells"][0].dend.show()
 
 for c in DTN.cells["DNLL"]["cells"]:
     c.soma.show()
 
-#plt.show()
+plt.show()

@@ -1,12 +1,10 @@
-from neuron import h, hclass, nrn
+from neuron import h, nrn
 import matplotlib.pyplot as plt
 import numpy as np
 
-class ModelBase(hclass(h.Section)):
+class ModelBase(nrn.Section):
     def __init__(self):
         nrn.Section.__init__(self)
-
-        print "Created Segment ID %s" %self(0.5)
 
         # Provide recording variables
         self.rec_v = h.Vector()
