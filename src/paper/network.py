@@ -3,7 +3,7 @@ import neuron
 import nrn
 from copy import deepcopy
 
-populationTemplate = {"getStim": False, "cells": []}
+populationTemplate = {"stim": None, "cells": []}
 
 class DTN(object):
 
@@ -15,7 +15,7 @@ class DTN(object):
         self.cells["IC"]["cells"].append(cells.IC_Neuron())
 
         numDNLL = 2
-        self.cells["DNLL"]["getStim"] = True
+        self.cells["DNLL"]["stim"] = "Poisson"
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
 

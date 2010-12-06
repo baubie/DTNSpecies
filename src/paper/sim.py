@@ -13,7 +13,9 @@ class Simulation(object):
         self.clamps = []
         for s in self.stim:
             for c in self.network.cells:
-                if self.network.cells[c]["getStim"] == True:
+                if self.network.cells[c]["stim"] == "Poisson":
+                    pass
+                elif self.network.cells[c]["stim"] == "IClamp":
                     for i in self.network.cells[c]["cells"]:
                         self.clamps.append(neuron.h.IClamp(0.5, sec=i.soma))
                         self.clamps[-1].amp = 0.01
