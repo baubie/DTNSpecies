@@ -32,6 +32,11 @@ class ModelBase(nrn.Section):
             self.GABAa.append(h.GABAa(self(pos)))
             self.GABAa[-1].gmax = gmax
 
+    def insertAMPA(self, num=1, gmax=0.015, pos=1):
+        for i in range(num):
+            self.AMPA.append(h.AMPA(self(pos)))
+            self.AMPA[-1].gmax = gmax
+
     def modifyGABAa(self, Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1):
         for i in range(len(self.GABAa)):
             self.GABAa[i].Cmax = Cmax
@@ -42,6 +47,15 @@ class ModelBase(nrn.Section):
             self.GABAa[i].Prethresh = Prethresh
             self.GABAa[i].Deadtime = Deadtime
 
+    def modifyAMPA(self, Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1):
+        for i in range(len(self.GABAa)):
+            self.AMPA[i].Cmax = Cmax
+            self.AMPA[i].Cdur = Cdur
+            self.AMPA[i].Alpha = Alpha 
+            self.AMPA[i].Beta = Beta
+            self.AMPA[i].Erev = Erev
+            self.AMPA[i].Prethresh = Prethresh
+            self.AMPA[i].Deadtime = Deadtime
 
 
 # DNLL Mostly projects GABA to the IC
@@ -77,7 +91,7 @@ class IC_Dendrite(ModelBase):
         self.nseg = 3
         self.insert('pas')
         self.L = 300
-        self.diam = 2
+        self.diam = 0.1
 
         self.E = -55
         self.g = 1.0/2000.0 # tau = 2 ms
@@ -87,6 +101,14 @@ class IC_Dendrite(ModelBase):
         self(0.50).pas.g = self.g
         self(0.75).pas.e = self.E
         self(0.75).pas.g = self.g
+
+        self.insert('hh2')
+
+        self(0.5).ena = 50
+        self(0.5).ek = -90
+        self(0.5).hh2.gnabar = 0.030
+        self(0.5).hh2.gkbar = 0.005
+        self(0.5).hh2.vtraub = -55
 
 
 
@@ -101,7 +123,7 @@ class IC_Soma(ModelBase):
         self.insert('pas')
 
         self.E = -55
-        self(0.5).pas.g = 1.0/2000.0 # tau = 2 ms
+        self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90

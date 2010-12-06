@@ -6,10 +6,19 @@ class DNLL_Neuron:
         self.soma = models.DNLL_Soma()
         self.getStim = False
 
+class MSO_Neuron:
+    def __init__(self):
+        self.soma = models.DNLL_Soma()
+        self.getStim = False
+
 class IC_Neuron:
     def __init__(self):
         self.soma = models.IC_Soma()
-        self.dend = models.IC_Dendrite()
-        self.dend.connect(self.soma)
+        self.dendI = models.IC_Dendrite()
+        self.dendE = models.IC_Dendrite()
+        self.dendE.L = 150
+        self.dendI.L = 150
+        self.dendI.connect(self.soma)
+        self.dendE.connect(self.soma)
         self.getStim = False
 
