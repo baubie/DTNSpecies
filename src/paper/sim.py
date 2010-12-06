@@ -13,12 +13,12 @@ class Simulation(object):
         clamps = []
         for s in self.stim:
             for c in self.network.cells:
-                if self.network.cells[c].getStim == True:
-                    clamp = neuron.h.IClamp(self.network.cells[c].soma(0.5))
-                    clamp.delay = s[0]
-                    clamp.amp = 0.03
-                    clamp.dur = s[1]-s[0]
-                    clamps.append(clamp)
+                if self.network.cells[c]["getStim"] == True:
+                    for i in self.network.cells[c]["cells"]:
+                        clamps.append(neuron.h.IClamp(i.soma(0.5)))
+                        clamps[-1].delay = s[0]
+                        clamps[-1].amp = 0.03
+                        clamps[-1].dur = s[1]-s[0]
 
     def run(self,sim_time=None):
         self.set_stim()

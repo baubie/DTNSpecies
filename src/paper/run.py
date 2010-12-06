@@ -6,18 +6,16 @@ import neuron
 DTN = network.DTN()
 s = Simulation(DTN)
 
+
 # Play with the parameters
-DTN.cells["IC"].dend.GABAa.Cmax = 1
-DTN.cells["IC"].dend.GABAa.Cdur = 1
-DTN.cells["IC"].dend.GABAa.Alpha = 5 
-DTN.cells["IC"].dend.GABAa.Beta = 0.18
-DTN.cells["IC"].dend.GABAa.Erev = -80
-DTN.cells["IC"].dend.GABAa.Prethresh = 0
-DTN.cells["IC"].dend.GABAa.Deadtime = 1
+DTN.cells["IC"]["cells"][0].dend.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1)
 
 s.run()
 
-DTN.cells["IC"].soma.show()
-DTN.cells["IC"].dend.show()
-DTN.cells["DNLL"].soma.show()
-plt.show()
+DTN.cells["IC"]["cells"][0].soma.show()
+DTN.cells["IC"]["cells"][0].dend.show()
+
+for c in DTN.cells["DNLL"]["cells"]:
+    c.soma.show()
+
+#plt.show()

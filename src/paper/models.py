@@ -1,11 +1,12 @@
-from neuron import h
-import nrn
+from neuron import h, hclass, nrn
 import matplotlib.pyplot as plt
 import numpy as np
 
-class ModelBase(nrn.Section):
+class ModelBase(hclass(h.Section)):
     def __init__(self):
         nrn.Section.__init__(self)
+
+        print "Created Segment ID %s" %self(0.5)
 
         # Provide recording variables
         self.rec_v = h.Vector()
@@ -14,6 +15,12 @@ class ModelBase(nrn.Section):
         self.rec_t = h.Vector()
         self.rec_t.record(h._ref_t)
 
+        # Receptor Lists
+        self.GABAa = []
+        self.GABAb = []
+        self.AMPA = []
+        self.NMDA = []
+
     def show(self):
         x = np.array(self.rec_t)
         y = np.array(self.rec_v)
@@ -21,6 +28,22 @@ class ModelBase(nrn.Section):
         plt.xlabel("Time (ms)")
         plt.ylabel("Voltage (mV")
         plt.axis(ymin=-90, ymax=50)
+        
+    def insertGABAa(self, num=1, gmax=0.015, pos=1):
+        for i in range(num):
+            self.GABAa.append(h.GABAa(self(pos)))
+            self.GABAa[-1].gmax = gmax
+
+    def modifyGABAa(self, Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1):
+        for i in range(len(self.GABAa)):
+            self.GABAa[i].Cmax = Cmax
+            self.GABAa[i].Cdur = Cdur
+            self.GABAa[i].Alpha = Alpha 
+            self.GABAa[i].Beta = Beta
+            self.GABAa[i].Erev = Erev
+            self.GABAa[i].Prethresh = Prethresh
+            self.GABAa[i].Deadtime = Deadtime
+
 
 
 # DNLL Mostly projects GABA to the IC
@@ -67,11 +90,6 @@ class IC_Dendrite(ModelBase):
         self(0.75).pas.e = self.E
         self(0.75).pas.g = self.g
 
-        self.GABAa = h.GABAa(self(1))
-        self.GABAa.gmax = 0.015
-        dummy = nrn.Section()
-        h.setpointer(dummy(0.5)._ref_v, 'pre', self.GABAa)
-
 
 
 class IC_Soma(ModelBase):
@@ -93,11 +111,7 @@ class IC_Soma(ModelBase):
         self(0.5).hh2.gkbar = 0.005
         self(0.5).hh2.vtraub = -55
 
-        self.GABAa = h.GABAa(self(1))
-        self.GABAa.gmax = 0.015
-        dummy = nrn.Section()
-        h.setpointer(dummy(0.5)._ref_v, 'pre', self.GABAa)
-
         self.L = 15
         self.diam = 15
+
 
