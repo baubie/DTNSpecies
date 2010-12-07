@@ -19,10 +19,10 @@ class ModelBase(nrn.Section):
         self.AMPA = []
         self.NMDA = []
 
-    def show(self):
+    def show(self,legend="Unknown"):
         x = np.array(self.rec_t)
         y = np.array(self.rec_v)
-        plt.plot(x,y)
+        plt.plot(x,y,label=legend)
         plt.xlabel("Time (ms)")
         plt.ylabel("Voltage (mV")
         plt.axis(ymin=-90, ymax=50)
@@ -70,28 +70,55 @@ class DNLL_Soma(ModelBase):
         self.insert('pas')
 
         self.E = -55
-        self(0.5).pas.g = 1.0/5000.0 # tau = 5 ms
+        self(0.5).pas.g = 1.0/1000.0 # tau = 5 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90
-        self(0.5).hh2.gnabar = 0.030
-        self(0.5).hh2.gkbar = 0.005
-        self(0.5).hh2.vtraub = -55
+        self(0.5).hh2.gnabar = 0.1
+        self(0.5).hh2.gkbar = 0.03
+        self(0.5).hh2.vtraub = -54
 
-        self.L = 15
-        self.diam = 15
+        self.L = 10
+        self.diam = 10
 
-
-class IC_Dendrite(ModelBase):
+# MSO Onset cell
+class MSO_Soma(ModelBase):
     def __init__(self):
         ModelBase.__init__(self)
         self.setup()
 
     def setup(self):
-        self.nseg = 3
+        self.nseg = 1
+        self.insert('hh2')
+        self.insert('pas')
+
+        #gkltbar = 0.01592 (mho/cm2) <0,1e9>
+        self.E = -55
+        self(0.5).pas.g = 1.0/1000.0 # tau = 5 ms
+        self(0.5).pas.e = self.E
+        self(0.5).ena = 50
+        self(0.5).ek = -90
+        self(0.5).hh2.gnabar = 0.1
+        self(0.5).hh2.gkbar = 0.03
+        self(0.5).hh2.vtraub = -57
+
+        self.L = 10
+        self.diam = 10
+
+
+class IC_Dendrite(ModelBase):
+    def __init__(self):
+        ModelBase.__init__(self)
+        self.rec_v = h.Vector()
+        self.rec_v.record(self(0.9)._ref_v)
+        self.setup()
+
+    def setup(self):
+        self.nseg = 9
         self.insert('pas')
         self.L = 300
-        self.diam = 0.1
+        self.diam = 3
+        self.Ra = 80
 
         self.E = -55
         self.g = 1.0/2000.0 # tau = 2 ms
@@ -102,13 +129,14 @@ class IC_Dendrite(ModelBase):
         self(0.75).pas.e = self.E
         self(0.75).pas.g = self.g
 
+'''
         self.insert('hh2')
-
         self(0.5).ena = 50
         self(0.5).ek = -90
         self(0.5).hh2.gnabar = 0.030
         self(0.5).hh2.gkbar = 0.005
         self(0.5).hh2.vtraub = -55
+'''
 
 
 
@@ -122,14 +150,15 @@ class IC_Soma(ModelBase):
         self.insert('hh2')
         self.insert('pas')
 
-        self.E = -55
-        self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
+        self.Ra = 100
+        self.E = -60
+        self(0.5).pas.g = 1.0/2000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90
-        self(0.5).hh2.gnabar = 0.030
-        self(0.5).hh2.gkbar = 0.005
-        self(0.5).hh2.vtraub = -55
+        self(0.5).hh2.gnabar = 0.1
+        self(0.5).hh2.gkbar = 0.03
+        self(0.5).hh2.vtraub = -60
 
         self.L = 15
         self.diam = 15

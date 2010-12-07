@@ -11,9 +11,17 @@ DTN.cells["IC"]["cells"][0].dendI.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18
 
 
 def show(network):
-    network.cells["IC"]["cells"][0].soma.show()
+    plt.subplot(3,1,1)
+    network.cells["IC"]["cells"][0].soma.show("soma")
+    network.cells["IC"]["cells"][0].dendE.show("dendE")
+    network.cells["IC"]["cells"][0].dendI.show("dendI")
+    plt.legend()
+    plt.subplot(3,1,2)
+    for c in network.cells["MSO"]["cells"]:
+        c.soma.show()
+    plt.subplot(3,1,3)
     for c in network.cells["DNLL"]["cells"]:
-            c.soma.show()
+        c.soma.show()
     plt.show()
 
 
@@ -22,18 +30,11 @@ s = Simulation(DTN)
 
 
 
-# Run the simulation
-s.stim_dur = 1
-s.run()
-show(DTN)
-
-s.stim_dur = 10
-s.run()
-show(DTN)
-
-s.stim_dur = 50
-s.run()
-show(DTN)
-
+# Run the simulations
+for d in [1,2,3,4,5]:
+    s.stim_dur = d
+    s.sim_time = 50
+    s.run()
+    show(DTN)
 
 neuron.h.quit()
