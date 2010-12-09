@@ -11,7 +11,7 @@ class Simulation(object):
         self.stim = [[10,50]]
         self.clamps = []
         self.poisson = None
-        self.poisson = neuron.h.Random(101)
+        self.poisson = neuron.h.Random(102)
         self.poisson.poisson(0.05)
         self.stim_dur = 10
 
@@ -27,7 +27,7 @@ class Simulation(object):
                         if self.network.cells[c]["type"] == "Sustained":
                             self.clamps[-1].dur = self.stim_dur
                         elif self.network.cells[c]["type"] == "Onset":
-                            self.clamps[-1].dur = 1
+                            self.clamps[-1].dur = 2
                         self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
 
                 elif self.network.cells[c]["stim"] == "IClamp":

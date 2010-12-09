@@ -117,26 +117,15 @@ class IC_Dendrite(ModelBase):
         self.nseg = 9
         self.insert('pas')
         self.L = 300
-        self.diam = 3
-        self.Ra = 80
+        self.diam = 2
+        self.Ra = 35.4
 
         self.E = -55
-        self.g = 1.0/2000.0 # tau = 2 ms
-        self(0.25).pas.e = self.E
-        self(0.25).pas.g = self.g
-        self(0.50).pas.e = self.E
-        self(0.50).pas.g = self.g
-        self(0.75).pas.e = self.E
-        self(0.75).pas.g = self.g
+        self.g = 1.0/10000.0 # tau = 10 ms
+        for seg in self:
+            seg.pas.e = self.E
+            seg.pas.g = self.g
 
-'''
-        self.insert('hh2')
-        self(0.5).ena = 50
-        self(0.5).ek = -90
-        self(0.5).hh2.gnabar = 0.030
-        self(0.5).hh2.gkbar = 0.005
-        self(0.5).hh2.vtraub = -55
-'''
 
 
 

@@ -16,8 +16,9 @@ class IC_Neuron:
         self.soma = models.IC_Soma()
         self.dendI = models.IC_Dendrite()
         self.dendE = models.IC_Dendrite()
-        self.dendE.L = 50
-        self.dendI.L = 50
+        self.dendE.L = 200
+        self.dendE.nseg = 19
+        self.dendI.L = 200
         self.dendI.connect(self.soma)
         self.dendE.connect(self.soma)
         self.getStim = False
