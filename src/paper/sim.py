@@ -25,10 +25,14 @@ class Simulation(object):
                         self.clamps.append(neuron.h.IClamp(0.5, sec=i.soma))
                         self.poisson.play(self.clamps[-1]._ref_amp)
                         if self.network.cells[c]["type"] == "Sustained":
-                            self.clamps[-1].dur = self.stim_dur
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                            self.clamps[-1].dur = max([self.stim_dur, self.network.cells[c]["mindur"]])
                         elif self.network.cells[c]["type"] == "Onset":
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
                             self.clamps[-1].dur = 2
-                        self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                        elif self.network.cells[c]["type"] == "Offset":
+                            self.clamps[-1].delay = self.delay+self.stim_dur+self.network.cells[c]["delay"]
+                            self.clamps[-1].dur = 2
 
                 elif self.network.cells[c]["stim"] == "IClamp":
                     for i in self.network.cells[c]["cells"]:

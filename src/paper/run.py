@@ -4,37 +4,43 @@ import network
 import neuron
 
 # Create our network
-DTN = network.DTN()
+DTN_AC = network.DTN_AntiCoincidence()
+DTN_C = network.DTN_Coincidence()
 
 # Play with the parameters
-DTN.cells["IC"]["cells"][0].dendI.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1)
+#DTN_AC.cells["IC"]["cells"][0].dendI.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1)
 
 
-def show(network):
-    plt.subplot(3,1,1)
+def show(network, cells):
+    plt.subplot(len(cells)+1,1,1)
     network.cells["IC"]["cells"][0].soma.show("soma")
+    '''
     network.cells["IC"]["cells"][0].dendE.show("dendE")
+    network.cells["IC"]["cells"][0].dendEOff.show("dendEOff")
     network.cells["IC"]["cells"][0].dendI.show("dendI")
     plt.legend()
-    plt.subplot(3,1,2)
-    for c in network.cells["MSO"]["cells"]:
-        c.soma.show()
-    plt.subplot(3,1,3)
-    for c in network.cells["DNLL"]["cells"]:
-        c.soma.show()
+    '''
+
+    count = 1
+    for pop in cells:
+        count = count + 1
+        plt.subplot(len(cells)+1,1,count)
+        for c in network.cells[pop]["cells"]:
+            c.soma.show()
+
     plt.show()
 
 
 # Initialize the simulation with the network
-s = Simulation(DTN)
+s = Simulation(DTN_C)
 
 
 
 # Run the simulations
-for d in [1,2,3,4,5]:
+for d in [8]:
     s.stim_dur = d
-    s.sim_time = 50
+    s.sim_time = 100
     s.run()
-    show(DTN)
+    show(DTN_C, ["MSO_ON", "MSO_OFF", "DNLL"])
 
 neuron.h.quit()

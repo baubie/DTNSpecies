@@ -2,6 +2,15 @@ from neuron import h, nrn
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+def nstomhocm(ns,area):
+    # Convert nS to mho/cm^2
+    # This allows us to decide on a total conductance
+    # independent of soma size
+    return 1E-9*ns/area
+
+
+
 class ModelBase(nrn.Section):
     def __init__(self):
         nrn.Section.__init__(self)
@@ -127,8 +136,6 @@ class IC_Dendrite(ModelBase):
             seg.pas.g = self.g
 
 
-
-
 class IC_Soma(ModelBase):
     def __init__(self):
         ModelBase.__init__(self)
@@ -139,17 +146,18 @@ class IC_Soma(ModelBase):
         self.insert('hh2')
         self.insert('pas')
 
-        self.Ra = 100
-        self.E = -60
-        self(0.5).pas.g = 1.0/2000.0 # tau = 2 ms
+
+
+        self.cm=1.0
+        self.Ra = 150
+        self.E = -65
+        self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
-        self(0.5).ek = -90
-        self(0.5).hh2.gnabar = 0.1
+        self(0.5).ek = -70
+        self(0.5).hh2.gnabar = 0.10
         self(0.5).hh2.gkbar = 0.03
-        self(0.5).hh2.vtraub = -60
+        self(0.5).hh2.vtraub = -52
 
-        self.L = 15
-        self.diam = 15
-
-
+        self.L = 12
+        self.diam = 12
