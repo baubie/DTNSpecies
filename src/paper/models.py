@@ -22,6 +22,11 @@ class ModelBase(nrn.Section):
         self.rec_t = h.Vector()
         self.rec_t.record(h._ref_t)
 
+        self.nc = h.NetCon(self(0.5)._ref_v, None, sec=self)
+        self.rec_s = h.Vector()
+        self.nc.record(self.rec_s)
+        
+
         # Receptor Lists
         self.GABAa = []
         self.GABAb = []
@@ -126,7 +131,7 @@ class IC_Dendrite(ModelBase):
         self.nseg = 9
         self.insert('pas')
         self.L = 300
-        self.diam = 2
+        self.diam = 1.5
         self.Ra = 35.4
 
         self.E = -55
@@ -146,18 +151,16 @@ class IC_Soma(ModelBase):
         self.insert('hh2')
         self.insert('pas')
 
-
-
         self.cm=1.0
-        self.Ra = 150
+        self.Ra = 35.4
         self.E = -65
         self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
-        self(0.5).ek = -70
+        self(0.5).ek = -90
         self(0.5).hh2.gnabar = 0.10
         self(0.5).hh2.gkbar = 0.03
         self(0.5).hh2.vtraub = -52
 
-        self.L = 12
-        self.diam = 12
+        self.L = 13
+        self.diam = 13
