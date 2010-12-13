@@ -14,9 +14,10 @@ class Simulation(object):
         self.poisson = neuron.h.Random(102)
         self.poisson.poisson(0.05)
         self.stim_dur = 10
+        self.verbose = True
 
     def set_stim(self):
-        print "...Creating Stimuli"
+        if self.verbose: print "...Creating Stimuli"
         self.clamps = []
         for s in self.stim:
             for c in self.network.cells:
@@ -42,13 +43,13 @@ class Simulation(object):
                         self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
 
     def run(self):
-        print "Initializing Simulation"
+        if self.verbose: print "Initializing Simulation"
         self.set_stim()
         neuron.h.dt = self.dt
         neuron.h.celsius = 37
         neuron.h.finitialize(-55)
         neuron.init()
-        print "...Running Simulation"
+        if self.verbose: print "...Running Simulation"
         neuron.run(self.sim_time)
-        print "...Simulation Complete\n"
+        if self.verbose: print "...Simulation Complete\n"
 

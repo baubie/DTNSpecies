@@ -9,9 +9,11 @@ class network(object):
     def __init__(self):
         self.cells = {}
         self.savedcells = []
+        self.savedparams = []
 
-    def savecells(self, names, spikes=True, voltage=False):
+    def savecells(self, names, param, spikes=True, voltage=False):
         saved = {}
+        self.savedparams.append(param)
         for n in names:
             population = []
             for c in self.cells[n[0]]["cells"]:
