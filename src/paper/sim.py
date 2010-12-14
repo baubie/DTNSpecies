@@ -3,7 +3,7 @@ import neuron
 
 class Simulation(object):
 
-    def __init__(self, network, amplitude=0.05, randomseed=100, sim_time=100, dt=0.01, delay=20):
+    def __init__(self, network, amplitude=0.05, randomseed=100, sim_time=100, dt=0.01, delay=10):
         self.network = network
         self.sim_time = sim_time
         self.dt = dt

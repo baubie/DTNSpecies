@@ -1,5 +1,4 @@
 from neuron import h, nrn
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -33,14 +32,6 @@ class ModelBase(nrn.Section):
         self.AMPA = []
         self.NMDA = []
 
-    def show(self,legend="Unknown"):
-        x = np.array(self.rec_t)
-        y = np.array(self.rec_v)
-        plt.plot(x,y,label=legend)
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Voltage (mV")
-        plt.axis(ymin=-90, ymax=50)
-        
     def insertGABAa(self, num=1, gmax=0.015, pos=1):
         for i in range(num):
             self.GABAa.append(h.GABAa(self(pos)))

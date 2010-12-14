@@ -91,11 +91,11 @@ class DTN_Coincidence(network):
         numMSO_ON = 100
         self.cells["MSO_ON"]["stim"] = "Poisson"
         self.cells["MSO_ON"]["type"] = "Onset"
-        self.cells["MSO_ON"]["delay"] = 8
+        self.cells["MSO_ON"]["delay"] = 5
         for i in range(numMSO_ON):
             self.cells["MSO_ON"]["cells"].append(cells.MSO_Neuron())
-        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.005/numMSO_ON,1)
-        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO_ON,0.005/numMSO_ON,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.01/numMSO_ON,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO_ON,0.01/numMSO_ON,1)
 
         for i in range(numMSO_ON):
             neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])

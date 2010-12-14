@@ -9,13 +9,11 @@ class DNLL_Neuron(Neuron):
     def __init__(self):
         Neuron.__init__(self)
         self.sec["soma"] = models.DNLL_Soma()
-        self.getStim = False
 
 class MSO_Neuron(Neuron):
     def __init__(self):
         Neuron.__init__(self)
         self.sec["soma"] = models.MSO_Soma()
-        self.getStim = False
 
 class IC_Neuron(Neuron):
     def __init__(self):
@@ -29,12 +27,11 @@ class IC_Neuron(Neuron):
         self.sec["dendEOff"].L = 100
         self.sec["dendI"].L = 100
 
-        self.sec["dendI"].nseg = 19
-        self.sec["dendE"].nseg = 19
-        self.sec["dendEOff"].nseg = 19
+        self.sec["dendI"].nseg = 5
+        self.sec["dendE"].nseg = 5
+        self.sec["dendEOff"].nseg = 5
 
         self.sec["dendI"].connect(self.sec["soma"])
         self.sec["dendE"].connect(self.sec["soma"])
         self.sec["dendEOff"].connect(self.sec["soma"])
-        self.getStim = False
 
