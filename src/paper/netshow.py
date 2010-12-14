@@ -1,15 +1,10 @@
 import matplotlib.pyplot as plt
 
-def unique(seq, idfun=None):
-    if idfun is None:
-        def idfun(x): return x
-    seen = {}
+def unique(seq):
     result = []
-    for item in seq:
-        marker = idfun(item)
-        if marker in seen: continue
-        seen[marker] = 1
-        result.append(item)
+    for a in seq:
+        if a not in result:
+            result.append(a)
     return result
 
 def frequency_unique(seq):
@@ -20,33 +15,38 @@ def frequency_unique(seq):
     return [unique_seq, vals]
 
 def plot_mean_spikes(network, section):
-    vals = []
-    [params, freq] = frequency_unique(network.savedparams)
-    vals = [0] * len(params)
-    for p in range(len(params)):
-        for s in range(len(network.savedcells)):
-            if network.savedparams[s] == params[p]:
-                for c in network.savedcells[s][section]:
-                    vals[p] += float(len(c['rec_s'])) / float(freq[p])
 
-    plt.plot(params, vals, 'o-')
-    plt.axis(ymin=0, ymax=max(vals)+0.1)
+    [uni, freq] = frequency_unique(network.savedparams)
+    x_vals = unique([i[1] for i in uni]) 
+    z_vals = unique([i[0] for i in uni])
+    repeats = freq[0]
+    max_y = 0
+    
+    for z in range(len(z_vals)):
+        y_vals = [0] * len(x_vals)
+        for x in range(len(x_vals)):
+            for s in range(len(network.savedcells)):
+                if network.savedparams[s][1] == x_vals[x] and network.savedparams[s][0] == z_vals[z]:
+                    for c in network.savedcells[s][section]:
+                        y_vals[x] += float(len(c['rec_s'])) / repeats
+        max_y = max(max_y, max(y_vals))
+
+        plt.plot(x_vals, y_vals, 'o-', label=str(z_vals[z]))
+    plt.axis(ymin=0, ymax=max_y+0.1)
+    plt.legend()
 
 
-def show_voltage(network, cells):
-    # Example Usage:    
-    # ns.show_voltage(DTN_C, ["MSO_ON", "MSO_OFF", "DNLL"])
-    plt.subplot(len(cells)+1,1,1)
-    network.cells["IC"]["cells"][0].sec["soma"].show("soma")
 
-    count = 1
-    for pop in cells:
-        count = count + 1
-        plt.subplot(len(cells)+1,1,count)
-        for c in network.cells[pop]["cells"]:
-            c.sec["soma"].show()
+def plot_voltage(network, section, param):
+    count = 0
+    for s in range(len(network.savedcells)):
+        if network.savedparams[s] == param:
+            for c in network.savedcells[s][section]:
+                plt.plot(c['rec_t'], c['rec_v'])
+                plt.axis(xmin=0, xmax=c['rec_t'][-1], ymin=-80, ymax=40)
 
-    plt.show()
+def subplot(row, col, num):
+    plt.subplot(row,col,num)
 
 def show():
     plt.show()

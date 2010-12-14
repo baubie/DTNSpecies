@@ -51,25 +51,44 @@ class ModelBase(nrn.Section):
             self.AMPA.append(h.AMPA(self(pos)))
             self.AMPA[-1].gmax = gmax
 
-    def modifyGABAa(self, Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1):
-        for i in range(len(self.GABAa)):
-            self.GABAa[i].Cmax = Cmax
-            self.GABAa[i].Cdur = Cdur
-            self.GABAa[i].Alpha = Alpha 
-            self.GABAa[i].Beta = Beta
-            self.GABAa[i].Erev = Erev
-            self.GABAa[i].Prethresh = Prethresh
-            self.GABAa[i].Deadtime = Deadtime
+    def insertNMDA(self, num=1, gmax=0.015, pos=1):
+        for i in range(num):
+            self.NMDA.append(h.NMDA(self(pos)))
+            self.NMDA[-1].gmax = gmax
 
-    def modifyAMPA(self, Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1):
+    def modifyGABAa(self, gmax=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
         for i in range(len(self.GABAa)):
-            self.AMPA[i].Cmax = Cmax
-            self.AMPA[i].Cdur = Cdur
-            self.AMPA[i].Alpha = Alpha 
-            self.AMPA[i].Beta = Beta
-            self.AMPA[i].Erev = Erev
-            self.AMPA[i].Prethresh = Prethresh
-            self.AMPA[i].Deadtime = Deadtime
+            if gmax != None: self.GABAa[i].gmax = gmax/float(len(self.GABAa))
+            if Cmax != None: self.GABAa[i].Cmax = Cmax
+            if Cdur != None: self.GABAa[i].Cdur = Cdur
+            if Alpha != None: self.GABAa[i].Alpha = Alpha 
+            if Beta != None: self.GABAa[i].Beta = Beta
+            if Erev != None: self.GABAa[i].Erev = Erev
+            if Prethresh != None: self.GABAa[i].Prethresh = Prethresh
+            if Deadtime != None: self.GABAa[i].Deadtime = Deadtime
+
+    def modifyAMPA(self, gmax=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
+        for i in range(len(self.AMPA)):
+            if gmax != None: self.AMPA[i].gmax = gmax/float(len(self.AMPA))
+            if Cmax != None: self.AMPA[i].Cmax = Cmax
+            if Cdur != None: self.AMPA[i].Cdur = Cdur
+            if Alpha != None: self.AMPA[i].Alpha = Alpha 
+            if Beta != None: self.AMPA[i].Beta = Beta
+            if Erev != None: self.AMPA[i].Erev = Erev
+            if Prethresh != None: self.AMPA[i].Prethresh = Prethresh
+            if Deadtime != None: self.AMPA[i].Deadtime = Deadtime
+
+    def modifyNMDA(self, gmax=None, mg=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
+        for i in range(len(self.NMDA)):
+            if gmax != None: self.NMDA[i].gmax = gmax/float(len(self.NMDA))
+            if Cmax != None: self.NMDA[i].Cmax = Cmax
+            if Cdur != None: self.NMDA[i].Cdur = Cdur
+            if Alpha != None: self.NMDA[i].Alpha = Alpha 
+            if Beta != None: self.NMDA[i].Beta = Beta
+            if Erev != None: self.NMDA[i].Erev = Erev
+            if Prethresh != None: self.NMDA[i].Prethresh = Prethresh
+            if Deadtime != None: self.NMDA[i].Deadtime = Deadtime
+            if mg != None: self.NMDA[i].mg = mg
 
 
 # DNLL Mostly projects GABA to the IC

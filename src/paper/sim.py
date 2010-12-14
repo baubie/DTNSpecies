@@ -3,7 +3,7 @@ import neuron
 
 class Simulation(object):
 
-    def __init__(self, network, sim_time=100, dt=0.01, delay=10):
+    def __init__(self, network, amplitude=0.05, randomseed=100, sim_time=100, dt=0.01, delay=20):
         self.network = network
         self.sim_time = sim_time
         self.dt = dt
@@ -11,10 +11,13 @@ class Simulation(object):
         self.stim = [[10,50]]
         self.clamps = []
         self.poisson = None
-        self.poisson = neuron.h.Random(102)
-        self.poisson.poisson(0.05)
+        self.poisson = neuron.h.Random(randomseed)
+        self.poisson.poisson(amplitude)
         self.stim_dur = 10
         self.verbose = True
+
+    def set_amplitude(self, amplitude):
+        self.poisson.poisson(amplitude)
 
     def set_stim(self):
         if self.verbose: print "...Creating Stimuli"
@@ -47,7 +50,7 @@ class Simulation(object):
         self.set_stim()
         neuron.h.dt = self.dt
         neuron.h.celsius = 37
-        neuron.h.finitialize(-55)
+        neuron.h.finitialize(-60)
         neuron.init()
         if self.verbose: print "...Running Simulation"
         neuron.run(self.sim_time)

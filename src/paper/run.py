@@ -5,38 +5,56 @@ import netshow as ns
 import progress
 
 # Create our network
-DTN_AC = network.DTN_AntiCoincidence()
-DTN_C = network.DTN_Coincidence()
-
-# Play with the parameters
-#DTN_AC.cells["IC"]["cells"][0].dendI.modifyGABAa(Cmax=1, Cdur=1, Alpha=5, Beta=0.18, Erev=-80, Prethresh=0, Deadtime=1)
+networks = {}
+#networks["C"] = network.DTN_Coincidence()
+networks["AC"] = network.DTN_AntiCoincidence()
 
 
 # Initialize the simulation with the network
-s_C = Simulation(DTN_C)
-s_C.verbose = False
-s_C.sim_time = 50
-s_AC = Simulation(DTN_AC)
-s_AC.verbose = False
-s_AC.sim_time = 50
+s = {}
+for net in networks:
+    s[net] = Simulation(networks[net])
+    s[net].verbose = False
+    s[net].sim_time = 100
 
 
 # Run the simulations
-stims = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]*5
-count = 0
-for d in stims:
-    progress.update(count, len(stims))
-    count += 1
-    s_C.stim_dur = d
-    s_AC.stim_dur = d
-    s_C.run()
-    s_AC.run()
-    DTN_C.savecells([["IC","soma"]], d, spikes=True,voltage=False)
-    DTN_AC.savecells([["IC","soma"]], d, spikes=True,voltage=False)
-progress.update(count, len(stims))
+stims = [i for i in range(1,20)]
+param = [0.0,0.01,0.02,0.03,0.04,0.05]
+repeats = 5
 
-ns.plot_mean_spikes(DTN_C, "IC-soma")
-ns.plot_mean_spikes(DTN_AC, "IC-soma")
+total = len(stims)*len(param)*repeats
+count = 0
+
+for a in param: 
+    for net in networks:
+        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=a)
+
+    for d in stims*repeats:
+        progress.update(count, total)
+        count += 1
+        for net in networks:
+            s[net].stim_dur = d 
+            s[net].run()
+            key = [a,d] 
+            networks[net].savecells([["IC","soma"]], key, spikes=True, voltage=True)
+
+# Plot the results
+'''
+count = 0
+for a in param:
+    for d in stims:
+        count += 1
+        key = [a,d]
+        ns.subplot(len(param),len(stims),count)
+        ns.plot_voltage(networks["AC"], "IC-soma", key)
+
+
+progress.update(count, len(stims))
+ns.show()
+'''
+
+ns.plot_mean_spikes(networks["AC"], "IC-soma")
 ns.show()
 
 neuron.h.quit()

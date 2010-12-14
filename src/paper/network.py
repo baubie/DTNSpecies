@@ -58,8 +58,10 @@ class DTN_AntiCoincidence(network):
         for i in range(numMSO):
             self.cells["MSO"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO,0.02/numMSO,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO,0.02/numMSO,1)
         for i in range(numMSO):
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])
+            neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])
 
 
 
@@ -93,8 +95,11 @@ class DTN_Coincidence(network):
         for i in range(numMSO_ON):
             self.cells["MSO_ON"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.005/numMSO_ON,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO_ON,0.005/numMSO_ON,1)
+
         for i in range(numMSO_ON):
             neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])
+            neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])
 
         # MSO Glutamate input
         numMSO_OFF = 100
@@ -104,8 +109,10 @@ class DTN_Coincidence(network):
         for i in range(numMSO_OFF):
             self.cells["MSO_OFF"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendEOff"].insertAMPA(numMSO_OFF,0.01/numMSO_OFF,1)
+        self.cells["IC"]["cells"][0].sec["dendEOff"].insertNMDA(numMSO_OFF,0.01/numMSO_OFF,1)
         for i in range(numMSO_OFF):
             neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendEOff"].AMPA[i])
+            neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendEOff"].NMDA[i])
 
 
 
