@@ -1,0 +1,47 @@
+size 8 3
+set font psh
+set hei 0.15
+set lwidth 0.02
+
+begin graph
+    size 4 3
+    scale auto
+    xtitle "Stimulus Duration (ms)"
+    ytitle "Mean Spikes per Trial"
+    x2axis off
+    y2axis off
+    data "c_mtc.dat"
+    xticks length -0.05
+    yticks length -0.05
+    xaxis min 0.5 max 18
+    yaxis min 0 max 2.0
+    d1 line color rgb(1,0,0)
+    d2 line color rgb(0.9,0,0)
+    d4 line color rgb(0.8,0,0)
+    d6 line color rgb(0.7,0,0)
+    d8 line color rgb(0.6,0,0)
+    d10 line color rgb(0.5,0,0)
+    d12 line color rgb(0.4,0,0)
+    d14 line color rgb(0.3,0,0)
+    d16 line color rgb(0.2,0,0)
+    d18 line color rgb(0.1,0,0)
+    d20 line color rgb(0.0,0,0)
+    key compact nobox
+end graph
+
+amove 4 0
+begin graph
+    size 4 3
+    scale auto
+    xtitle " (ms)"
+    ytitle "Width (ms) / Number of Spikes"
+    x2axis off
+    y2axis off
+    data "prop_c_mtc.dat"
+    xticks length -0.05
+    yticks length -0.05
+    xaxis min 0.5
+    d1 line marker fcircle msize 0.13 color rgb(0,0,0)
+    d3 line marker fsquare msize 0.1 color rgb(0,0,0)
+    key compact nobox pos br
+end graph
