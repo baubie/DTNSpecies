@@ -39,7 +39,6 @@ using namespace std;
 
 
 
-
 void progress(ptime start, long done, long total, int found, bool searchMode, int row, bool force);
 vector<double> makeDurations();
 
@@ -271,7 +270,7 @@ int main(int argc, char* argv[])
                             Synapse OffE;
                             Synapse SusI;
                             OnE.gMax = params.val("gMaxOn");
-                            OnE.tau1 = params.val("tauOn");
+                            OnE.tau1 = 0.01; //params.val("tauOn");
                             OnE.tau2 = params.val("tauOn");
                             OnE.del = params.val("dOn");
                             OffE.gMax = params.val("gMaxOff");

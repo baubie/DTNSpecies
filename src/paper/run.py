@@ -6,8 +6,8 @@ import progress
 
 # Create our network
 networks = {}
-networks["C"] = network.DTN_Coincidence()
-#networks["AC"] = network.DTN_AntiCoincidence()
+#networks["C"] = network.DTN_Coincidence()
+networks["AC"] = network.DTN_AntiCoincidence()
 
 
 # Initialize the simulation with the network
@@ -20,9 +20,9 @@ for net in networks:
 
 
 # Run the simulations
-stims = [i for i in range(1,26,1)]
-param  = [1000.0,1500.0,2000.0,2500.0,3000.0,3500.0,4000.0,4500.0,5000.0,5500.0,6000.0]
-repeats = 10
+stims = [i for i in range(1,31,1)]
+param = [(float(i)+1)*1000 for i in range(20)]
+repeats = 15
 
 total = len(stims)*len(param)*repeats
 print "Running %d simulations..." % total
@@ -30,7 +30,7 @@ count = 0
 
 for a in param: 
     for net in networks:
-        networks["C"].cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/a
+        networks["AC"].cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/a
 
     for d in stims*repeats:
         progress.update(count, total)
@@ -41,7 +41,7 @@ for a in param:
             key = [a,d] 
             networks[net].savecells([["IC","soma"]], key, spikes=True, voltage=False)
 
-ns.plot_mean_spikes(networks["C"], "IC-soma", "mtc.dat")
+ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_mtc.dat")
 ns.show()  # Comment out to just save the results to file
 
 # Plot the results
@@ -55,6 +55,5 @@ if False:
             ns.plot_voltage(networks["C"], "IC-soma", key)
     progress.update(count, len(stims))
     ns.show()
-
 
 neuron.h.quit()

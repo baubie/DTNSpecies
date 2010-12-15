@@ -44,6 +44,7 @@ class DTN_AntiCoincidence(network):
         numDNLL = 50
         self.cells["DNLL"]["stim"] = "Poisson"
         self.cells["DNLL"]["delay"] = 0
+        self.cells["DNLL"]["mindur"] = 2
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
         self.cells["IC"]["cells"][0].sec["dendI"].insertGABAa(numDNLL,0.02/numDNLL,1)
@@ -91,7 +92,7 @@ class DTN_Coincidence(network):
         numMSO_ON = 100
         self.cells["MSO_ON"]["stim"] = "Poisson"
         self.cells["MSO_ON"]["type"] = "Onset"
-        self.cells["MSO_ON"]["delay"] = 5
+        self.cells["MSO_ON"]["delay"] = 6
         for i in range(numMSO_ON):
             self.cells["MSO_ON"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.01/numMSO_ON,1)
