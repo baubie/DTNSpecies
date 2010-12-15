@@ -55,7 +55,7 @@ class DTN_AntiCoincidence(network):
         numMSO = 100
         self.cells["MSO"]["stim"] = "Poisson"
         self.cells["MSO"]["type"] = "Onset"
-        self.cells["MSO"]["delay"] = 5
+        self.cells["MSO"]["delay"] = 6
         for i in range(numMSO):
             self.cells["MSO"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO,0.02/numMSO,1)
