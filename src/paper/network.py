@@ -11,13 +11,32 @@ class network(object):
         self.savedcells = []
         self.savedparams = []
 
-    def savecells(self, names, param, spikes=True, voltage=False):
+    def savecells(self, names, param, spikes=True, NMDAi=False, AMPAi=False, GABAai=False, 
+                                                   NMDAg=False, AMPAg=False, GABAag=False, voltage=False):
         saved = {}
         self.savedparams.append(param)
         for n in names:
             population = []
             for c in self.cells[n[0]]["cells"]:
-                cell = {"rec_v": [], "rec_t": [], "rec_s": []}
+                cell = {"rec_v": [], "rec_t": [], "rec_s": [], "rec_AMPAi": [], "rec_NMDAi": [], "rec_GABAai": []}
+
+                if NMDAi:
+                    cell["rec_NMDAi"] = list(c.sec[n[1]].NMDAi())
+
+                if AMPAi:
+                    cell["rec_AMPAi"] = list(c.sec[n[1]].AMPAi())
+
+                if GABAai:
+                    cell["rec_GABAai"] = list(c.sec[n[1]].GABAai())
+
+                if NMDAg:
+                    cell["rec_NMDAg"] = list(c.sec[n[1]].NMDAg())
+
+                if AMPAg:
+                    cell["rec_AMPAg"] = list(c.sec[n[1]].AMPAg())
+
+                if GABAag:
+                    cell["rec_GABAag"] = list(c.sec[n[1]].GABAag())
 
                 if spikes:
                     cell["rec_s"] = list(c.sec[n[1]].rec_s)
@@ -58,7 +77,7 @@ class DTN_AntiCoincidence(network):
         for i in range(numMSO):
             self.cells["MSO"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO,0.03/numMSO,1)
-        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO,0.03/numMSO,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO,0.10/numMSO,1)
         for i in range(numMSO):
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])

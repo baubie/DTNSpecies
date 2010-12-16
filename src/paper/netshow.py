@@ -69,6 +69,21 @@ def plot_voltage(network, section, param):
                 if haveX: plt.plot(c['rec_t'], c['rec_v'])
                 if haveX: plt.axis(xmin=0, xmax=c['rec_t'][-1], ymin=-80, ymax=40)
 
+def plot_current(network, section, current, param):
+    count = 0
+    for s in range(len(network.savedcells)):
+        if network.savedparams[s] == param:
+            for c in network.savedcells[s][section]:
+                if haveX: plt.plot(c['rec_t'], c['rec_'+current+'i'])
+
+def plot_conductance(network, section, current, param):
+    count = 0
+    for s in range(len(network.savedcells)):
+        if network.savedparams[s] == param:
+            for c in network.savedcells[s][section]:
+                if haveX: plt.plot(c['rec_t'], c['rec_'+current+'g'])
+
+
 def subplot(row, col, num):
     if haveX: plt.subplot(row,col,num)
 
