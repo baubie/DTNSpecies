@@ -57,8 +57,8 @@ class DTN_AntiCoincidence(network):
         self.cells["MSO"]["delay"] = 6
         for i in range(numMSO):
             self.cells["MSO"]["cells"].append(cells.MSO_Neuron())
-        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO,0.02/numMSO,1)
-        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO,0.02/numMSO,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO,0.03/numMSO,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO,0.03/numMSO,1)
         for i in range(numMSO):
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])
