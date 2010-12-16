@@ -44,7 +44,6 @@ class DTN_AntiCoincidence(network):
         numDNLL = 50
         self.cells["DNLL"]["stim"] = "Poisson"
         self.cells["DNLL"]["delay"] = 0
-        self.cells["DNLL"]["mindur"] = 2
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
         self.cells["IC"]["cells"][0].sec["dendI"].insertGABAa(numDNLL,0.02/numDNLL,1)
