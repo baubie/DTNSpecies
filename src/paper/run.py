@@ -15,7 +15,7 @@ s = {}
 for net in networks:
     s[net] = Simulation(networks[net])
     s[net].verbose = False
-    s[net].sim_time = 500
+    s[net].sim_time = 200
     s[net].dt = 0.025
 
 
@@ -24,11 +24,11 @@ stims = [i for i in range(1,31,1)]
 param = [(float(i)+1)*1000 for i in range(20)]
 repeats = 15
 
-
+'''
 stims = [1, 10, 50]
-param = [0.0033, 0.0066, 0.0132, 0.0264, 0.528]
+param = [0.01, 0.02, 0.05, 0.1]
 repeats = 1
-
+'''
 
 total = len(stims)*len(param)*repeats
 print "Running %d simulations..." % total
@@ -36,8 +36,8 @@ count = 0
 
 for a in param: 
     for net in networks:
-        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0)
-        networks["AC"].cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0)
+        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
+        networks["AC"].cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.02)
 
     for d in stims*repeats:
         progress.update(count, total)
@@ -55,12 +55,12 @@ for a in param:
                                                                          GABAag=True, 
                                                                          voltage=True)
 
-if False:
-    ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_mtc.dat")
+if True:
+    ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_nmda_beta.dat")
     ns.show()  # Comment out to just save the results to file
 
 # Plot the results
-if True:
+if False:
     count = 0
     for a in param:
         for d in stims:
@@ -71,7 +71,7 @@ if True:
     progress.update(count, len(stims))
     ns.show()
 
-if True:
+if False:
     count = 0
     for a in param:
         for d in stims:
