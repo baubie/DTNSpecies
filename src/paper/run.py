@@ -6,8 +6,8 @@ import progress
 
 # Create our network
 networks = {}
-#networks["C"] = network.DTN_Coincidence()
-networks["AC"] = network.DTN_AntiCoincidence()
+networks["C"] = network.DTN_Coincidence()
+#networks["AC"] = network.DTN_AntiCoincidence()
 
 
 # Initialize the simulation with the network
@@ -15,20 +15,16 @@ s = {}
 for net in networks:
     s[net] = Simulation(networks[net])
     s[net].verbose = False
-    s[net].sim_time = 200
+    s[net].sim_time = 100
     s[net].dt = 0.025
 
 
 # Run the simulations
 stims = [i for i in range(1,31,1)]
-param = [(float(i)+1)*1000 for i in range(20)]
 repeats = 15
 
-'''
-stims = [1, 10, 50]
 param = [0.01, 0.02, 0.05, 0.1]
 repeats = 1
-'''
 
 total = len(stims)*len(param)*repeats
 print "Running %d simulations..." % total
@@ -36,8 +32,8 @@ count = 0
 
 for a in param: 
     for net in networks:
-        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
-        networks["AC"].cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.02)
+        networks["C"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
+        networks["C"].cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(Beta=a, mg=0.5)
 
     for d in stims*repeats:
         progress.update(count, total)
@@ -56,7 +52,7 @@ for a in param:
                                                                          voltage=True)
 
 if True:
-    ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_nmda_beta.dat")
+    ns.plot_mean_spikes(networks["C"], "IC-soma", "c_nmda_beta.dat")
     ns.show()  # Comment out to just save the results to file
 
 # Plot the results
@@ -67,7 +63,7 @@ if False:
             count += 1
             key = [a,d]
             ns.subplot(len(param),len(stims),count)
-            ns.plot_voltage(networks["AC"], "IC-soma", key)
+            ns.plot_voltage(networks["C"], "IC-soma", key)
     progress.update(count, len(stims))
     ns.show()
 
@@ -78,9 +74,9 @@ if False:
             count += 1
             key = [a,d]
             ns.subplot(len(param),len(stims),count)
-            ns.plot_conductance(networks["AC"], "IC-dendE", "NMDA", key)
-            ns.plot_conductance(networks["AC"], "IC-dendE", "AMPA", key)
-            ns.plot_conductance(networks["AC"], "IC-dendE", "GABAa", key)
+            ns.plot_conductance(networks["C"], "IC-dendE", "NMDA", key)
+            ns.plot_conductance(networks["C"], "IC-dendE", "AMPA", key)
+            ns.plot_conductance(networks["C"], "IC-dendE", "GABAa", key)
     progress.update(count, len(stims))
     ns.show()
 
