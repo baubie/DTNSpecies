@@ -7,7 +7,7 @@ import progress
 # Create our network
 networks = {}
 networks["C"] = network.DTN_Coincidence()
-#networks["AC"] = network.DTN_AntiCoincidence()
+networks["AC"] = network.DTN_AntiCoincidence()
 
 
 # Initialize the simulation with the network
@@ -31,6 +31,7 @@ count = 0
 
 for a in param: 
     for net in networks:
+        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
         networks["C"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
         networks["C"].cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(Beta=a, mg=0.5)
 
@@ -52,6 +53,7 @@ for a in param:
 
 if True:
     ns.plot_mean_spikes(networks["C"], "IC-soma", "c_nmda_beta.dat")
+    ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_nmda_beta.dat")
     ns.show()  # Comment out to just save the results to file
 
 # Plot the results
