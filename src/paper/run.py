@@ -24,7 +24,6 @@ stims = [i for i in range(1,31,1)]
 repeats = 15
 
 param = [0.01, 0.02, 0.05, 0.1]
-repeats = 1
 
 total = len(stims)*len(param)*repeats
 print "Running %d simulations..." % total
