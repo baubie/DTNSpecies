@@ -15,14 +15,14 @@ s = {}
 for net in networks:
     s[net] = Simulation(networks[net])
     s[net].verbose = False
-    s[net].sim_time = 100
+    s[net].sim_time = 50
     s[net].dt = 0.025
 
 
 # Run the simulations
-stims = [i for i in range(1,31,1)]
-param = [i*0.01 for i in range(1,11)]
-repeats = 15
+stims = [i for i in range(1,4,1)]
+param = [i*0.01 for i in range(1,11,2)]
+repeats = 1
 
 total = len(stims)*len(param)*repeats
 print "Running %d simulations..." % total
@@ -42,28 +42,24 @@ for a in param:
             s[net].run()
             key = [a,d] 
             networks[net].savecells([["IC","soma"],["IC","dendE"]], key, spikes=True, 
-                                                                         NMDAi=False, 
-                                                                         AMPAi=False, 
-                                                                         GABAai=False, 
-                                                                         NMDAg=False, 
-                                                                         AMPAg=False, 
-                                                                         GABAag=False, 
-                                                                         voltage=False)
+                                                                         conductance=False, 
+                                                                         current=False, 
+                                                                         voltage=True)
 
-if True:
+if False:
     ns.plot_mean_spikes(networks["C"], "IC-soma", "c_nmda_beta.dat")
     ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_nmda_beta.dat")
     ns.show()  # Comment out to just save the results to file
 
 # Plot the results
-if False:
+if True:
     count = 0
     for a in param:
         for d in stims:
             count += 1
             key = [a,d]
             ns.subplot(len(param),len(stims),count)
-            ns.plot_voltage(networks["C"], "IC-soma", key)
+            ns.plot_voltage(networks["AC"], "IC-soma", key)
     progress.update(count, len(stims))
     ns.show()
 

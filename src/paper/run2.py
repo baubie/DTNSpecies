@@ -43,13 +43,9 @@ for a in param:
             s[net].run()
             key = [a,d] 
             networks[net].savecells([["IC","soma"],["IC","dendE"]], key, spikes=True, 
-                                                                         NMDAi=False, 
-                                                                         AMPAi=False, 
-                                                                         GABAai=False, 
-                                                                         NMDAg=False, 
-                                                                         AMPAg=False, 
-                                                                         GABAag=False, 
-                                                                         voltage=False)
+                                                                         conductance=False, 
+                                                                         current=False, 
+                                                                         voltage=True)
 
 if True:
     ns.plot_mean_spikes(networks["C"], "IC-soma", "c_soma_size.dat")
