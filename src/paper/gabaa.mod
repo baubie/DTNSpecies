@@ -67,6 +67,7 @@ ENDCOMMENT
 INDEPENDENT {t FROM 0 TO 1 WITH 1 (ms)}
 
 NEURON {
+    THREADSAFE
 	POINT_PROCESS GABAa
 	POINTER pre
 	RANGE C, R, R0, R1, g, gmax, lastrelease, TimeCount

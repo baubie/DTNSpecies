@@ -12,6 +12,7 @@ class Simulation(object):
         self.clamps = []
         self.poisson = None
         self.poisson = neuron.h.Random(randomseed)
+        index = self.poisson.MCellRan4(randomseed)
         self.poisson.poisson(amplitude)
         self.stim_dur = 10
         self.verbose = True
@@ -33,10 +34,10 @@ class Simulation(object):
                             self.clamps[-1].dur = max([self.stim_dur, self.network.cells[c]["mindur"]])
                         elif self.network.cells[c]["type"] == "Onset":
                             self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
-                            self.clamps[-1].dur = min([self.stim_dur,2])
+                            self.clamps[-1].dur = max([self.network.cells[c]["mindur"], min([self.stim_dur,2])])
                         elif self.network.cells[c]["type"] == "Offset":
                             self.clamps[-1].delay = self.delay+self.stim_dur+self.network.cells[c]["delay"]
-                            self.clamps[-1].dur = min([self.stim_dur,2])
+                            self.clamps[-1].dur = max([self.network.cells[c]["mindur"], min([self.stim_dur,2])])
 
                 elif self.network.cells[c]["stim"] == "IClamp":
                     for i in self.network.cells[c]["cells"]:
@@ -51,6 +52,7 @@ class Simulation(object):
         neuron.h.dt = self.dt
         neuron.h.celsius = 37
         neuron.h.finitialize(-60)
+        neuron.h.load_file('parcom.hoc')
         neuron.init()
         if self.verbose: print "...Running Simulation"
         neuron.run(self.sim_time)

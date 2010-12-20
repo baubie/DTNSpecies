@@ -43,6 +43,7 @@ NEURON {
         USEION k READ ek WRITE ik
         RANGE gkhtbar, gkht, ik
         GLOBAL ninf, pinf, ntau, ptau
+        THREADSAFE
 }
 
 INDEPENDENT {t FROM 0 TO 1 WITH 1 (ms)}

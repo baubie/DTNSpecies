@@ -29,6 +29,7 @@ NEURON {
         USEION na READ ena WRITE ina
         RANGE gnabar, gna, ina
         GLOBAL hinf, minf, htau, mtau
+        THREADSAFE
 }
 
 INDEPENDENT {t FROM 0 TO 1 WITH 1 (ms)}

@@ -1,6 +1,8 @@
 import sys
 
 def update(count, total, width=50):
+    if count < 0 or count > total: return
+
     width = max([5,width]) # Minimum of 5 characters
     mid = int(width/2)-1
     percent = float(count)/total

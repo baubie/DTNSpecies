@@ -1,79 +1,59 @@
-from sim import Simulation
-import network
+import simulations
 import neuron
+import sys
 import netshow as ns
-import progress
 
-# Create our network
-networks = {}
-networks["C"] = network.DTN_Coincidence()
-networks["AC"] = network.DTN_AntiCoincidence()
+ShowSpikes = True
+ShowVoltage = False
+
+stims = [i for i in range(1,25,1)]
+param = [i*0.01 for i in range(1,11,1)]
+repeats = 15
+
+pc = neuron.h.ParallelContext()
+numProcs = int(pc.nhost())
+pc.runworker()
+ret = []
+for i in range(numProcs):
+    pc.submit(simulations.NMDA_BETA,numProcs,i,stims,param,repeats,ShowSpikes,ShowVoltage)
+while pc.working():
+    ret.append(pc.pyret())
+pc.done()
+
+savedparams = []
+savedcells = []
+
+for i in range(numProcs):
+    for r in ret:
+        if r[0] == i:
+            savedparams += r[1]
+            savedcells += r[2]
+
+class Network:
+    def __init__(self):
+        savedparams = []
+        savedcells = []
+
+net = Network()
+net.savedparams = savedparams
+net.savedcells = savedcells
 
 
-# Initialize the simulation with the network
-s = {}
-for net in networks:
-    s[net] = Simulation(networks[net])
-    s[net].verbose = False
-    s[net].sim_time = 50
-    s[net].dt = 0.025
-
-
-# Run the simulations
-stims = [i for i in range(1,4,1)]
-param = [i*0.01 for i in range(1,11,2)]
-repeats = 1
-
-total = len(stims)*len(param)*repeats
-print "Running %d simulations..." % total
-count = 0
-
-for a in param: 
-    for net in networks:
-        networks["AC"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, gmax=0.05, mg=0.5)
-        networks["C"].cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, gmax=0.03, mg=0.5)
-        networks["C"].cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(Beta=a, gmax=0.03, mg=0.5)
-
-    for d in stims*repeats:
-        progress.update(count, total)
-        count += 1
-        for net in networks:
-            s[net].stim_dur = d 
-            s[net].run()
-            key = [a,d] 
-            networks[net].savecells([["IC","soma"],["IC","dendE"]], key, spikes=True, 
-                                                                         conductance=False, 
-                                                                         current=False, 
-                                                                         voltage=True)
-
-if False:
-    ns.plot_mean_spikes(networks["C"], "IC-soma", "c_nmda_beta.dat")
-    ns.plot_mean_spikes(networks["AC"], "IC-soma", "ac_nmda_beta.dat")
+if ShowSpikes:
+    ns.plot_mean_spikes(net, "IC-soma", "ac_nmda_beta.dat")
     ns.show()  # Comment out to just save the results to file
 
 # Plot the results
-if True:
+if ShowVoltage:
     count = 0
     for a in param:
         for d in stims:
             count += 1
             key = [a,d]
             ns.subplot(len(param),len(stims),count)
-            ns.plot_voltage(networks["AC"], "IC-soma", key)
-    progress.update(count, len(stims))
-    ns.show()
-
-if False:
-    count = 0
-    for a in param:
-        for d in stims:
-            count += 1
-            key = [a,d]
-            ns.subplot(len(param),len(stims),count)
-            ns.plot_conductance(networks["C"], "IC-dendE", "NMDA", key)
-            ns.plot_conductance(networks["C"], "IC-dendE", "AMPA", key)
-            ns.plot_conductance(networks["C"], "IC-dendE", "GABAa", key)
-    progress.update(count, len(stims))
+            ns.plot_voltage(net, "IC-soma", key)
     ns.show()
 
 neuron.h.quit()
+
+

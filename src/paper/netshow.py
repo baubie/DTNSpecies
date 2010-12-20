@@ -50,7 +50,7 @@ def plot_mean_spikes(network, section, filename=None):
         f = open(filename, 'w')
         f.write('"x-axis"')
         for z in range(len(z_vals)):
-            f.write(",%s" % str(z_vals[z]))
+            f.write(",\"%s\"" % str(z_vals[z]))
         f.write("\n")
         for x in range(len(x_vals)):
             f.write(str(x_vals[x]))
@@ -58,8 +58,6 @@ def plot_mean_spikes(network, section, filename=None):
                 f.write(",%s" % str(y_vals_saved[z][x]))
             f.write("\n")
         f.close()
-
-
 
 def plot_voltage(network, section, param):
     count = 0

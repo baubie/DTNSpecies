@@ -7,6 +7,7 @@ NEURON {
 	NONSPECIFIC_CURRENT i
 	RANGE  gbar
 	GLOBAL hinf, tau1,tau2
+    THREADSAFE
 }
 
 PARAMETER {

@@ -23,6 +23,7 @@ NEURON {
 	RANGE m_inf, h_inf, n_inf
 	RANGE tau_m, tau_h, tau_n
 	RANGE m_exp, h_exp, n_exp
+    THREADSAFE
 }
 
 

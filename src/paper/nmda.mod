@@ -75,6 +75,7 @@ NEURON {
 	NONSPECIFIC_CURRENT i
 	RANGE Cmax, Cdur, Alpha, Beta, Erev, mg
 	RANGE Prethresh, Deadtime, Rinf, Rtau
+    THREADSAFE
 }
 UNITS {
 	(nA) = (nanoamp)
