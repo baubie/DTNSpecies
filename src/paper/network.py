@@ -75,7 +75,6 @@ class DTN_AntiCoincidence(network):
             neuron.h.setpointer(self.cells["MSO"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])
 
 
-
 class DTN_Coincidence(network):
     def __init__(self):
         network.__init__(self)
@@ -91,7 +90,7 @@ class DTN_Coincidence(network):
         numDNLL = 50
         self.cells["DNLL"]["stim"] = "Poisson"
         self.cells["DNLL"]["delay"] = 0
-        self.cells["DNLL"]["mindur"] = 2
+        self.cells["DNLL"]["mindur"] = 1
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
         self.cells["IC"]["cells"][0].sec["dendI"].insertGABAa(numDNLL,0.03/numDNLL,1)
@@ -102,11 +101,11 @@ class DTN_Coincidence(network):
         numMSO_ON = 100
         self.cells["MSO_ON"]["stim"] = "Poisson"
         self.cells["MSO_ON"]["type"] = "Onset"
-        self.cells["MSO_ON"]["delay"] = 8
+        self.cells["MSO_ON"]["delay"] = 15
         for i in range(numMSO_ON):
             self.cells["MSO_ON"]["cells"].append(cells.MSO_Neuron())
-        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.01/numMSO_ON,1)
-        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO_ON,0.03/numMSO_ON,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertAMPA(numMSO_ON,0.005/numMSO_ON,1)
+        self.cells["IC"]["cells"][0].sec["dendE"].insertNMDA(numMSO_ON,0.01/numMSO_ON,1)
 
         for i in range(numMSO_ON):
             neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].AMPA[i])
@@ -120,7 +119,7 @@ class DTN_Coincidence(network):
         for i in range(numMSO_OFF):
             self.cells["MSO_OFF"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendEOff"].insertAMPA(numMSO_OFF,0.01/numMSO_OFF,1)
-        self.cells["IC"]["cells"][0].sec["dendEOff"].insertNMDA(numMSO_OFF,0.03/numMSO_OFF,1)
+        self.cells["IC"]["cells"][0].sec["dendEOff"].insertNMDA(numMSO_OFF,0.01/numMSO_OFF,1)
         for i in range(numMSO_OFF):
             neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendEOff"].AMPA[i])
             neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendEOff"].NMDA[i])

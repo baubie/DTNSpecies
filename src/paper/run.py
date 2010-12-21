@@ -8,14 +8,14 @@ ShowSpikes = True
 ShowVoltage = False
 
 # Define Paramters
-stims = [i for i in range(1,25,1)]
-param = [i*0.01 for i in range(1,11,1)]
-stims = [1, 5, 10]
-param = [0.01, 0.1]
-repeats = 1
-sim_time = 100
-netdef = network.DTN_AntiCoincidence
-modify = sims.AC_NMDA_BETA
+stims = [i for i in range(1,25)] + [i for i in range(25,251,5)]
+param = [i*0.005 for i in range(1,22,2)]
+repeats = 10
+sim_time = 1000
+netdef = network.DTN_Coincidence
+modify = sims.C_NMDA_BETA
+spike_filename = "c_nmda_beta.dat"
+total = len(stims)*len(param)*repeats
 
 
 
@@ -29,6 +29,7 @@ modify = sims.AC_NMDA_BETA
 # Setup and run simulations in parallel
 pc = neuron.h.ParallelContext()
 numProcs = int(pc.nhost())
+print "Running %d simulations via %d processes..." % total, numProcs
 ret = []
 pc.runworker()
 for i in range(numProcs):
@@ -56,7 +57,7 @@ net.savedcells = savedcells
 
 # Plot the mean number of spikes
 if ShowSpikes:
-    ns.plot_mean_spikes(net, "IC-soma", "ac_nmda_beta.dat")
+    ns.plot_mean_spikes(net, "IC-soma", spike_filename)
     ns.show()  # Comment out to just save the results to file
 
 # Plot the voltage traces

@@ -23,7 +23,6 @@ def frequency_unique(seq):
     return [unique_seq, vals]
 
 def plot_mean_spikes(network, section, filename=None):
-
     [uni, freq] = frequency_unique(network.savedparams)
     x_vals = unique([i[1] for i in uni]) 
     z_vals = unique([i[0] for i in uni])

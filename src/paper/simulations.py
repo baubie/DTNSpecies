@@ -36,3 +36,8 @@ def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,Sav
 def AC_NMDA_BETA(net,a):
     net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
     return net
+
+def C_NMDA_BETA(net,a):
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(Beta=a, mg=0.5)
+    return net
