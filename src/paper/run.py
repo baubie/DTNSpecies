@@ -4,12 +4,13 @@ import network
 import sys
 import netshow as ns
 
+
+# Define Paramters
 ShowSpikes = True
 ShowVoltage = False
 
-# Define Paramters
 stims = [i for i in range(1,25)] + [i for i in range(25,251,5)]
-param = [i*0.005 for i in range(1,22,2)]
+param = [i*0.002 for i in range(1,22,1)]
 repeats = 10
 sim_time = 1000
 netdef = network.DTN_Coincidence
@@ -29,7 +30,7 @@ total = len(stims)*len(param)*repeats
 # Setup and run simulations in parallel
 pc = neuron.h.ParallelContext()
 numProcs = int(pc.nhost())
-print "Running %d simulations via %d processes..." % total, numProcs
+print "Running "+str(total)+ " simulations via "+str(numProcs)+" processes..."
 ret = []
 pc.runworker()
 for i in range(numProcs):
@@ -37,6 +38,7 @@ for i in range(numProcs):
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
+
 
 # Combine all of the results together
 savedparams = []

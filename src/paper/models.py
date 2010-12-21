@@ -16,10 +16,6 @@ class ModelBase(nrn.Section):
 
         # Provide recording variables
         self.rec_v = h.Vector()
-        self.rec_v.record(self(0.5)._ref_v)
-
-        self.rec_t = h.Vector()
-        self.rec_t.record(h._ref_t)
 
         self.nc = h.NetCon(self(0.5)._ref_v, None, sec=self)
         self.rec_s = h.Vector()
@@ -39,9 +35,12 @@ class ModelBase(nrn.Section):
         self.AMPA = []
         self.NMDA = []
 
+    def recordVoltage(self):
+        self.rec_v.record(self(0.5)._ref_v)
+
     def NMDAi(self):
-        r = [0]*len(self.rec_t)
-        if len(self.NMDA) == 0: return r
+        if len(self.NMDA) == 0: return []
+        r = [0]*len(self.rec_NMDA_i[0])
         for i in self.rec_NMDA_i:
             for t in range(len(i)):
                 r[t] += i[t]
@@ -49,8 +48,8 @@ class ModelBase(nrn.Section):
         return r
 
     def AMPAi(self):
-        r = [0]*len(self.rec_t)
-        if len(self.AMPA) == 0: return r
+        if len(self.AMPA) == 0: return []
+        r = [0]*len(self.rec_AMPA_i[0])
         for i in self.rec_AMPA_i:
             for t in range(len(i)):
                 r[t] += i[t]
@@ -58,8 +57,8 @@ class ModelBase(nrn.Section):
         return r
 
     def GABAai(self):
-        r = [0]*len(self.rec_t)
-        if len(self.GABAa) == 0: return r
+        if len(self.GABAa) == 0: return []
+        r = [0]*len(self.rec_GABAa_i[0])
         for i in self.rec_GABAa_i:
             for t in range(len(i)):
                 r[t] += i[t]
@@ -67,8 +66,8 @@ class ModelBase(nrn.Section):
         return r
 
     def NMDAg(self):
-        r = [0]*len(self.rec_t)
-        if len(self.NMDA) == 0: return r
+        if len(self.NMDA) == 0: return []
+        r = [0]*len(self.rec_NMDA_g[0])
         for i in self.rec_NMDA_g:
             for t in range(len(i)):
                 r[t] += i[t]
@@ -76,8 +75,8 @@ class ModelBase(nrn.Section):
         return r
 
     def AMPAg(self):
-        r = [0]*len(self.rec_t)
-        if len(self.AMPA) == 0: return r
+        if len(self.AMPA) == 0: return []
+        r = [0]*len(self.rec_AMPA_g[0])
         for i in self.rec_AMPA_g:
             for t in range(len(i)):
                 r[t] += i[t]
@@ -85,40 +84,46 @@ class ModelBase(nrn.Section):
         return r
 
     def GABAag(self):
-        r = [0]*len(self.rec_t)
-        if len(self.GABAa) == 0: return r
+        if len(self.GABAa) == 0: return []
+        r = [0]*len(self.rec_GABAa_g[0])
         for i in self.rec_GABAa_g:
             for t in range(len(i)):
                 r[t] += i[t]
         r = [i/len(self.GABAa) for i in r]
         return r
 
-    def insertGABAa(self, num=1, gmax=0.015, pos=1):
+    def insertGABAa(self, recConductance=False, recCurrent=False, num=1, gmax=0.015, pos=1):
         for i in range(num):
             self.GABAa.append(h.GABAa(self(pos)))
             self.GABAa[-1].gmax = gmax
-            self.rec_GABAa_i.append(h.Vector())
-            self.rec_GABAa_i[-1].record(self.GABAa[-1]._ref_i)
-            self.rec_GABAa_g.append(h.Vector())
-            self.rec_GABAa_g[-1].record(self.GABAa[-1]._ref_g)
+            if recCurrent:
+                self.rec_GABAa_i.append(h.Vector())
+                self.rec_GABAa_i[-1].record(self.GABAa[-1]._ref_i)
+            if recConductance:
+                self.rec_GABAa_g.append(h.Vector())
+                self.rec_GABAa_g[-1].record(self.GABAa[-1]._ref_g)
 
-    def insertAMPA(self, num=1, gmax=0.015, pos=1):
+    def insertAMPA(self, recConductance=False, recCurrent=False,  num=1, gmax=0.015, pos=1):
         for i in range(num):
             self.AMPA.append(h.AMPA(self(pos)))
             self.AMPA[-1].gmax = gmax
-            self.rec_AMPA_i.append(h.Vector())
-            self.rec_AMPA_i[-1].record(self.AMPA[-1]._ref_i)
-            self.rec_AMPA_g.append(h.Vector())
-            self.rec_AMPA_g[-1].record(self.AMPA[-1]._ref_g)
+            if recCurrent:
+                self.rec_AMPA_i.append(h.Vector())
+                self.rec_AMPA_i[-1].record(self.AMPA[-1]._ref_i)
+            if recConductance:
+                self.rec_AMPA_g.append(h.Vector())
+                self.rec_AMPA_g[-1].record(self.AMPA[-1]._ref_g)
 
-    def insertNMDA(self, num=1, gmax=0.015, pos=1):
+    def insertNMDA(self, recConductance=False, recCurrent=False,  num=1, gmax=0.015, pos=1):
         for i in range(num):
             self.NMDA.append(h.NMDA(self(pos)))
             self.NMDA[-1].gmax = gmax
-            self.rec_NMDA_i.append(h.Vector())
-            self.rec_NMDA_i[-1].record(self.NMDA[-1]._ref_i)
-            self.rec_NMDA_g.append(h.Vector())
-            self.rec_NMDA_g[-1].record(self.NMDA[-1]._ref_g)
+            if recCurrent:
+                self.rec_NMDA_i.append(h.Vector())
+                self.rec_NMDA_i[-1].record(self.NMDA[-1]._ref_i)
+            if recConductance:
+                self.rec_NMDA_g.append(h.Vector())
+                self.rec_NMDA_g[-1].record(self.NMDA[-1]._ref_g)
 
     def modifyGABAa(self, gmax=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
         for i in range(len(self.GABAa)):

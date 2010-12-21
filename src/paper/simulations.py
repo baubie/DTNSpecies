@@ -7,6 +7,10 @@ from math import ceil
 
 def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
     net = netdef()
+
+    if SaveVoltage:
+        net.recordVoltage()
+
     repeats = int(repeats)
     s = Simulation(net, randomseed=200)
     s.verbose = False

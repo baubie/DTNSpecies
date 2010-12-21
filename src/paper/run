@@ -1,1 +1,1 @@
-mpiexec --prefix /home/aubiebn/local64 -np 1 --hostfile my-hosts --byslot --host hopper /home/aubiebn/neuron/nrn/x86_64/bin/nrniv -mpi -python run.py
+mpiexec -np 1 `which nrniv` -mpi -python run.py
