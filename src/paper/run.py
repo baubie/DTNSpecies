@@ -9,16 +9,13 @@ import netshow as ns
 ShowSpikes = True
 ShowVoltage = False
 
-stims = [i for i in range(1,25)] + [i for i in range(25,251,5)]
-param = [i*0.002 for i in range(1,22,1)]
 repeats = 10
-sim_time = 1000
+sim_time = 500
 netdef = network.DTN_Coincidence
-modify = sims.C_NMDA_BETA
-spike_filename = "c_nmda_beta.dat"
+modify = sims.C_SEARCH
+[stims,param] = sims.C_SEARCH(None,None,True)
+spike_filename = "c_mix.dat"
 total = len(stims)*len(param)*repeats
-
-
 
 
 
