@@ -9,14 +9,13 @@ import netshow as ns
 ShowSpikes = True
 ShowVoltage = False
 
-repeats = 10
+repeats = 5
 sim_time = 500
 netdef = network.DTN_Coincidence
 modify = sims.C_SEARCH
 [stims,param] = sims.C_SEARCH(None,None,True)
-spike_filename = "c_mix.dat"
+spike_filename = "c_mix_big.dat"
 total = len(stims)*len(param)*repeats
-
 
 
 

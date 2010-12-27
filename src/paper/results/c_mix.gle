@@ -1,0 +1,144 @@
+size 8 3
+set font psh
+set hei 0.15
+set lwidth 0.02
+begin graph
+    size 4 3
+    scale auto
+    xtitle "Stimulus Duration (ms)"
+    ytitle "Mean Spikes per Trial"
+    x2axis off
+    y2axis off
+    data "c_mix.dat"
+    xticks length -0.05
+    yticks length -0.05
+    d1 line color rgb(1,0,0)
+    d2 line color rgb(0.0181818181818,0.0,0.981818181818)
+    d3 line color rgb(0.0363636363636,0.0,0.963636363636)
+    d4 line color rgb(0.0545454545455,0.0,0.945454545455)
+    d5 line color rgb(0.0727272727273,0.0,0.927272727273)
+    d6 line color rgb(0.0909090909091,0.0,0.909090909091)
+    d7 line color rgb(0.109090909091,0.0,0.890909090909)
+    d8 line color rgb(0.127272727273,0.0,0.872727272727)
+    d9 line color rgb(0.145454545455,0.0,0.854545454545)
+    d10 line color rgb(0.163636363636,0.0,0.836363636364)
+    d11 line color rgb(0.181818181818,0.0,0.818181818182)
+    d12 line color rgb(0.2,0.0,0.8)
+    d13 line color rgb(0.218181818182,0.0,0.781818181818)
+    d14 line color rgb(0.236363636364,0.0,0.763636363636)
+    d15 line color rgb(0.254545454545,0.0,0.745454545455)
+    d16 line color rgb(0.272727272727,0.0,0.727272727273)
+    d17 line color rgb(0.290909090909,0.0,0.709090909091)
+    d18 line color rgb(0.309090909091,0.0,0.690909090909)
+    d19 line color rgb(0.327272727273,0.0,0.672727272727)
+    d20 line color rgb(0.345454545455,0.0,0.654545454545)
+    d21 line color rgb(0.363636363636,0.0,0.636363636364)
+    d22 line color rgb(0.381818181818,0.0,0.618181818182)
+    d23 line color rgb(0.4,0.0,0.6)
+    d24 line color rgb(0.418181818182,0.0,0.581818181818)
+    d25 line color rgb(0.436363636364,0.0,0.563636363636)
+    d26 line color rgb(0.454545454545,0.0,0.545454545455)
+    d27 line color rgb(0.472727272727,0.0,0.527272727273)
+    d28 line color rgb(0.490909090909,0.0,0.509090909091)
+    d29 line color rgb(0.509090909091,0.0,0.490909090909)
+    d30 line color rgb(0.527272727273,0.0,0.472727272727)
+    d31 line color rgb(0.545454545455,0.0,0.454545454545)
+    d32 line color rgb(0.563636363636,0.0,0.436363636364)
+    d33 line color rgb(0.581818181818,0.0,0.418181818182)
+    d34 line color rgb(0.6,0.0,0.4)
+    d35 line color rgb(0.618181818182,0.0,0.381818181818)
+    d36 line color rgb(0.636363636364,0.0,0.363636363636)
+    d37 line color rgb(0.654545454545,0.0,0.345454545455)
+    d38 line color rgb(0.672727272727,0.0,0.327272727273)
+    d39 line color rgb(0.690909090909,0.0,0.309090909091)
+    d40 line color rgb(0.709090909091,0.0,0.290909090909)
+    d41 line color rgb(0.727272727273,0.0,0.272727272727)
+    d42 line color rgb(0.745454545455,0.0,0.254545454545)
+    d43 line color rgb(0.763636363636,0.0,0.236363636364)
+    d44 line color rgb(0.781818181818,0.0,0.218181818182)
+    d45 line color rgb(0.8,0.0,0.2)
+    d46 line color rgb(0.818181818182,0.0,0.181818181818)
+    d47 line color rgb(0.836363636364,0.0,0.163636363636)
+    d48 line color rgb(0.854545454545,0.0,0.145454545455)
+    d49 line color rgb(0.872727272727,0.0,0.127272727273)
+    d50 line color rgb(0.890909090909,0.0,0.109090909091)
+    d51 line color rgb(0.909090909091,0.0,0.0909090909091)
+    d52 line color rgb(0.927272727273,0.0,0.0727272727273)
+    d53 line color rgb(0.945454545455,0.0,0.0545454545455)
+    d54 line color rgb(0.963636363636,0.0,0.0363636363636)
+    d55 line color rgb(0.981818181818,0.0,0.0181818181818)
+    d56 line color rgb(0,0,1)
+    d57 line color rgb(0.0,0.0,0.0181818181818)
+    d58 line color rgb(0.0,0.0,0.0363636363636)
+    d59 line color rgb(0.0,0.0,0.0545454545455)
+    d60 line color rgb(0.0,0.0,0.0727272727273)
+    d61 line color rgb(0.0,0.0,0.0909090909091)
+    d62 line color rgb(0.0,0.0,0.109090909091)
+    d63 line color rgb(0.0,0.0,0.127272727273)
+    d64 line color rgb(0.0,0.0,0.145454545455)
+    d65 line color rgb(0.0,0.0,0.163636363636)
+    d66 line color rgb(0.0,0.0,0.181818181818)
+    d67 line color rgb(0.0,0.0,0.2)
+    d68 line color rgb(0.0,0.0,0.218181818182)
+    d69 line color rgb(0.0,0.0,0.236363636364)
+    d70 line color rgb(0.0,0.0,0.254545454545)
+    d71 line color rgb(0.0,0.0,0.272727272727)
+    d72 line color rgb(0.0,0.0,0.290909090909)
+    d73 line color rgb(0.0,0.0,0.309090909091)
+    d74 line color rgb(0.0,0.0,0.327272727273)
+    d75 line color rgb(0.0,0.0,0.345454545455)
+    d76 line color rgb(0.0,0.0,0.363636363636)
+    d77 line color rgb(0.0,0.0,0.381818181818)
+    d78 line color rgb(0.0,0.0,0.4)
+    d79 line color rgb(0.0,0.0,0.418181818182)
+    d80 line color rgb(0.0,0.0,0.436363636364)
+    d81 line color rgb(0.0,0.0,0.454545454545)
+    d82 line color rgb(0.0,0.0,0.472727272727)
+    d83 line color rgb(0.0,0.0,0.490909090909)
+    d84 line color rgb(0.0,0.0,0.509090909091)
+    d85 line color rgb(0.0,0.0,0.527272727273)
+    d86 line color rgb(0.0,0.0,0.545454545455)
+    d87 line color rgb(0.0,0.0,0.563636363636)
+    d88 line color rgb(0.0,0.0,0.581818181818)
+    d89 line color rgb(0.0,0.0,0.6)
+    d90 line color rgb(0.0,0.0,0.618181818182)
+    d91 line color rgb(0.0,0.0,0.636363636364)
+    d92 line color rgb(0.0,0.0,0.654545454545)
+    d93 line color rgb(0.0,0.0,0.672727272727)
+    d94 line color rgb(0.0,0.0,0.690909090909)
+    d95 line color rgb(0.0,0.0,0.709090909091)
+    d96 line color rgb(0.0,0.0,0.727272727273)
+    d97 line color rgb(0.0,0.0,0.745454545455)
+    d98 line color rgb(0.0,0.0,0.763636363636)
+    d99 line color rgb(0.0,0.0,0.781818181818)
+    d100 line color rgb(0.0,0.0,0.8)
+    d101 line color rgb(0.0,0.0,0.818181818182)
+    d102 line color rgb(0.0,0.0,0.836363636364)
+    d103 line color rgb(0.0,0.0,0.854545454545)
+    d104 line color rgb(0.0,0.0,0.872727272727)
+    d105 line color rgb(0.0,0.0,0.890909090909)
+    d106 line color rgb(0.0,0.0,0.909090909091)
+    d107 line color rgb(0.0,0.0,0.927272727273)
+    d108 line color rgb(0.0,0.0,0.945454545455)
+    d109 line color rgb(0.0,0.0,0.963636363636)
+    d110 line color rgb(0.0,0.0,0.981818181818)
+    key compact nobox
+end graph
+amove 4 0
+begin graph
+    size 4 3
+    scale auto
+    xtitle " (ms)"
+    ytitle "Width (ms) / Number of Spikes"
+    x2axis off
+    y2axis off
+    data "c_mix.analyze"
+    xticks length -0.05
+    yticks length -0.05
+    let d4 = x, d1/d3
+    d1 line marker fcircle msize 0.1 color rgb(1,0,0)
+    d2 line marker fsquare msize 0.1 color rgb(0,1,0)
+    d3 line marker fdiamond msize 0.1 color rgb(0,0,1)
+    d4 line marker ftriangle msize 0.1 color rgb(0,0,0) key "Norm Width"
+    key compact nobox pos br
+end graph

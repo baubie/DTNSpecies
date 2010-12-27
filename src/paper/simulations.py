@@ -42,16 +42,19 @@ def C_SEARCH(net,a,getparams=False):
         stims = [i for i in range(1,30)] + [i for i in range(30,251,10)]
         ondelay = [i for i in range(5,51,5)]
         offweight = [i*0.1 for i in range(0,21,2)]
+        onweight = [i*0.1 for i in range(0,21,2)]
         param = []
         for a in ondelay:
             for b in offweight:
-                param.append([a,b])
+                for c in onweight:
+                    param.append([a,b,c])
         return [stims, param]
 
+    net.cells["MSO_ON"]["delay"] = a[0]
     net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.01*a[1], mg=0.5)
     net.cells["IC"]["cells"][0].sec["dendEOff"].modifyAMPA(gmax=0.005*a[1])
-
-    net.cells["MSO_ON"]["delay"] = a[0]
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=0.01*a[2], mg=0.5)
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyAMPA(gmax=0.005*a[2])
     return net
 
 
