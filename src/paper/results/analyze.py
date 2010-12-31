@@ -50,14 +50,15 @@ if (len(sys.argv) < 2 + numParams):
 
 
 if listMode:
-    y_params = [[] for i in range(len(y_names[0]))]
+    y_params = [[] for i in range(numParams)]
+    y_slice = sys.argv[2:] 
     for y in y_names:
         for i in range(numParams): 
             y_params[i].append(y[i])
     for i in range(numParams):
         y_params[i] = unique(y_params[i])
 
-    print y_params
+    print y_slice
     quit()
 
 
