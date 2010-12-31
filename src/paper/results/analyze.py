@@ -52,14 +52,47 @@ if (len(sys.argv) < 2 + numParams):
 if listMode:
     y_params = [[] for i in range(numParams)]
     y_slice = sys.argv[2:] 
-    for y in y_names:
+    if len(y_slice) != numParams:
+        print "Error: Require %d parameters found %d" % numParams,len(y_slice)
+        quit()
+
+    for yi in y_names:
         for i in range(numParams): 
-            y_params[i].append(y[i])
+            y_params[i].append(yi[i])
     for i in range(numParams):
         y_params[i] = unique(y_params[i])
 
-    print y_slice
-    quit()
+
+    new_y_names = []
+    new_y = []
+    freeparam = None
+    for i in range(numParams):
+        if y_slice[i] == "-": freeparam = i
+
+    for i in range(numParams):
+        if i != freeparam:
+            print "Parameter %d constrained" % i
+            print y_params[i][int(y_slice[i])]
+        else:
+            print "Parameter %d free" % i
+            print y_params[i]
+            new_y_names = y_params[i]
+
+    key = []
+    for i in range(len(y_names)):
+        goodparam = True
+        for j in range(numParams):
+            if j != freeparam and y_names[i][j] != y_params[j][int(y_slice[j])]:
+                goodparam = False
+        if goodparam:
+            key.append(i)
+
+    for yi in range(len(y)):
+        if yi in key:
+            new_y.append(y[yi])
+
+    y_names = new_y_names
+    y = new_y
 
 
 tuning_widths = []
@@ -72,7 +105,7 @@ for series in range(len(y)):
     max_pos = y[series].index(max(y[series]))
     half = max(y[series]) / 2.0
     half_pos = -1
-    width = 999
+    width = 0
 
     if half in y[series]:
         found = False
@@ -92,7 +125,23 @@ for series in range(len(y)):
                 distance = (half-y[series][i-1]) / m
                 width = x[i-1]+distance - x[max_pos]
                 break
+
+    if max(y[series]) == 0: width = 0
     tuning_widths.append(width)
+
+
+f = open(filename+".sliced", 'w')
+f.write('"x-axis"')
+for i in range(len(y_names)):
+    f.write(',"%s"' % str(y_names[i]))
+f.write("\n")
+for xi in range(len(x)):
+    f.write(str(x[xi]))
+    for yi in y:
+        f.write(",%s" % str(yi[xi]))
+    f.write("\n")
+f.close()
+
 
 
 f = open(filename+".analyze", 'w')
@@ -103,7 +152,7 @@ for i in range(len(y_names)):
     f.write("%s," % best_duration[i])
     f.write("%s" % most_spikes[i])
     f.write("\n")
-    f.close()
+f.close()
 
 
 def color(i, total):
@@ -125,6 +174,13 @@ def color(i, total):
     return 'rgb('+str(col[0])+','+str(col[1])+','+str(col[2])+')'
 
 
+# Determine  the highest responding x value over all y datasets
+highest = -1
+for ds in y:
+    for yi in range(len(ds)-1):
+        if ds[yi] > 0:
+            highest = max(highest, x[yi+1])
+if highest == -1: highest = 10
 
 # Output GLE file
 f = open(filename+".gle", "w")
@@ -139,7 +195,9 @@ f.write('    xtitle "Stimulus Duration (ms)"\n')
 f.write('    ytitle "Mean Spikes per Trial"\n')
 f.write('    x2axis off\n')
 f.write('    y2axis off\n')
-f.write('    data "'+filename+'.dat"\n')
+f.write('    yaxis min 0\n')
+f.write('    xaxis min 0 max '+str(highest+int(highest*0.25))+'\n')
+f.write('    data "'+filename+'.sliced"\n')
 f.write('    xticks length -0.05\n')
 f.write('    yticks length -0.05\n')
 for i in range(len(y)):
