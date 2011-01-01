@@ -95,6 +95,7 @@ if listMode:
     y = new_y
 
 
+
 tuning_widths = []
 best_duration = []
 most_spikes = []
@@ -130,6 +131,7 @@ for series in range(len(y)):
     tuning_widths.append(width)
 
 
+if len(y_names) == 0: y_names = ["Sliced"]
 f = open(filename+".sliced", 'w')
 f.write('"x-axis"')
 for i in range(len(y_names)):
@@ -141,7 +143,6 @@ for xi in range(len(x)):
         f.write(",%s" % str(yi[xi]))
     f.write("\n")
 f.close()
-
 
 
 f = open(filename+".analyze", 'w')
