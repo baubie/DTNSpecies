@@ -5,7 +5,7 @@ import progress
 from math import ceil
 
 
-def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
+def run(id,netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
     net = netdef()
 
     if SaveVoltage:
@@ -29,9 +29,9 @@ def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,Sav
                 s.stim_dur = d 
                 s.run()
                 key = [a,d] 
-                net.savecells([["IC","soma"],["IC","dendE"]], key, spikes=SaveSpikes,voltage=SaveVoltage)
+                net.savecells([["IC","soma"]], key, spikes=SaveSpikes,voltage=SaveVoltage)
             count += 1
-    progress.update(count-start, spp)
+    progress.update(count-start, spp,id=id)
 
     r = [thisProc,net.savedparams,net.savedcells]
     return r
@@ -40,21 +40,23 @@ def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,Sav
 def C_SEARCH_RATIOS(net,a,getparams=False):
     if getparams:
         stims = [i for i in range(1,26)]
-        nmda_gmax = [i for i in range(0,21,4)]
-        nmda_beta = [i*0.1 for i in range(0,21,2)]
-        inhib_gmax = [i for i in range(0,21,5)]
+        nmda_gmax = [i*0.1*0.01 for i in range(0,21,4)]
+        nmda_beta = [i*0.1*0.0066 for i in range(0,21,2)]
+        inhib_gmax = [i*0.1*0.002 for i in range(0,21,5)]
+        mg = [i*0.5 for i in range(0,5,1)]
         param = []
         for a in nmda_gmax:
             for b in nmda_beta:
                 for c in inhib_gmax:
-                    param.append([a,b,c])
+                    for d in mg:
+                        param.append([a,b,c,d])
         return [stims, param]
 
     net.cells["MSO_ON"]["delay"] = 15
     net.cells["MSO_OFF"]["delay"] = 2
-    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.01*a[0], Beta=0.0066*a[1], mg=0.5)
-    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=0.01*a[0], Beta=0.0066*a[1], mg=0.5)
-    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.002*a[2])
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=a[0], Beta=a[1], mg=a[3])
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=a[0], Beta=a[1], mg=a[3])
+    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
     return net
 
 def C_SEARCH(net,a,getparams=False):

@@ -10,13 +10,12 @@ ShowSpikes = True
 ShowVoltage = False
 
 repeats = 10
-sim_time = 150
+sim_time = 100
 netdef = network.DTN_Coincidence
 modify = sims.C_SEARCH_RATIOS
 [stims,param] = sims.C_SEARCH_RATIOS(None,None,True)
 spike_filename = "c_ratios.dat"
 total = len(stims)*len(param)*repeats
-
 
 
 #####
@@ -26,11 +25,12 @@ total = len(stims)*len(param)*repeats
 # Setup and run simulations in parallel
 pc = neuron.h.ParallelContext()
 numProcs = int(pc.nhost())
-print "Running "+str(total)+ " simulations via "+str(numProcs)+" processes..."
+if pc.id() == 1:
+    print "Running "+str(total)+ " simulations via "+str(numProcs)+" processes..."
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,netdef,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage)
+    pc.submit(sims.run,pc.id(),netdef,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
