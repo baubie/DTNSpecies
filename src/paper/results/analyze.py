@@ -7,6 +7,14 @@ if len(sys.argv) < 2:
 
 import csv
 
+
+def unique(seq):
+    result = []
+    for a in seq:
+        if a not in result:
+            result.append(a)
+    return result
+
 # Capture raw data
 filename = sys.argv[1]
 data = csv.reader(open(filename+".dat", 'rb'), delimiter=',')
@@ -24,17 +32,80 @@ for d in data:
         for i in range(len(y_names)):
             y[i].append(float(d[i+1])) 
 
+for i in range(len(y_names)):
+    y_names[i] = eval(y_names[i])
+
+listMode = False
+numParams = 1
+
+if isinstance(y_names[0],list):
+    numParams = len(y_names[0])
+    listMode = True
+
+print "Found %d parameters" % numParams
+if (len(sys.argv) < 2 + numParams):
+    print "Error: Please specificy which parameters to use."
+    print "Example: python analyze.py file 4 1 *"
+    print "This will use the 3rd parameter as the y variable"
+
+
+if listMode:
+    y_params = [[] for i in range(numParams)]
+    y_slice = sys.argv[2:] 
+    if len(y_slice) != numParams:
+        print "Error: Require %d parameters found %d" % numParams,len(y_slice)
+        quit()
+
+    for yi in y_names:
+        for i in range(numParams): 
+            y_params[i].append(yi[i])
+    for i in range(numParams):
+        y_params[i] = unique(y_params[i])
+
+
+    new_y_names = []
+    new_y = []
+    freeparam = None
+    for i in range(numParams):
+        if y_slice[i] == "-": freeparam = i
+
+    for i in range(numParams):
+        if i != freeparam:
+            print "Parameter %d constrained" % i
+            print y_params[i][int(y_slice[i])]
+        else:
+            print "Parameter %d free" % i
+            print y_params[i]
+            new_y_names = y_params[i]
+
+    key = []
+    for i in range(len(y_names)):
+        goodparam = True
+        for j in range(numParams):
+            if j != freeparam and y_names[i][j] != y_params[j][int(y_slice[j])]:
+                goodparam = False
+        if goodparam:
+            key.append(i)
+
+    for yi in range(len(y)):
+        if yi in key:
+            new_y.append(y[yi])
+
+    y_names = new_y_names
+    y = new_y
+
 
 tuning_widths = []
 best_duration = []
 most_spikes = []
+
 for series in range(len(y)):
     best_duration.append(x[y[series].index(max(y[series]))])
     most_spikes.append(max(y[series]))
     max_pos = y[series].index(max(y[series]))
     half = max(y[series]) / 2.0
     half_pos = -1
-    width = 999
+    width = 0
 
     if half in y[series]:
         found = False
@@ -55,7 +126,22 @@ for series in range(len(y)):
                 width = x[i-1]+distance - x[max_pos]
                 break
 
+    if max(y[series]) == 0: width = 0
     tuning_widths.append(width)
+
+
+f = open(filename+".sliced", 'w')
+f.write('"x-axis"')
+for i in range(len(y_names)):
+    f.write(',"%s"' % str(y_names[i]))
+f.write("\n")
+for xi in range(len(x)):
+    f.write(str(x[xi]))
+    for yi in y:
+        f.write(",%s" % str(yi[xi]))
+    f.write("\n")
+f.close()
+
 
 
 f = open(filename+".analyze", 'w')
@@ -71,8 +157,8 @@ f.close()
 
 def color(i, total):
     points = [ [0.0, [1,0,0]],
-               [0.5, [0,0,1]],
-               [1.0, [0,0,0]],
+    [0.5, [0,0,1]],
+    [1.0, [0,0,0]],
              ]
     pos = float(i)/float(total)
     col = []
@@ -88,7 +174,13 @@ def color(i, total):
     return 'rgb('+str(col[0])+','+str(col[1])+','+str(col[2])+')'
 
 
-
+# Determine  the highest responding x value over all y datasets
+highest = -1
+for ds in y:
+    for yi in range(len(ds)-1):
+        if ds[yi] > 0:
+            highest = max(highest, x[yi+1])
+if highest == -1: highest = 10
 
 # Output GLE file
 f = open(filename+".gle", "w")
@@ -103,7 +195,9 @@ f.write('    xtitle "Stimulus Duration (ms)"\n')
 f.write('    ytitle "Mean Spikes per Trial"\n')
 f.write('    x2axis off\n')
 f.write('    y2axis off\n')
-f.write('    data "'+filename+'.dat"\n')
+f.write('    yaxis min 0\n')
+f.write('    xaxis min 0 max '+str(highest+int(highest*0.25))+'\n')
+f.write('    data "'+filename+'.sliced"\n')
 f.write('    xticks length -0.05\n')
 f.write('    yticks length -0.05\n')
 for i in range(len(y)):
@@ -129,7 +223,6 @@ f.write('    d4 line marker ftriangle msize 0.1 color rgb(0,0,0) key "Norm Width
 f.write('    key compact nobox pos br\n')
 f.write('end graph\n')
 f.close()
-
 
 # View results in QGLE
 call(["qgle", filename+".gle"])
