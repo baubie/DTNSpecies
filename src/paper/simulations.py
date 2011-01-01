@@ -37,6 +37,26 @@ def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,Sav
     return r
 
 
+def C_SEARCH_RATIOS(net,a,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,26)]
+        nmda_gmax = [i for i in range(0,21,4)]
+        nmda_beta = [i*0.1 for i in range(0,21,2)]
+        inhib_gmax = [i for i in range(0,21,5)]
+        param = []
+        for a in nmda_gmax:
+            for b in nmda_beta:
+                for c in inhib_gmax:
+                    param.append([a,b,c])
+        return [stims, param]
+
+    net.cells["MSO_ON"]["delay"] = 15
+    net.cells["MSO_OFF"]["delay"] = 2
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.01*a[0], Beta=0.0066*a[1], mg=0.5)
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=0.01*a[0], Beta=0.0066*a[1], mg=0.5)
+    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.002*a[2])
+    return net
+
 def C_SEARCH(net,a,getparams=False):
     if getparams:
         stims = [i for i in range(1,30)] + [i for i in range(30,251,10)]
