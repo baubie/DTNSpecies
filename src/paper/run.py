@@ -12,9 +12,9 @@ ShowVoltage = False
 repeats = 10
 sim_time = 100
 netdef = network.DTN_Coincidence
-modify = sims.C_SEARCH_RATIOS
+modify = sims.C_PHYSICAL
 [stims,param] = sims.C_SEARCH_RATIOS(None,None,True)
-spike_filename = "c_ratios.dat"
+spike_filename = "c_physical.dat"
 total = len(stims)*len(param)*repeats
 
 

@@ -16,6 +16,8 @@ class network(object):
         self.rec_t = neuron.h.Vector()
         self.rec_t.record(neuron.h._ref_t, sec=self.time_sec)
 
+        self.sim_amp = 0.05
+
     def recordVoltage(self):
         for pops in self.cells:
             for c in self.cells[pops]["cells"]:

@@ -23,6 +23,7 @@ def run(id,netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,
     count = 0
     for a in param: 
         net = modify(net,a)
+        s.set_amplitude(net.sim_amp)
         for d in stims*repeats:
             progress.update(count-start, spp)
             if count >= start and count < end:
@@ -35,6 +36,29 @@ def run(id,netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,
 
     r = [thisProc,net.savedparams,net.savedcells]
     return r
+
+
+
+
+def C_PHYSICAL(net,a,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,26)]
+        soma_size = [i for i in range(5,26,2)]
+        onset_length = [1]+[i for i in range(100,1001,100)]
+        amplitude = [i*0.01+0.03 for i in range(0,8,1)]
+        param = []
+        for a in soma_size:
+            for b in onset_length:
+                for c in amplitude:
+                        param.append([a,b,c])
+        return [stims, param]
+
+    net.cells["IC"]["cells"][0].sec["soma"].L=a[0]
+    net.cells["IC"]["cells"][0].sec["soma"].diam=a[0]
+    net.cells["IC"]["cells"][0].sec["dendE"].L=a[1]
+    net.sim_amp=a[2]
+    return net
+
 
 
 def C_SEARCH_RATIOS(net,a,getparams=False):
