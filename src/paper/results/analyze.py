@@ -209,7 +209,7 @@ f.write('    data "'+filename+'.sliced"\n')
 f.write('    xticks length -0.05\n')
 f.write('    yticks length -0.05\n')
 for i in range(len(y)):
-    f.write('    d'+str(int(i+1))+' line color '+color(i,len(y))+'\n')
+    f.write('    d'+str(int(i+1))+' line color '+color(i,len(y))+' smooth'+'\n')
 f.write('    key compact nobox\n')
 f.write('end graph\n')
 f.write('amove 4 0\n')
