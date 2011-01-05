@@ -5,11 +5,12 @@ import progress
 from math import ceil
 
 
-def run(id,netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
+def run(netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
     net = netdef()
 
     if SaveVoltage:
         net.recordVoltage()
+    pc = neuron.h.ParallelContext()
 
     repeats = int(repeats)
     s = Simulation(net, randomseed=200)
@@ -25,20 +26,39 @@ def run(id,netdef,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,
         net = modify(net,a)
         s.set_amplitude(net.sim_amp)
         for d in stims*repeats:
-            progress.update(count-start, spp)
             if count >= start and count < end:
+                progress.update(count-start,spp,pc.id())
                 s.stim_dur = d 
                 s.run()
                 key = [a,d] 
                 net.savecells([["IC","soma"]], key, spikes=SaveSpikes,voltage=SaveVoltage)
             count += 1
-    progress.update(count-start, spp,id=id)
+    progress.update(spp,spp,pc.id())
 
     r = [thisProc,net.savedparams,net.savedcells]
     return r
 
 
 
+def C_RECEPTORS(net,a,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,50,1)]
+        ampa_g = [i*0.001 for i in range(0,21,2)]
+        nmda_g = [i*0.001 for i in range(0,21,2)]
+        gaba_g = [i*0.001 for i in range(0,21,2)]
+        param = []
+        for a in ampa_g:
+            for b in nmda_g:
+                for c in gaba_g:
+                        param.append([a,b,c])
+        return [stims, param]
+
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyAMPA(gmax=a[0])
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyAMPA(gmax=a[0])
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=a[1],mg=1)
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=a[1],mg=1)
+    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
+    return net
 
 def C_PHYSICAL(net,a,getparams=False):
     if getparams:

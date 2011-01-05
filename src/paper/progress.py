@@ -1,6 +1,12 @@
 import sys
 
 def update(count,total,id=0,width=50):
+    if total == 0 or count % 10 > 0: return
+    percent = 100*float(count)/total
+    print "["+str(int(id))+"] "+str(percent)
+
+
+def updatebar(count,total,id=0,width=50):
     if count < 0 or count > total: return
 
     width = max([5,width]) # Minimum of 5 characters

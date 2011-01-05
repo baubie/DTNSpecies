@@ -43,25 +43,22 @@ if isinstance(y_names[0],list):
     listMode = True
 
 print "Found %d parameters" % numParams
-if (len(sys.argv) < 2 + numParams):
-    print "Error: Please specificy which parameters to use."
-    print "Example: python analyze.py file 4 1 *"
-    print "This will use the 3rd parameter as the y variable"
-
 
 if listMode:
     y_params = [[] for i in range(numParams)]
-    y_slice = sys.argv[2:] 
-    if len(y_slice) != numParams:
-        print "Error: Require %d parameters found %d" % numParams,len(y_slice)
-        quit()
-
     for yi in y_names:
         for i in range(numParams): 
             y_params[i].append(yi[i])
     for i in range(numParams):
         y_params[i] = unique(y_params[i])
 
+    y_slice = sys.argv[2:] 
+    if len(y_slice) != numParams:
+        print "Error: Require %d parameters found %d" % (numParams, len(y_slice))
+        print "Parameters: "
+        for p in y_params:
+            print p
+        quit()
 
     new_y_names = []
     new_y = []
@@ -101,7 +98,15 @@ best_duration = []
 most_spikes = []
 
 for series in range(len(y)):
-    best_duration.append(x[y[series].index(max(y[series]))])
+
+    # Calculate BD
+    first = y[series].index(max(y[series]))
+    last = first
+    for i in range(first, len(y[series])):
+        if y[series][i] == max(y[series]): last = i
+    BD = (x[first]+x[last])/2.0 # Middle of curves
+
+    best_duration.append(BD)
     most_spikes.append(max(y[series]))
     max_pos = y[series].index(max(y[series]))
     half = max(y[series]) / 2.0
@@ -157,9 +162,11 @@ f.close()
 
 
 def color(i, total):
-    points = [ [0.0, [1,0,0]],
-    [0.5, [0,0,1]],
-    [1.0, [0,0,0]],
+    points = [ [0.00, [1,0,0]],
+               [0.25, [0,1,1]],
+               [0.50, [0,0,1]],
+               [0.75, [1,0,1]],
+               [1.00, [0,0,0]],
              ]
     pos = float(i)/float(total)
     col = []

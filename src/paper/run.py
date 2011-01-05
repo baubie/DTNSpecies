@@ -12,25 +12,25 @@ ShowVoltage = False
 repeats = 10
 sim_time = 100
 netdef = network.DTN_Coincidence
-modify = sims.C_PHYSICAL
-[stims,param] = sims.C_SEARCH_RATIOS(None,None,True)
-spike_filename = "c_physical.dat"
-total = len(stims)*len(param)*repeats
+modify = sims.C_RECEPTORS
+spike_filename = "c_receptors.dat"
 
 
 #####
 # EVERY BELOW HERE SHOULD NOT NEED TO BE MODIFIED
 
+[stims,param] = modify(None,None,True)
+total = len(stims)*len(param)*repeats
 
 # Setup and run simulations in parallel
 pc = neuron.h.ParallelContext()
 numProcs = int(pc.nhost())
-if pc.id() == 1:
+if pc.id() == 0:
     print "Running "+str(total)+ " simulations via "+str(numProcs)+" processes..."
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,pc.id(),netdef,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage)
+    pc.submit(sims.run,netdef,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
