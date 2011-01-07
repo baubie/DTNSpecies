@@ -63,7 +63,7 @@ def plot_voltage(network, section, param):
     for s in range(len(network.savedcells)):
         if network.savedparams[s] == param:
             for c in network.savedcells[s][section]:
-                if haveX: plt.plot(c['rec_t'], c['rec_v'])
+                if haveX: plt.plot(c['rec_t'], c['rec_v'],label=str(param))
                 if haveX: plt.axis(xmin=0, xmax=c['rec_t'][-1], ymin=-80, ymax=40)
 
 def plot_current(network, section, current, param):
@@ -86,3 +86,6 @@ def subplot(row, col, num):
 
 def show():
     if haveX: plt.show()
+
+def legend():
+    if haveX: plt.legend()

@@ -98,7 +98,7 @@ class DTN_Coincidence(network):
         self.cells["MSO_ON"] = deepcopy(populationTemplate)
         self.cells["MSO_OFF"] = deepcopy(populationTemplate)
 
-        numIC = 2
+        numIC = 1
         self.cells["IC"]["cells"].append(cells.IC_Neuron())
 
         # DNLL GABA input
@@ -113,7 +113,7 @@ class DTN_Coincidence(network):
             neuron.h.setpointer(self.cells["DNLL"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendI"].GABAa[i])
 
         # MSO Glutamate input
-        numMSO_ON = 100
+        numMSO_ON = 1
         self.cells["MSO_ON"]["stim"] = "Poisson"
         self.cells["MSO_ON"]["type"] = "Onset"
         self.cells["MSO_ON"]["delay"] = 15
@@ -127,10 +127,10 @@ class DTN_Coincidence(network):
             neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["dendE"].NMDA[i])
 
         # MSO Glutamate input
-        numMSO_OFF = 100
+        numMSO_OFF = 1
         self.cells["MSO_OFF"]["stim"] = "Poisson"
         self.cells["MSO_OFF"]["type"] = "Offset"
-        self.cells["MSO_OFF"]["delay"] = 2
+        self.cells["MSO_OFF"]["delay"] = 1
         for i in range(numMSO_OFF):
             self.cells["MSO_OFF"]["cells"].append(cells.MSO_Neuron())
         self.cells["IC"]["cells"][0].sec["dendEOff"].insertAMPA(num=numMSO_OFF,gmax=0.005/numMSO_OFF,pos=1)

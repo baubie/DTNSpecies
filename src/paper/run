@@ -1,1 +1,1 @@
-mpiexec -np 1 `which nrniv` -mpi -python run.py
+mpiexec -np 8 `which nrniv` -mpi -python run.py

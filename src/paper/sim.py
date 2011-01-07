@@ -42,9 +42,21 @@ class Simulation(object):
                 elif self.network.cells[c]["stim"] == "IClamp":
                     for i in self.network.cells[c]["cells"]:
                         self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
-                        self.clamps[-1].amp = 0.01
-                        self.clamps[-1].dur = self.stim_dur
-                        self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                        if self.network.cells[c]["type"] == "Sustained":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = self.stim_dur
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                        if self.network.cells[c]["type"] == "Onset":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = 1
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                        if self.network.cells[c]["type"] == "Offset":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = 1
+                            self.clamps[-1].delay = self.delay+self.stim_dur+self.network.cells[c]["delay"]
 
     def run(self):
         if self.verbose: print "Initializing Simulation"
