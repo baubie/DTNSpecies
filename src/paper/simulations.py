@@ -40,7 +40,8 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
 
 def C_MEMBRANE_TC(net,a,getparams=False):
     if getparams:
-        stims = [1,3,10]
+        stims = [1,3,10,15,25]
+        stims = range(1,26,1)
         param = [0.01,0.0066,0.0056,0.0046]
         return [1,250,stims, param]
 
@@ -52,7 +53,7 @@ def C_MEMBRANE_TC(net,a,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.00, Beta=0.0066, mg=1.0)
 
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/5000.0
-    net.cells["MSO_ON"]["delay"] = 15
+    net.cells["MSO_ON"]["delay"] = 5
 
     net.cells["MSO_ON"]["stim"] = "IClamp"
     net.cells["MSO_ON"]["stimamp"] = 0.1

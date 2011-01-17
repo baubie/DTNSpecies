@@ -6,7 +6,7 @@ import netshow as ns
 
 
 # Define Paramters
-ShowSpikes = False
+ShowSpikes = True
 ShowVoltage = True
 
 netdef = network.DTN_Coincidence
