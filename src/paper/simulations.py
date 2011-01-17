@@ -22,10 +22,10 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     end = (thisProc+1)*spp
     count = 0
     for a in param: 
-        net = modify(net,a)
         s.set_amplitude(net.sim_amp)
         for d in stims*repeats:
             if count >= start and count < end:
+                net = modify(net,a,d)
                 progress.update(count-start,spp,thisProc)
                 s.stim_dur = d 
                 s.run()
@@ -38,22 +38,28 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     return r
 
 
-def C_MEMBRANE_TC(net,a,getparams=False):
+def C_NMDA_BETA_SIMPLE(net,a,stim,getparams=False):
     if getparams:
         stims = [1,3,10,15,25]
         stims = range(1,26,1)
-        param = [0.01,0.0066,0.0056,0.0046]
-        return [1,250,stims, param]
+        param = [0.0066]
+        return [1,100,stims, param]
 
-    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.025)
-    net.cells["IC"]["cells"][0].sec["dendE"].modifyAMPA(gmax=0.02)
-    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=0.08, Beta=a, mg=1.0)
+    if stim <= 1:
+        mult = 0.5*(stim)
+    else:
+        mult = 1.0
 
-    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyAMPA(gmax=0.02)
-    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.00, Beta=0.0066, mg=1.0)
+    net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=0.015, Beta=0.18)
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyAMPA(gmax=0.010*mult)
+    net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=0.010, Beta=a, mg=1.0)
+
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyAMPA(gmax=0.010*mult)
+    net.cells["IC"]["cells"][0].sec["dendEOff"].modifyNMDA(gmax=0.010, Beta=a, mg=1.0)
 
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/5000.0
-    net.cells["MSO_ON"]["delay"] = 5
+    net.cells["MSO_ON"]["delay"] = 10
+    net.cells["MSO_OFF"]["delay"] = 5
 
     net.cells["MSO_ON"]["stim"] = "IClamp"
     net.cells["MSO_ON"]["stimamp"] = 0.1
@@ -61,7 +67,9 @@ def C_MEMBRANE_TC(net,a,getparams=False):
     net.cells["MSO_OFF"]["stimamp"] = 0.1
     return net
 
-def C_RECEPTORS(net,a,getparams=False):
+
+
+def C_RECEPTORS(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,50,1)]
         ampa_g = [i*0.001 for i in range(0,21,2)]
@@ -81,7 +89,7 @@ def C_RECEPTORS(net,a,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
     return net
 
-def C_PHYSICAL(net,a,getparams=False):
+def C_PHYSICAL(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,26)]
         soma_size = [i for i in range(5,26,2)]
@@ -100,7 +108,7 @@ def C_PHYSICAL(net,a,getparams=False):
     net.sim_amp=a[2]
     return net
 
-def C_SEARCH_RATIOS(net,a,getparams=False):
+def C_SEARCH_RATIOS(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,26)]
         nmda_gmax = [i*0.1*0.01 for i in range(0,21,4)]
@@ -122,7 +130,7 @@ def C_SEARCH_RATIOS(net,a,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
     return net
 
-def C_SEARCH(net,a,getparams=False):
+def C_SEARCH(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,30)] + [i for i in range(30,251,10)]
         ondelay = [i for i in range(5,51,5)]
@@ -142,11 +150,11 @@ def C_SEARCH(net,a,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendE"].modifyAMPA(gmax=0.005*a[2])
     return net
 
-def AC_NMDA_BETA(net,a,getparams=False):
+def AC_NMDA_BETA(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(Beta=a, mg=0.5)
     return net
 
-def C_NMDA_BETA(net,a,getparams=False):
+def C_NMDA_BETA(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,25)] + [i for i in range(25,251,5)]
         param = [i*0.002 for i in range(1,22,1)]

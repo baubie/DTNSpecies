@@ -1,1 +1,5 @@
-mpiexec -np 8 `which nrniv` -mpi -python run.py
+P="${1:-8}"
+echo "Running ${P} processes"
+CMD="mpiexec -np ${P} `which nrniv` -mpi -python run.py"
+echo $CMD
+$CMD

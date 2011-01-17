@@ -246,9 +246,9 @@ class IC_Soma(ModelBase):
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90
-        self(0.5).hh2.gnabar = 0.100
+        self(0.5).hh2.gnabar = 0.1
         self(0.5).hh2.gkbar = 0.005
-        self(0.5).hh2.vtraub = -40
+        self(0.5).hh2.vtraub = -42
 
         self.L = 13
         self.diam = 13

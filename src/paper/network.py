@@ -102,7 +102,7 @@ class DTN_Coincidence(network):
         self.cells["IC"]["cells"].append(cells.IC_Neuron())
 
         # DNLL GABA input
-        numDNLL = 50
+        numDNLL = 5
         self.cells["DNLL"]["stim"] = "Poisson"
         self.cells["DNLL"]["delay"] = 0
         self.cells["DNLL"]["mindur"] = 1

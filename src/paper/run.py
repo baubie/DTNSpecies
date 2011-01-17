@@ -6,19 +6,19 @@ import netshow as ns
 
 
 # Define Paramters
-ShowSpikes = True
+ShowSpikes = False
 ShowVoltage = True
 
 netdef = network.DTN_Coincidence
-modify = sims.C_MEMBRANE_TC
+modify = sims.C_NMDA_BETA_SIMPLE
 spike_filename = "c_membrane_tc.dat"
-tosave = [["IC","soma"]]
+tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 
 
 #####
 # EVERY BELOW HERE SHOULD NOT NEED TO BE MODIFIED
 
-[repeats,sim_time,stims,param] = modify(None,None,True)
+[repeats,sim_time,stims,param] = modify(None,None,None,True)
 total = len(stims)*len(param)*repeats
 
 # Setup and run simulations in parallel
@@ -33,7 +33,7 @@ for i in range(numProcs):
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
-
+print "Simulation complete.  Post processing."
 
 # Combine all of the results together
 savedparams = []
@@ -62,11 +62,12 @@ if ShowVoltage:
     count = 0
     for d in stims:
         count += 1
-        #ns.subplot(len(param),len(stims),count)
         ns.subplot(len(stims),1,count)
         for a in param:
             key = [a,d]
             ns.plot_voltage(net, "IC-soma", key)
+            ns.plot_voltage(net, "MSO_ON-soma", key)
+            ns.plot_voltage(net, "MSO_OFF-soma", key)
     ns.legend()
     ns.show()
 
