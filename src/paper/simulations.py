@@ -40,17 +40,22 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
 
 def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,26,1)]
+        stims = [i for i in range(1,17,1)]
         param = [0.0066]
         return [1,100,stims,param]
 
-    if stim <= 1:
-        mult = 1.0*(stim)
+    if stim <= 2:
+        mult = 0.375*(stim)
+        mult = 1.0
     else:
         mult = 1.0
 
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.003*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.005*2*mult,mg=1.0)
+
     net.cells["MSO_ON"]["delay"] = 10
-    net.cells["MSO_OFF"]["delay"] = 5
+    net.cells["MSO_OFF"]["delay"] = 4
 
     net.cells["MSO_ON"]["stim"] = "IClamp"
     net.cells["MSO_ON"]["stimamp"] = 0.1

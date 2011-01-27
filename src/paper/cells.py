@@ -35,3 +35,7 @@ class IC_Neuron(Neuron):
         self.sec["dendE"].connect(self.sec["soma"])
         self.sec["dendEOff"].connect(self.sec["soma"])
 
+class IC_NeuronSoma(Neuron):
+    def __init__(self):
+        Neuron.__init__(self)
+        self.sec["soma"] = models.IC_Soma()

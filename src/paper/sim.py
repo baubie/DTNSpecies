@@ -62,7 +62,7 @@ class Simulation(object):
         if self.verbose: print "Initializing Simulation"
         self.set_stim()
         neuron.h.dt = self.dt
-        neuron.h.celsius = 37
+        neuron.h.celsius = 36
         neuron.h.finitialize(-60)
         neuron.h.load_file('parcom.hoc')
         neuron.init()

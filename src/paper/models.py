@@ -240,14 +240,13 @@ class IC_Soma(ModelBase):
         self.insert('pas')
 
         self.cm=1.0
-        self.Ra = 35.4
         self.E = -65
         self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90
         self(0.5).hh2.gnabar = 0.1
-        self(0.5).hh2.gkbar = 0.005
+        self(0.5).hh2.gkbar = 0.008
         self(0.5).hh2.vtraub = -42
 
         self.L = 13

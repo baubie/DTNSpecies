@@ -9,7 +9,7 @@ import netshow as ns
 ShowSpikes = True
 ShowVoltage = True
 
-netdef = network.DTN_Coincidence
+netdef = network.DTN_CoincidenceSimple
 modify = sims.C_DEFAULT
 spike_filename = "c_default.dat"
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
