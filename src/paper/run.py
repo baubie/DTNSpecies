@@ -7,7 +7,7 @@ import netshow as ns
 
 # Define Paramters
 ShowSpikes = True
-ShowVoltage = True
+ShowVoltage = False
 
 netdef = network.DTN_CoincidenceSimple
 modify = sims.C_DEFAULT

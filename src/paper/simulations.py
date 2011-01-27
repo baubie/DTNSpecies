@@ -42,7 +42,7 @@ def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,17,1)]
         param = [0.0066]
-        return [1,100,stims,param]
+        return [25,100,stims,param]
 
     if stim <= 2:
         mult = 0.375*(stim)
