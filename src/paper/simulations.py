@@ -15,7 +15,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     s = Simulation(net, randomseed=200)
     s.verbose = False
     s.sim_time = sim_time
-    s.dt = 0.025
+    s.dt = 0.050
     total = len(stims)*len(param)*repeats
     spp = ceil(float(total)/procs)
     start = thisProc*spp
@@ -41,8 +41,8 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
 def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,17,1)]
-        param = [0.0066]
-        return [25,100,stims,param]
+        param = [1]
+        return [1,100,stims,param]
 
     if stim <= 2:
         mult = 0.375*(stim)

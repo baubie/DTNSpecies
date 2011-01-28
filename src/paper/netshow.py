@@ -66,6 +66,24 @@ def plot_voltage(network, section, param):
                 if haveX: plt.plot(c['rec_t'], c['rec_v'],label=str(param))
                 if haveX: plt.axis(xmin=0, xmax=c['rec_t'][-1], ymin=-80, ymax=40)
 
+def save_voltage(network, sections, param, filename):
+    f = open(filename, 'w')
+    f.write('"time"')
+    for s in sections:
+        f.write(',"'+s+'"')
+    f.write("\n")
+    rec_t = network.savedcells[0][sections[0]][0]['rec_t']
+
+    for x in range(len(rec_t)):
+        f.write(str(rec_t[x]))
+        for s in range(len(network.savedcells)):
+            if network.savedparams[s] == param:
+                for section in sections:
+                    # We are only saving the FIRST neuron here
+                    f.write(','+str(network.savedcells[s][section][0]['rec_v'][x]))
+        f.write("\n")
+    f.close()
+
 def plot_current(network, section, current, param):
     count = 0
     for s in range(len(network.savedcells)):

@@ -6,12 +6,14 @@ import netshow as ns
 
 
 # Define Paramters
-ShowSpikes = True
+ShowSpikes = False
 ShowVoltage = False
+SaveVoltage = True
 
 netdef = network.DTN_CoincidenceSimple
 modify = sims.C_DEFAULT
-spike_filename = "c_default.dat"
+spike_filename = "c_default_spikes.dat"
+voltage_filename = "c_default_voltage"
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 
 
@@ -32,7 +34,7 @@ if pc.id() == 0:
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage)
+    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,ShowSpikes,ShowVoltage or SaveVoltage)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
@@ -73,6 +75,12 @@ if ShowVoltage:
             ns.plot_voltage(net, "MSO_OFF-soma", key)
     ns.legend()
     ns.show()
+
+if SaveVoltage:
+    for d in stims:
+        for a in param:
+            key = [a,d]
+            ns.save_voltage(net, ["IC-soma", "MSO_ON-soma", "MSO_OFF-soma"], key, voltage_filename+"_s_"+str(d)+"_a_"+str(a)+".dat")
 
 neuron.h.quit()
 
