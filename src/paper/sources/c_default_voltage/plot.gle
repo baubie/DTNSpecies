@@ -1,0 +1,108 @@
+size 3 6 
+set font ss
+set hei 0.12
+set lwidth 0.01
+
+sub plot file$ dur pos height yt$
+    amove 0 pos
+    begin graph
+        size 2 height
+        xaxis off
+        xtitle "" 
+        ytitle ""
+        x2axis off
+        y2axis off
+        data file$
+        xticks length -0.05
+        yticks length 0.03
+        xaxis min -1 max 35
+        yaxis dticks 50 nofirst nolast
+        yaxis min -100 max 50
+        ynames ""
+        let d1 = x-10, d1
+        let d2 = x-10, d2
+        let d3 = x-10, d3
+        d1 line lwidth 0.01 color rgb(0,0,0)
+        d2 line lwidth 0.01 color rgb(0.4,0.4,0.4)
+        d3 line lwidth 0.01 color rgb(0.6,0.6,0.6)
+        key off
+    end graph
+    set hei 0.1
+    amove xg(30) yg(-20)
+    write yt$
+    set hei 0.12
+    set lwidth 0.05
+    amove xg(0) yg(42)
+    aline xg(dur) yg(42)
+    set lwidth 0.01
+end sub
+
+sub plotx file$ dur pos height yt$
+    amove 0 pos
+    begin graph
+        size 2 height
+        xtitle "Time (ms)"
+        ytitle ""
+        x2axis off
+        y2axis off
+        data file$
+        xticks length -0.03
+        yticks length 0.03
+        xaxis min -1 max 35
+        yaxis dticks 50 nofirst nolast
+        yaxis min -100 max 50
+        ynames ""
+        let d1 = x-10, d1
+        let d2 = x-10, d2
+        let d3 = x-10, d3
+        d1 line lwidth 0.01 color rgb(0,0,0) key "DTN"
+        d2 line lwidth 0.01 color rgb(0.4,0.4,0.4) key "Onset"
+        d3 line lwidth 0.01 color rgb(0.6,0.6,0.6)  key "Offset"
+        key off
+    end graph
+    set hei 0.1
+    write yt$
+    set hei 0.12
+    set lwidth 0.05
+    amove xg(0) yg(42)
+    aline xg(dur) yg(42)
+    set lwidth 0.01
+end sub
+
+height = 0.4
+pos = 6.0 - height
+
+plot "c_default_voltage_s_1_a_1.dat" 1 pos height "1 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_2_a_1.dat" 2 pos height "2 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_3_a_1.dat" 3 pos height "3 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_4_a_1.dat" 4 pos height "4 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_5_a_1.dat" 5 pos height "5 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_6_a_1.dat" 6 pos height "6 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_7_a_1.dat" 7 pos height "7 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_8_a_1.dat" 8 pos height "8 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_9_a_1.dat" 9 pos height "9 ms"
+pos = pos - height*0.8
+plot "c_default_voltage_s_10_a_1.dat" 10 pos height "10 ms"
+pos = pos - height*0.8
+plotx "c_default_voltage_s_11_a_1.dat" 11 pos height "11 ms"
+pos = pos - height*0.8
+
+begin key
+    nobox
+    offset -0.55 3.2
+    hei 0.095
+    compact
+    text "DTN" color rgb(0,0,0) lstyle 0
+    separator
+    text "Onset" color rgb(0.4,0.4,0.4) lstyle 0
+    separator
+    text "Offset" color rgb(0.6,0.6,0.6) lstyle 0
+end key
