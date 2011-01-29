@@ -42,7 +42,7 @@ def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,17,1)]
         param = [1]
-        return [1,100,stims,param]
+        return [10,100,stims,param]
 
     if stim <= 2:
         mult = 0.375*(stim)
@@ -53,9 +53,11 @@ def C_DEFAULT(net,a,stim,getparams=False):
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.003*2*mult)
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.005*2*mult,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035)
 
     net.cells["MSO_ON"]["delay"] = 10
-    net.cells["MSO_OFF"]["delay"] = 4
+    net.cells["MSO_OFF"]["delay"] = 5
+    net.cells["DNLL"]["delay"] = 1
 
     net.cells["MSO_ON"]["stim"] = "IClamp"
     net.cells["MSO_ON"]["stimamp"] = 0.1

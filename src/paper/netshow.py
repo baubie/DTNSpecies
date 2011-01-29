@@ -84,6 +84,22 @@ def save_voltage(network, sections, param, filename):
         f.write("\n")
     f.close()
 
+def save_spikes(network, section, param, filename, trials, diff=1):
+    f = open(filename, 'w')
+
+    count = {}
+    for s in range(len(network.savedcells)): 
+        if network.savedparams[s][0] == param:
+            for c in network.savedcells[s][section]:
+                dur = network.savedparams[s][1]
+                if dur not in count.keys(): count[dur] = 0
+                for spike in c['rec_s']:
+                    out = str(spike)+","+str(dur+(float(count[dur])/trials)*diff*0.6+diff*0.3)
+                    f.write(out+"\n")
+                count[dur] += 1
+    f.close()
+
+
 def plot_current(network, section, current, param):
     count = 0
     for s in range(len(network.savedcells)):
