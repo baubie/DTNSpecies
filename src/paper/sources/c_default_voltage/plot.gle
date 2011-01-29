@@ -1,4 +1,4 @@
-size 2 4
+size 3 6
 set font ss
 set hei 0.12
 set lwidth 0.01
@@ -6,7 +6,7 @@ set lwidth 0.01
 sub plot file$ dur pos height
     amove 0 pos
     begin graph
-        size 2 height
+        size 3 height
         xaxis off
         xtitle "" 
         ytitle ""
@@ -32,7 +32,7 @@ end sub
 sub plotx file$ dur pos height
     amove 0 pos
     begin graph
-        size 2 height
+        size 3 height
         xtitle "Time (ms)"
         ytitle ""
         x2axis off
@@ -55,8 +55,8 @@ sub plotx file$ dur pos height
 end sub
 
 sub writelabel t$ offset
-    set hei 0.1
-    amove xg(29.5+offset) yg(-20)
+    set hei 0.12
+    amove xg(30.75+offset) yg(-20)
     write t$
     set hei 0.12
     set lwidth 0.05
@@ -65,8 +65,8 @@ sub writelabel t$ offset
     set lwidth 0.01
 end sub
 
-height = 0.4
-pos = 3.9 - height
+height = 0.6
+pos = 5.9 - height
 
 plot "c_default_voltage_s_1_a_1.dat" 1 pos height
 writelabel "1 ms" 0
@@ -104,12 +104,12 @@ pos = pos - height*0.8
 
 begin key
     nobox
-    offset -0.09 3.20
-    hei 0.095
+    offset -0.09 4.85
+    hei 0.12
     compact
-    text "DTN" color rgb(0,0,0) lstyle 0
+    text "Offset" color rgb(0.6,0.6,0.6) lstyle 0
     separator
     text "Onset" color rgb(0.4,0.4,0.4) lstyle 0
     separator
-    text "Offset" color rgb(0.6,0.6,0.6) lstyle 0
+    text "DTN" color rgb(0,0,0) lstyle 0
 end key
