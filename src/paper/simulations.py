@@ -12,7 +12,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
         net.recordVoltage()
 
     repeats = int(repeats)
-    s = Simulation(net, randomseed=200)
+    s = Simulation(net, randomseed=100)
     s.verbose = False
     s.sim_time = sim_time
     s.dt = 0.050
