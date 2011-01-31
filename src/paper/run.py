@@ -8,14 +8,18 @@ import netshow as ns
 # Define Paramters
 ShowMean = False
 ShowVoltage = False
-SaveVoltage = False
-SaveSpikes = True
 ShowSpikes = False
+
+SaveVoltage = False
+SaveSpikes = False
+SaveFSL = True
+SaveMean = True
 
 netdef = network.DTN_CoincidenceSimple
 modify = sims.C_DEFAULT
-mean_spike_filename = "c_default_mean.dat"
+mean_spike_filename = "c_default_mean"
 spike_filename = "c_default_spikes"
+fsl_filename = "c_default_fsl"
 voltage_filename = "c_default_voltage"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
@@ -38,7 +42,7 @@ if pc.id() == 0:
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean,ShowVoltage or SaveVoltage)
+    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean or SaveMean or SaveFSL,ShowVoltage or SaveVoltage)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
@@ -62,13 +66,19 @@ net.savedcells = savedcells
 
 
 # Plot the mean number of spikes
-if ShowSpikes:
-    ns.plot_mean_spikes(net, "IC-soma", mean_spike_filename)
-    ns.show()  # Comment out to just save the results to file
+if ShowMean:
+    ns.plot_mean_spikes(net, "IC-soma")
+    ns.show()
+
+if SaveMean:
+    ns.save_mean_spikes(net, "IC-soma", param, mean_spike_filename+".dat")
 
 if SaveSpikes:
     for a in param:
         ns.save_spikes(net, "IC-soma", a, spike_filename+"_"+str(a)+".dat", repeats)
+
+if SaveFSL:
+    ns.save_fsl(net, "IC-soma", param, fsl_filename+".dat", repeats)
 
 # Plot the voltage traces
 if ShowVoltage:
