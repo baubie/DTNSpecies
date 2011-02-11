@@ -46,7 +46,7 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
     if stim <= 2:
         mult = 0.375*(stim)
-        mult = 1.0
+        #mult = 1.0
     else:
         mult = 1.0
 

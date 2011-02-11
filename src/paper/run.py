@@ -12,7 +12,7 @@ ShowSpikes = False
 
 SaveVoltage = False
 SaveSpikes = False
-SaveFSL = True
+SaveFSL = False
 SaveMean = True
 
 netdef = network.DTN_CoincidenceSimple
