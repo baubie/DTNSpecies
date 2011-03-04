@@ -31,7 +31,7 @@ class network(object):
         for n in names:
             population = []
             for c in self.cells[n[0]]["cells"]:
-                cell = {"rec_v": [], "rec_t": [], "rec_s": [], "rec_AMPAi": [], "rec_NMDAi": [], "rec_GABAai": []}
+                cell = {"rec_v": [], "rec_t": [], "rec_s": [], "rec_AMPAg": [], "rec_NMDAg": [], "rec_GABAag": [], "rec_AMPAi": [], "rec_NMDAi": [], "rec_GABAai": []}
                 if current:
                     cell["rec_NMDAi"] = list(c.sec[n[1]].NMDAi())
                     cell["rec_AMPAi"] = list(c.sec[n[1]].AMPAi())
@@ -160,7 +160,7 @@ class DTN_CoincidenceSimple(network):
         self.cells["DNLL"]["mindur"] = 1
         for i in range(numDNLL):
             self.cells["DNLL"]["cells"].append(cells.DNLL_Neuron())
-        self.cells["IC"]["cells"][0].sec["soma"].insertGABAa(num=numDNLL,gmax=0.0035/numDNLL,pos=0.5)
+        self.cells["IC"]["cells"][0].sec["soma"].insertGABAa(recConductance=True,num=numDNLL,gmax=0.0035/numDNLL,pos=0.5)
         for i in range(numDNLL):
             neuron.h.setpointer(self.cells["DNLL"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["soma"].GABAa[i])
 
@@ -171,8 +171,8 @@ class DTN_CoincidenceSimple(network):
         self.cells["MSO_ON"]["delay"] = 15
         for i in range(numMSO_ON):
             self.cells["MSO_ON"]["cells"].append(cells.MSO_Neuron())
-        self.cells["IC"]["cells"][0].sec["soma"].insertAMPA(num=numMSO_ON,gmax=0.003/numMSO_ON,pos=0.5)
-        self.cells["IC"]["cells"][0].sec["soma"].insertNMDA(num=numMSO_ON,gmax=0.005/numMSO_ON,pos=0.5)
+        self.cells["IC"]["cells"][0].sec["soma"].insertAMPA(recConductance=True,num=numMSO_ON,gmax=0.003/numMSO_ON,pos=0.5)
+        self.cells["IC"]["cells"][0].sec["soma"].insertNMDA(recConductance=True,num=numMSO_ON,gmax=0.005/numMSO_ON,pos=0.5)
 
         for i in range(numMSO_ON):
             neuron.h.setpointer(self.cells["MSO_ON"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["soma"].AMPA[i])
@@ -185,8 +185,8 @@ class DTN_CoincidenceSimple(network):
         self.cells["MSO_OFF"]["delay"] = 1
         for i in range(numMSO_OFF):
             self.cells["MSO_OFF"]["cells"].append(cells.MSO_Neuron())
-        self.cells["IC"]["cells"][0].sec["soma"].insertAMPA(num=numMSO_OFF,gmax=0.003/numMSO_OFF,pos=0.5)
-        self.cells["IC"]["cells"][0].sec["soma"].insertNMDA(num=numMSO_OFF,gmax=0.005/numMSO_OFF,pos=0.5)
+        self.cells["IC"]["cells"][0].sec["soma"].insertAMPA(recConductance=True,num=numMSO_OFF,gmax=0.003/numMSO_OFF,pos=0.5)
+        self.cells["IC"]["cells"][0].sec["soma"].insertNMDA(recConductance=True,num=numMSO_OFF,gmax=0.005/numMSO_OFF,pos=0.5)
         for i in range(numMSO_OFF):
             neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["soma"].AMPA[i+numMSO_ON])
             neuron.h.setpointer(self.cells["MSO_OFF"]["cells"][i].sec["soma"](0.5)._ref_v, 'pre', self.cells["IC"]["cells"][0].sec["soma"].NMDA[i+numMSO_ON])

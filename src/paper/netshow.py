@@ -193,7 +193,6 @@ def save_fsl(network, section, param, filename, trials):
         f.write("\n")
     f.close()
 
-
 def plot_current(network, section, current, param):
     count = 0
     for s in range(len(network.savedcells)):

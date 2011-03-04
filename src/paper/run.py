@@ -9,18 +9,20 @@ import netshow as ns
 ShowMean = False
 ShowVoltage = False
 ShowSpikes = False
+ShowConductance = True
 
 SaveVoltage = False
 SaveSpikes = False
 SaveFSL = False
 SaveMean = True
+SaveConductance = True
 
 netdef = network.DTN_CoincidenceSimple
-modify = sims.C_DEFAULT
-mean_spike_filename = "c_default_mean"
-spike_filename = "c_default_spikes"
-fsl_filename = "c_default_fsl"
-voltage_filename = "c_default_voltage"
+modify = sims.C_NMDA_SIMPLE
+mean_spike_filename = "c_nmda_mean"
+spike_filename = "c_nmda_spikes"
+fsl_filename = "c_nmda_fsl"
+voltage_filename = "c_nmda_voltage"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 
@@ -42,7 +44,7 @@ if pc.id() == 0:
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean or SaveMean or SaveFSL,ShowVoltage or SaveVoltage)
+    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean or SaveMean or SaveFSL,ShowVoltage or SaveVoltage,SaveConductance or ShowConductance)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
@@ -93,6 +95,19 @@ if ShowVoltage:
             ns.plot_voltage(net, "MSO_OFF-soma", key)
     ns.legend()
     ns.show()
+
+# Plot the condutance
+if ShowConductance:
+    count = 0
+    for d in stims:
+        count += 1
+        ns.subplot(len(stims),1,count)
+        for a in param:
+            key = [a,d]
+            ns.plot_conductance(net, "IC-soma", "NMDA", key)
+    ns.legend()
+    ns.show()
+
 
 if SaveVoltage:
     for d in stims:

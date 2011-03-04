@@ -5,7 +5,7 @@ import progress
 from math import ceil
 
 
-def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage):
+def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage,SaveConductance):
     net = netdef()
 
     if SaveVoltage:
@@ -30,7 +30,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
                 s.stim_dur = d 
                 s.run()
                 key = [a,d] 
-                net.savecells(tosave, key, spikes=SaveSpikes,voltage=SaveVoltage)
+                net.savecells(tosave, key, spikes=SaveSpikes,voltage=SaveVoltage,conductance=SaveConductance)
             count += 1
     progress.update(spp,spp,thisProc)
 
@@ -40,9 +40,9 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
 
 def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,17,1)]
+        stims = [i for i in range(1,25,1)]
         param = [1]
-        return [20,100,stims,param]
+        return [1,100,stims,param]
 
     if stim <= 2:
         mult = 0.375*(stim)
@@ -66,8 +66,44 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
     return net
 
+def C_NMDA_SIMPLE(net,a,stim,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,17,1)]
+        param = [0.0016,0.0033,0.0066,0.0132,0.0264,0.0528]
+        param = [0.001,0.0033,0.0066,1]
+        return [20,100,stims,param]
 
-def C_NMDA_BETA_SIMPLE(net,a,stim,getparams=False):
+    if stim <= 2:
+        mult = 0.375*(stim)
+        #mult = 1.0
+    else:
+        mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.003*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.005*2*mult*0.0066/a,Beta=a, mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035)
+
+    net.cells["MSO_ON"]["delay"] = 10
+    net.cells["MSO_OFF"]["delay"] = 5
+    net.cells["DNLL"]["delay"] = 1
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
+
+
+
+
+
+
+
+
+
+def C_NMDA_BETA_OLD(net,a,stim,getparams=False):
     if getparams:
         stims = [1,3,10,15,25]
         stims = range(1,26,1)
@@ -95,8 +131,6 @@ def C_NMDA_BETA_SIMPLE(net,a,stim,getparams=False):
     net.cells["MSO_OFF"]["stimamp"] = 0.1
     return net
 
-
-
 def C_RECEPTORS(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,50,1)]
@@ -117,8 +151,6 @@ def C_RECEPTORS(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
     return net
 
-
-
 def C_PHYSICAL(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,26)]
@@ -137,8 +169,6 @@ def C_PHYSICAL(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendE"].L=a[1]
     net.sim_amp=a[2]
     return net
-
-
 
 def C_SEARCH_RATIOS(net,a,stim,getparams=False):
     if getparams:
@@ -161,8 +191,6 @@ def C_SEARCH_RATIOS(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["dendE"].modifyNMDA(gmax=a[0], Beta=a[1], mg=a[3])
     net.cells["IC"]["cells"][0].sec["dendI"].modifyGABAa(gmax=a[2])
     return net
-
-
 
 def C_SEARCH(net,a,stim,getparams=False):
     if getparams:
