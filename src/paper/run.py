@@ -6,16 +6,16 @@ import netshow as ns
 
 
 # Define Paramters
-ShowMean = False
+ShowMean = True
 ShowVoltage = False
 ShowSpikes = False
-ShowConductance = True
+ShowConductance = False
 
 SaveVoltage = False
 SaveSpikes = False
 SaveFSL = False
 SaveMean = True
-SaveConductance = True
+SaveConductance = False
 
 netdef = network.DTN_CoincidenceSimple
 modify = sims.C_NMDA_SIMPLE
@@ -25,6 +25,7 @@ fsl_filename = "c_nmda_fsl"
 voltage_filename = "c_nmda_voltage"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
+
 
 
 

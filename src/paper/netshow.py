@@ -200,12 +200,13 @@ def plot_current(network, section, current, param):
             for c in network.savedcells[s][section]:
                 if haveX: plt.plot(c['rec_t'], c['rec_'+current+'i'])
 
+
 def plot_conductance(network, section, current, param):
     count = 0
     for s in range(len(network.savedcells)):
         if network.savedparams[s] == param:
             for c in network.savedcells[s][section]:
-                if haveX: plt.plot(c['rec_t'], c['rec_'+current+'g'])
+                if haveX: plt.plot(c['rec_t'], c['rec_'+current+'g'],label=str(param))
 
 
 def subplot(row, col, num):
