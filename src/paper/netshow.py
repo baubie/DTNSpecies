@@ -54,21 +54,32 @@ def plot_voltage(network, section, param):
                 if haveX: plt.plot(c['rec_t'], c['rec_v'],label=str(param))
                 if haveX: plt.axis(xmin=0, xmax=c['rec_t'][-1], ymin=-80, ymax=40)
 
+def list_to_string(l):
+    r = ""
+    if type(l).__name__ == 'list':
+        r  = str(l[0])
+        for a in range(1,len(l)):
+            r += "_"+str(l[a])
+    else:
+        r = str(l)
+
+    return r
+
 def save_mean_spikes(network, section, param, filename):
     f = open(filename, 'w')
     
     mean = {}
     stim = []
     for a in param:
-        mean[a] = {}
+        mean[list_to_string(a)] = {}
     for a in param:
         for s in range(len(network.savedcells)): 
             if network.savedparams[s][0] == a:
                 for c in network.savedcells[s][section]:
                     dur = network.savedparams[s][1]
                     if dur not in stim: stim.append(dur)
-                    if dur not in mean[a].keys(): mean[a][dur] = []
-                    mean[a][dur].append(len(c['rec_s']))
+                    if dur not in mean[list_to_string(a)].keys(): mean[list_to_string(a)][dur] = []
+                    mean[list_to_string(a)][dur].append(len(c['rec_s']))
 
     mean_sd = deepcopy(mean)
 
@@ -96,7 +107,7 @@ def save_mean_spikes(network, section, param, filename):
     stim.sort()
     f.write('"Duration"')
     for a in param:
-        f.write(',"'+str(a)+'",""')
+        f.write(',"'+list_to_string(a)+'",""')
     f.write("\n")
     for s in range(len(stim)):
         f.write(str(stim[s]))

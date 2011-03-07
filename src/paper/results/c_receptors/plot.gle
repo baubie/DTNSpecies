@@ -1,0 +1,31 @@
+height = 5
+width = 5
+space = 1
+
+size 5*width+4*space 5*height+4*space
+
+set hei 0.2
+sub draw_graph dataset$ d1$ e1$ d2$ e2$ d3$ e3$ d4$ e4$ d5$ e5$ x y title$
+    amove 5*width+4*space-x*width 5*height+4*space-y*height
+    begin graph
+        size width height
+        title title$
+        data "c_receptors_mean.dat" d1=c1,c\expr{d1$} d2=c1,c\expr{e1$} d3=c1,c\expr{d2$} d4=c1,c\expr{e2$} d5=c1,c\expr{d3$} d6=c1,c\expr{e3$} d7=c1,c\expr{d4$} d8=c1,c\expr{e4$} d9=c1,c\expr{d5$} d10=c1,c\expr{e5$}
+        d1 line color blue
+        d3 line color red
+        d5 line color green
+        d7 line color purple
+        d9 line color black
+        key off
+    end graph
+end sub
+
+for AMPA = 0 to 4
+    for NMDA = 0 to 4
+        a = 10*(4*AMPA+NMDA)+2
+        draw_graph dataset$ "\expr{a}" "\expr{a+1}" "\expr{a+2}" "\expr{a+3}" "\expr{a+4}" "\expr{a+5}" "\expr{a+6}" "\expr{a+7}" "\expr{a+8}" "\expr{a+9}" AMPA NMDA "\expr{a}"
+    next NMDA
+next AMPA
+
+
+
