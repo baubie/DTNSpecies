@@ -97,16 +97,16 @@ def C_NMDA_SIMPLE(net,a,stim,getparams=False):
 
 def C_RECEPTORS_SIMPLE(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,101,1)];
-        AMPAamp = [0,0.001,0.003,0.005,0.007]
-        NMDAamp = [0,0.0025,0.005,0.0075,0.01,0.015]
+        stims = [i for i in range(1,50,1)]+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        AMPAamp = [0,0.001,0.003,0.005,0.007,0.009]
+        NMDAamp = [0,0.004,0.008,0.012,0.016,0.020]
         NMDAbeta = [0.0016,0.0033,0.0066,0.0099]
         param = []
         for a in AMPAamp:
             for b in NMDAamp:
                 for c in NMDAbeta:
                     param.append([a,b,c])
-        return [25,300,stims,param]
+        return [20,400,stims,param]
 
     if stim <= 25:
         mult = 0.375*(stim)

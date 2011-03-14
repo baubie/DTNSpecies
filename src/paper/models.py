@@ -241,7 +241,7 @@ class IC_Soma(ModelBase):
 
         self.cm=1.0
         self.E = -65
-        self(0.5).pas.g = 1.0/5000.0 # tau = 2 ms
+        self(0.5).pas.g = 1.0/5000.0 # tau = 5 ms
         self(0.5).pas.e = self.E
         self(0.5).ena = 50
         self(0.5).ek = -90

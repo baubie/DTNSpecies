@@ -11,18 +11,19 @@ ShowVoltage = False
 ShowSpikes = False
 ShowConductance = False
 
-SaveVoltage = False
-SaveSpikes = False
-SaveFSL = False
+SaveVoltage = True
+SaveSpikes = True
+SaveFSL = True
 SaveMean = True
 SaveConductance = False
 
 netdef = network.DTN_CoincidenceSimple
-modify = sims.C_RECEPTORS_SIMPLE
-mean_spike_filename = "c_receptors_mean"
-spike_filename = "c_receptors_spikes"
-fsl_filename = "c_nmda_fsl"
-voltage_filename = "c_nmda_voltage"
+modify = sims.C_DEFAULT
+
+mean_spike_filename = "c_default_mean"
+fsl_filename = "c_default_fsl"
+spike_filename = "c_default_spikes"
+voltage_filename = "c_default_voltage"
 
 #modify = sims.C_DEFAULT
 #mean_spike_filename = "c_mean"

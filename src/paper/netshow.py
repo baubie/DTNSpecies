@@ -71,7 +71,7 @@ def save_mean_spikes(network, section, param, filename):
     mean = {}
     stim = []
     for a in param:
-        mean[list_to_string(a)] = {}
+        mean[list_to_string(a)] = {} 
     for a in param:
         for s in range(len(network.savedcells)): 
             if network.savedparams[s][0] == a:
@@ -111,10 +111,10 @@ def save_mean_spikes(network, section, param, filename):
     f.write("\n")
     for s in range(len(stim)):
         f.write(str(stim[s]))
-        for a in mean:
-            if mean[a][stim[s]] != []: f.write(","+str(mean[a][stim[s]]))
+        for a in param:
+            if mean[list_to_string(a)][stim[s]] != []: f.write(","+str(mean[list_to_string(a)][stim[s]]))
             else: f.write(",-")
-            f.write(","+str(mean_sd[a][stim[s]]))
+            f.write(","+str(mean_sd[list_to_string(a)][stim[s]]))
         f.write("\n")
     f.close()
 
@@ -157,15 +157,15 @@ def save_fsl(network, section, param, filename, trials):
     fsl = {}
     stim = []
     for a in param:
-        fsl[a] = {}
+        fsl[list_to_string(a)] = {}
     for a in param:
         for s in range(len(network.savedcells)): 
             if network.savedparams[s][0] == a:
                 for c in network.savedcells[s][section]:
                     dur = network.savedparams[s][1]
                     if dur not in stim: stim.append(dur)
-                    if dur not in fsl[a].keys(): fsl[a][dur] = []
-                    if len(c['rec_s']) > 0: fsl[a][dur].append(c['rec_s'][0])
+                    if dur not in fsl[list_to_string(a)].keys(): fsl[list_to_string(a)][dur] = []
+                    if len(c['rec_s']) > 0: fsl[list_to_string(a)][dur].append(c['rec_s'][0])
 
     fsl_sd = deepcopy(fsl)
 
@@ -197,10 +197,10 @@ def save_fsl(network, section, param, filename, trials):
     f.write("\n")
     for s in range(len(stim)):
         f.write(str(stim[s]))
-        for a in fsl:
-            if fsl[a][stim[s]] != []: f.write(","+str(fsl[a][stim[s]]))
+        for a in param:
+            if fsl[list_to_string(a)][stim[s]] != []: f.write(","+str(fsl[list_to_string(a)][stim[s]]))
             else: f.write(",-")
-            f.write(","+str(fsl_sd[a][stim[s]]))
+            f.write(","+str(fsl_sd[list_to_string(a)][stim[s]]))
         f.write("\n")
     f.close()
 
