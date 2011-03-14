@@ -5,7 +5,7 @@ import progress
 from math import ceil
 
 
-def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage,SaveConductance):
+def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpikes,SaveVoltage,SaveConductance,SaveCurrent):
     net = netdef()
 
     if SaveVoltage:
@@ -30,7 +30,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
                 s.stim_dur = d 
                 s.run()
                 key = [a,d] 
-                net.savecells(tosave, key, spikes=SaveSpikes,voltage=SaveVoltage,conductance=SaveConductance)
+                net.savecells(tosave, key, spikes=SaveSpikes,voltage=SaveVoltage,conductance=SaveConductance,current=SaveCurrent)
             count += 1
     progress.update(spp,spp,thisProc)
 
@@ -42,7 +42,7 @@ def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,26,1)]
         param = [1]
-        return [20,100,stims,param]
+        return [1,100,stims,param]
 
     if stim <= 2:
         mult = 0.375*(stim)
@@ -52,7 +52,7 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.003*2*mult)
-    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.009*2*mult,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.015*2*mult,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035)
 
     net.cells["MSO_ON"]["delay"] = 12

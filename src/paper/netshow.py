@@ -136,6 +136,43 @@ def save_voltage(network, sections, param, filename):
         f.write("\n")
     f.close()
 
+def save_current(network, section, receptors, param, filename):
+    f = open(filename, 'w')
+    f.write('"time"')
+    for r in receptors:
+        f.write(',"'+r+'"')
+    f.write("\n")
+    rec_t = network.savedcells[0][section][0]['rec_t']
+
+    for x in range(len(rec_t)):
+        f.write(str(rec_t[x]))
+        for s in range(len(network.savedcells)):
+            if network.savedparams[s] == param:
+                for r in receptors:
+                    # We are only saving the FIRST neuron here
+                    f.write(','+str(network.savedcells[s][section][0]['rec_'+r+'i'][x]))
+        f.write("\n")
+    f.close()
+
+def save_conductance(network, section, receptors, param, filename):
+    f = open(filename, 'w')
+    f.write('"time"')
+    for r in receptors:
+        f.write(',"'+r+'"')
+    f.write("\n")
+    rec_t = network.savedcells[0][section][0]['rec_t']
+
+    for x in range(len(rec_t)):
+        f.write(str(rec_t[x]))
+        for s in range(len(network.savedcells)):
+            if network.savedparams[s] == param:
+                for r in receptors:
+                    # We are only saving the FIRST neuron here
+                    f.write(','+str(network.savedcells[s][section][0]['rec_'+r+'g'][x]))
+        f.write("\n")
+    f.close()
+
+
 def save_spikes(network, section, param, filename, trials, diff=1):
     f = open(filename, 'w')
 

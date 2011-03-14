@@ -15,15 +15,13 @@ SaveVoltage = True
 SaveSpikes = True
 SaveFSL = True
 SaveMean = True
-SaveConductance = False
+SaveConductance = True
+SaveCurrent = True
 
 netdef = network.DTN_CoincidenceSimple
 modify = sims.C_DEFAULT
 
-mean_spike_filename = "c_default_mean"
-fsl_filename = "c_default_fsl"
-spike_filename = "c_default_spikes"
-voltage_filename = "c_default_voltage"
+base_filename = "c_default"
 
 #modify = sims.C_DEFAULT
 #mean_spike_filename = "c_mean"
@@ -49,7 +47,7 @@ if pc.id() == 0:
 ret = []
 pc.runworker()
 for i in range(numProcs):
-    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean or SaveMean or SaveFSL,ShowVoltage or SaveVoltage,SaveConductance or ShowConductance)
+    pc.submit(sims.run,netdef,tosave,modify,numProcs,i,stims,param,repeats,sim_time,SaveSpikes or ShowSpikes or ShowMean or SaveMean or SaveFSL,ShowVoltage or SaveVoltage,SaveConductance or ShowConductance,SaveCurrent)
 while pc.working():
     ret.append(pc.pyret())
 pc.done()
@@ -78,14 +76,35 @@ if ShowMean:
     ns.show()
 
 if SaveMean:
-    ns.save_mean_spikes(net, "IC-soma", param, mean_spike_filename+".dat")
+    ns.save_mean_spikes(net, "IC-soma", param, base_filename+"_mean.dat")
 
 if SaveSpikes:
     for a in param:
-        ns.save_spikes(net, "IC-soma", a, spike_filename+"_"+ns.list_to_string(a)+".dat", repeats)
+        ns.save_spikes(net, "IC-soma", a, base_filename+"_spikes_"+ns.list_to_string(a)+".dat", repeats)
 
 if SaveFSL:
-    ns.save_fsl(net, "IC-soma", param, fsl_filename+".dat", repeats)
+    ns.save_fsl(net, "IC-soma", param, base_filename+"_fsl.dat", repeats)
+
+if SaveVoltage:
+    for d in stims:
+        for a in param:
+            key = [a,d]
+            ns.save_voltage(net, ["IC-soma", "MSO_ON-soma", "MSO_OFF-soma"], key, base_filename+"_voltage_s_"+str(d)+"_a_"+str(a)+".dat")
+
+if SaveConductance:
+    for d in stims:
+        for a in param:
+            key = [a,d]
+            ns.save_conductance(net, "IC-soma", ["AMPA","NMDA","GABAa"], key, base_filename+"_conductance_s_"+str(d)+"_a_"+str(a)+".dat")
+
+if SaveCurrent:
+    for d in stims:
+        for a in param:
+            key = [a,d]
+            ns.save_current(net, "IC-soma", ["AMPA","NMDA","GABAa"], key, base_filename+"_current_s_"+str(d)+"_a_"+str(a)+".dat")
+
+
+
 
 # Plot the voltage traces
 if ShowVoltage:
@@ -114,11 +133,6 @@ if ShowConductance:
     ns.show()
 
 
-if SaveVoltage:
-    for d in stims:
-        for a in param:
-            key = [a,d]
-            ns.save_voltage(net, ["IC-soma", "MSO_ON-soma", "MSO_OFF-soma"], key, voltage_filename+"_s_"+str(d)+"_a_"+str(a)+".dat")
 
 neuron.h.quit()
 
