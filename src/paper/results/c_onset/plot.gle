@@ -18,7 +18,7 @@ sub draw_graph dataset$ d1$ e1$ d2$ e2$ d3$ e3$ d4$ e4$ x y codeA$ codeB$ codeC$
         d5 line color green key "20 ms"
         d7 line color black key "40 ms"
         yaxis min 0.0 max 3.3 nofirst hei 0.2 lwidth 0.01 dticks 0.5
-        xaxis nofirst hei 0.2 lwidth 0.01 max 250 dticks 25
+        xaxis nofirst hei 0.2 lwidth 0.01 max 100 dticks 25
         x2axis off
         y2axis off
         \expr{codeA$}

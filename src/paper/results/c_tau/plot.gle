@@ -1,4 +1,4 @@
-height = 1
+height = 1.0
 width = 2
 
 total_width = 3*width+0.6
@@ -13,9 +13,9 @@ sub draw_graph dataset$ d1$ e1$ d2$ e2$ d3$ e3$ d4$ e4$ x y codeA$ codeB$ codeC$
         size width height
         fullsize
         data "c_tau_mean.dat" d1=c1,c\expr{d1$} d2=c1,c\expr{e1$} d3=c1,c\expr{d2$} d4=c1,c\expr{e2$} d5=c1,c\expr{d3$} d6=c1,c\expr{e3$} d7=c1,c\expr{d4$} d6=c1,c\expr{e4$}
-        d1 line color red key "2 ms"
-        d3 line color blue key "5 ms"
-        d5 line color green key "8 ms"
+        d1 line color gray20 key "2 ms"
+        d3 line color gray40 key "5 ms"
+        d5 line color gray60 key "8 ms"
         d7 line color black key "11 ms"
         yaxis min 0.0 max 6.0 nofirst hei 0.2 lwidth 0.01 dticks 0.5
         xaxis nofirst hei 0.2 lwidth 0.01 max 150 dticks 25

@@ -1,0 +1,13 @@
+size 15 15
+set font psh
+
+begin graph
+	data "summary.dat"
+	bar d1 fill gray50 width 0.01 dist 0.01
+	bar d3 from d1 fill gray20 width 0.01 dist 0.01
+	yaxis min 0
+	x2axis off
+	y2axis off
+end graph
+
+
