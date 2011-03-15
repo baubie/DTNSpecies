@@ -1,12 +1,11 @@
-size 7 7
+size 9 7
 
 set font psh
 set hei 0.35
 
-amove 0 3.75
+amove 0.5 3.75
 begin graph
-    scale auto
-    size 7 3.25
+    size 7.5 3.25
     data "c_default_conductance_s_25_a_1.dat"
     let d1=x-25,d1*1000
     let d2=x-25,d2*1000
@@ -14,24 +13,24 @@ begin graph
     xaxis min 0 max 75
     x2axis off
     y2axis off
-    ytitle "Conductance (pS)"
+    ytitle "Conductance (nS)"
     d1 line color gray30
     d2 line color gray60
     d3 line color black
+    ticks length -0.1
     key nobox compact offset 3.7 1.5
 end graph
 
-amove 0 0
+amove 0.5 0.5
 begin graph
-    scale auto
-    size 7 3.75
+    size 7.5 3.25
     data "c_default_current_s_25_a_1.dat"
     let d1=x-25,d1
     let d2=x-25,d2
     let d3=x-25,d3
     let d4=x,d1+d2+d3
     xaxis min 0 max 75
-    yaxis min -0.065 max 0.01
+    yaxis min -0.075 max 0.01
     x2axis off
     y2axis off
     ytitle "Current (nA)"
@@ -40,5 +39,6 @@ begin graph
     d2 line color gray60
     d3 line color black
     d4 line color black lwidth 0.05 lstyle 2 key "Combined"
-    key nobox compact offset 3.75 0.6
+    ticks length -0.1
+    key nobox compact offset 3.95 0.475
 end graph
