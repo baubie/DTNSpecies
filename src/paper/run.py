@@ -11,22 +11,24 @@ ShowVoltage = False
 ShowSpikes = False
 ShowConductance = False
 
-SaveVoltage = True
-SaveSpikes = True
 SaveFSL = True
 SaveMean = True
-SaveConductance = True
-SaveCurrent = True
+SaveSpikes = False
+
+SaveVoltage = False
+SaveConductance = False
+SaveCurrent = False
 
 netdef = network.DTN_CoincidenceSimple
-modify = sims.C_DEFAULT
+modify = sims.C_TAU
 
-base_filename = "c_default"
+base_filename = "c_tau_wide"
 
 #modify = sims.C_DEFAULT
 #mean_spike_filename = "c_mean"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
+tosave = [["IC","soma"]]
 
 
 

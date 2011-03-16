@@ -150,8 +150,8 @@ class DTN_CoincidenceSimple(network):
         self.cells["MSO_ON"] = deepcopy(populationTemplate)
         self.cells["MSO_OFF"] = deepcopy(populationTemplate)
 
-        con = True
-        cur = True
+        con = False
+        cur = False
 
         numIC = 1
         self.cells["IC"]["cells"].append(cells.IC_NeuronSoma())

@@ -12,7 +12,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
         net.recordVoltage()
 
     repeats = int(repeats)
-    s = Simulation(net, randomseed=100,delay=25)
+    s = Simulation(net, randomseed=50,delay=25)
     s.verbose = False
     s.sim_time = sim_time
     s.dt = 0.050
@@ -52,10 +52,10 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.003*2*mult)
-    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.015*2*mult,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.009*2*mult,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035)
 
-    net.cells["MSO_ON"]["delay"] = 12
+    net.cells["MSO_ON"]["delay"] = 8
     net.cells["MSO_OFF"]["delay"] = 5
     net.cells["DNLL"]["delay"] = 1
 
@@ -68,20 +68,21 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
 def C_RECEPTORS_SIMPLE(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,151,1)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,301,10)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
         AMPAamp = [0.001,0.002,0.003,0.004]
         NMDAamp = [0,0.005,0.010,0.015,0.020,0.025]
         NMDAbeta = [0.0026,0.0046,0.0066,0.0086]
 
-        AMPAamp = [0.001,0.002,0.003,0.004]
-        NMDAamp = [0.005,0.010,0.015,0.020]
-        NMDAbeta = [0.0033,0.0066,0.0099]
+        AMPAamp = [0.003]
+        NMDAamp = [0.020]
+
+        NMDAbeta = [0.00165,0.0033,0.0066,0.0132]
         param = []
         for a in AMPAamp:
             for b in NMDAamp:
                 for c in NMDAbeta:
                     param.append([a,b,c])
-        return [20,200,stims,param]
+        return [20,500,stims,param]
 
     if stim <= 25:
         mult = 0.375*(stim)
@@ -95,7 +96,7 @@ def C_RECEPTORS_SIMPLE(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=a[1]*2*mult,Beta=a[2],mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035) # Normally 0.0035
 
-    net.cells["MSO_ON"]["delay"] = 12
+    net.cells["MSO_ON"]["delay"] = 8
     net.cells["MSO_OFF"]["delay"] = 5 
     net.cells["DNLL"]["delay"] = 1
 
@@ -108,16 +109,19 @@ def C_RECEPTORS_SIMPLE(net,a,stim,getparams=False):
 
 def C_TAU(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,251,1)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,51,1)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,301,10)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
         AMPAamp = [0.001,0.002,0.003,0.004]
         NMDAamp = [0.005,0.010,0.015,0.020]
-        tau = [2000,4000,6000,8000]
+        AMPAamp = [0.003]
+        NMDAamp = [0.009]
+        tau = [2000,3000,4000,5000,6000,8000,10000,12000,14000]
         param = []
         for a in AMPAamp:
             for b in NMDAamp:
                 for c in tau:
                     param.append([a,b,c])
-        return [20,350,stims,param]
+        return [20,500,stims,param]
 
     if stim <= 25:
         mult = 0.375*(stim)
@@ -132,7 +136,7 @@ def C_TAU(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/a[2]
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035) # Normally 0.0035
 
-    net.cells["MSO_ON"]["delay"] = 12
+    net.cells["MSO_ON"]["delay"] = 8
     net.cells["MSO_OFF"]["delay"] = 5 
     net.cells["DNLL"]["delay"] = 1
 
@@ -145,9 +149,11 @@ def C_TAU(net,a,stim,getparams=False):
 
 def C_ONSET(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,251,1)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,101,5)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
         AMPAamp = [0.001,0.002,0.003,0.004]
         NMDAamp = [0.005,0.010,0.015,0.020]
+        AMPAamp = [0.003]
+        NMDAamp = [0.009]
         Onset = [5,15,30,60]
         param = []
         for a in AMPAamp:
