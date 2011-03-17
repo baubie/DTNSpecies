@@ -73,8 +73,9 @@ def C_DEFAULT(net,a,stim,getparams=False):
 def C_COMBINED(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(5,206,10)]
-        #stims = [5,15,26,36,46,56,67,77,87,97,108,118,128,149,159,169,180,190,200]
+        stims = [185]
         param = [1]
+        return [1,400,stims,param]
         return [20,400,stims,param]
 
     if stim <= 2:
@@ -174,6 +175,42 @@ def C_TAU(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=a[1]*2*mult,Beta=0.0066,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/a[2]
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035) # Normally 0.0035
+
+    net.cells["MSO_ON"]["delay"] = 8
+    net.cells["MSO_OFF"]["delay"] = 5 
+    net.cells["DNLL"]["delay"] = 1
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
+
+def C_INHIBITION(net,a,stim,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,51,1)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        AMPAamp = [0.003]
+        NMDAamp = [0.009]
+        inhg = [0.0,0.001, 0.0015, 0.003, 0.005, 0.007]
+        param = []
+        for a in AMPAamp:
+            for b in NMDAamp:
+                for c in inhg:
+                    param.append([a,b,c])
+        return [20,500,stims,param]
+
+    if stim <= 25:
+        mult = 0.375*(stim)
+        mult = 0.04*stim
+        mult = 1
+    else:
+        mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=a[0]*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=a[1]*2*mult,Beta=0.0066,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=a[2]) # Normally 0.0035
 
     net.cells["MSO_ON"]["delay"] = 8
     net.cells["MSO_OFF"]["delay"] = 5 

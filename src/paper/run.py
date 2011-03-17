@@ -13,16 +13,16 @@ ShowConductance = False
 
 SaveFSL = True
 SaveMean = True
-SaveSpikes = True
+SaveSpikes = False
 
 SaveVoltage = False
 SaveConductance = False
 SaveCurrent = False
 
-netdef = network.DTN_CoincidenceSimpleEarly
-modify = sims.C_COMBINED
+netdef = network.DTN_CoincidenceSimple
+modify = sims.C_INHIBITION
 
-base_filename = "c_combined"
+base_filename = "c_inhibition"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 tosave = [["IC","soma"]]
