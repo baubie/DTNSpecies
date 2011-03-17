@@ -13,19 +13,16 @@ ShowConductance = False
 
 SaveFSL = True
 SaveMean = True
-SaveSpikes = False
+SaveSpikes = True
 
 SaveVoltage = False
 SaveConductance = False
 SaveCurrent = False
 
-netdef = network.DTN_CoincidenceSimple
-modify = sims.C_TAU
+netdef = network.DTN_CoincidenceSimpleEarly
+modify = sims.C_COMBINED
 
-base_filename = "c_tau_wide"
-
-#modify = sims.C_DEFAULT
-#mean_spike_filename = "c_mean"
+base_filename = "c_combined"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 tosave = [["IC","soma"]]
@@ -130,7 +127,7 @@ if ShowConductance:
         ns.subplot(len(stims),1,count)
         for a in param:
             key = [a,d]
-            ns.plot_conductance(net, "IC-soma", "NMDA", key)
+            ns.plot_conductance(net, "IC-soma", "GABAa", key)
     ns.legend()
     ns.show()
 

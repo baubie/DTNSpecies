@@ -136,6 +136,17 @@ class ModelBase(nrn.Section):
             if Prethresh != None: self.GABAa[i].Prethresh = Prethresh
             if Deadtime != None: self.GABAa[i].Deadtime = Deadtime
 
+    def modifyGABAaRange(self, recRange, gmax=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
+        for i in recRange:
+            if gmax != None: self.GABAa[i].gmax = gmax
+            if Cmax != None: self.GABAa[i].Cmax = Cmax
+            if Cdur != None: self.GABAa[i].Cdur = Cdur
+            if Alpha != None: self.GABAa[i].Alpha = Alpha 
+            if Beta != None: self.GABAa[i].Beta = Beta
+            if Erev != None: self.GABAa[i].Erev = Erev
+            if Prethresh != None: self.GABAa[i].Prethresh = Prethresh
+            if Deadtime != None: self.GABAa[i].Deadtime = Deadtime
+
     def modifyAMPA(self, gmax=None, Cmax=None, Cdur=None, Alpha=None, Beta=None, Erev=None, Prethresh=None, Deadtime=None):
         for i in range(len(self.AMPA)):
             if gmax != None: self.AMPA[i].gmax = gmax/float(len(self.AMPA))
