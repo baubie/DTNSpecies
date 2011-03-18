@@ -13,8 +13,9 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
 
     repeats = int(repeats)
     # Randomseed was 50 for most figures
-    # Changed to 60 to combined
-    s = Simulation(net, randomseed=100,delay=25)
+    # Changed to 100 for rat
+    # Changed to 200 for mouse
+    s = Simulation(net, randomseed=200,delay=25)
     s.verbose = False
     s.sim_time = sim_time
     s.dt = 0.050
@@ -70,12 +71,10 @@ def C_DEFAULT(net,a,stim,getparams=False):
 
     return net
 
-def C_COMBINED(net,a,stim,getparams=False):
+def C_RAT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(5,206,10)]
-        stims = [185]
         param = [1]
-        return [1,400,stims,param]
         return [20,400,stims,param]
 
     if stim <= 2:
@@ -89,7 +88,6 @@ def C_COMBINED(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.010*2*mult,Beta=0.0050,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAaRange(range(10), gmax=0.00077/10)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAaRange(range(10,20), gmax=0.0060/10)
-#    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0035*2)
 
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/10000
 
@@ -98,6 +96,39 @@ def C_COMBINED(net,a,stim,getparams=False):
     net.cells["DNLL"]["delay"] = 30
     net.cells["DNLLEarly"]["delay"] = 11
     net.cells["DNLLEarly"]["mindur"] = 25
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
+
+def C_BAT(net,a,stim,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,26,1)]
+        stims = [25]
+        param = [1]
+        return [1,150,stims,param]
+
+    if stim <= 1:
+        mult = 0.0
+    else:
+        mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.0030*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.010*2*mult,Beta=0.0066,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAaRange(range(10), gmax=0.0030/10)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAaRange(range(10,20), gmax=0.0000/10)
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/6500
+
+    net.cells["MSO_ON"]["delay"] = 10
+    net.cells["MSO_OFF"]["delay"] = 10
+    net.cells["DNLL"]["delay"] = 6
+    net.cells["DNLLEarly"]["delay"] = 3
+    net.cells["DNLLEarly"]["mindur"] = 1
 
     net.cells["MSO_ON"]["stim"] = "IClamp"
     net.cells["MSO_ON"]["stimamp"] = 0.1
