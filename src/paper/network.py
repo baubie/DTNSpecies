@@ -206,8 +206,8 @@ class DTN_CoincidenceSimpleEarly(network):
         self.cells["MSO_ON"] = deepcopy(populationTemplate)
         self.cells["MSO_OFF"] = deepcopy(populationTemplate)
 
-        con = True
-        cur = True
+        con = False
+        cur = False
 
         enum = 2
 

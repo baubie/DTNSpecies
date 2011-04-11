@@ -11,18 +11,18 @@ ShowVoltage = False
 ShowSpikes = False
 ShowConductance = False
 
-SaveFSL = False
-SaveMean = False
-SaveSpikes = False
+SaveFSL = True
+SaveMean = True
+SaveSpikes = True
 
 SaveVoltage = False
-SaveConductance = True
-SaveCurrent = True
+SaveConductance = False
+SaveCurrent = False
 
 netdef = network.DTN_CoincidenceSimpleEarly
-modify = sims.C_BAT
+modify = sims.C_RAT
 
-base_filename = "c_bat"
+base_filename = "c_rat"
 
 tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
 #tosave = [["IC","soma"]]

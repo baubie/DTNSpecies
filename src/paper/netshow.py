@@ -46,6 +46,7 @@ def plot_mean_spikes(network, section):
     if haveX: plt.axis(ymin=0, ymax=max_y+0.1)
     if haveX: plt.legend()
 
+
 def plot_voltage(network, section, param):
     count = 0
     for s in range(len(network.savedcells)):
@@ -173,7 +174,7 @@ def save_conductance(network, section, receptors, param, filename):
     f.close()
 
 
-def save_spikes(network, section, param, filename, trials, diff=1):
+def save_spikes(network, section, param, filename, trials, diff=10):
     f = open(filename, 'w')
 
     count = {}
