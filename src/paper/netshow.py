@@ -174,7 +174,7 @@ def save_conductance(network, section, receptors, param, filename):
     f.close()
 
 
-def save_spikes(network, section, param, filename, trials, diff=10):
+def save_spikes(network, section, param, filename, trials, diff=1):
     f = open(filename, 'w')
 
     count = {}

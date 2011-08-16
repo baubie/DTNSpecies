@@ -11,21 +11,21 @@ ShowVoltage = False
 ShowSpikes = False
 ShowConductance = False
 
-SaveFSL = True
+SaveFSL = False
 SaveMean = True
-SaveSpikes = True
+SaveSpikes = False
 
 SaveVoltage = False
 SaveConductance = False
 SaveCurrent = False
 
-netdef = network.DTN_CoincidenceSimpleEarly
-modify = sims.C_RAT
+netdef = network.DTN_CoincidenceSimple
+modify = sims.C_JUST_DNLL
 
-base_filename = "c_rat"
+base_filename = "c_just_dnll"
 
-tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
-#tosave = [["IC","soma"]]
+#tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
+tosave = [["IC","soma"],["DNLL","soma"]]
 
 
 
@@ -76,6 +76,7 @@ if ShowMean:
 
 if SaveMean:
     ns.save_mean_spikes(net, "IC-soma", param, base_filename+"_mean.dat")
+    ns.save_mean_spikes(net, "DNLL-soma", param, base_filename+"_DNLL_mean.dat")
 
 if SaveSpikes:
     for a in param:

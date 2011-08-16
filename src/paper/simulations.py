@@ -14,7 +14,8 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     repeats = int(repeats)
     # Randomseed was 200 for most figures
     # Changed to 200 for rat
-    s = Simulation(net, randomseed=200,delay=25)
+    # Changed to 200 for anurans
+    s = Simulation(net, randomseed=202,delay=25)
     s.verbose = False
     s.sim_time = sim_time
     s.dt = 0.050
@@ -39,6 +40,34 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     r = [thisProc,net.savedparams,net.savedcells]
     return r
 
+def C_JUST_DNLL(net,a,stim,getparams=False):
+
+    # I used this simulation to figure out the actual input rate of the inhibitory spikes
+    # It turns out to be 250 Hz
+    if getparams:
+        stims = [1000]
+        param = [1]
+        return [1000,1500,stims,param]
+
+    mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.020*2*mult,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0025)
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
+
+    net.cells["MSO_ON"]["delay"] = 10
+    net.cells["MSO_OFF"]["delay"] = 6
+    net.cells["DNLL"]["delay"] = 0
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
 
 def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
@@ -291,7 +320,7 @@ def C_BAT(net,a,stim,getparams=False):
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.0090*2*mult)
-    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.00*2*mult,Beta=0.0066,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.0*2*mult,Beta=0.0066,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0052)
 
     net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/1500
@@ -304,6 +333,62 @@ def C_BAT(net,a,stim,getparams=False):
     net.cells["MSO_ON"]["stimamp"] = 0.1
     net.cells["MSO_OFF"]["stim"] = "IClamp"
     net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
+
+def C_BAT_JUN2(net,a,stim,getparams=False):
+    if getparams:
+        stims = [i for i in range(1,26,1)]
+        param = [1]
+        return [20,150,stims,param]
+
+    if stim <= 1:
+        mult = 0.0
+    else:
+        mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.012*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.008*2*mult,Beta=0.0066,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0080)
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/1200
+
+    net.cells["MSO_ON"]["delay"] = 12
+    net.cells["MSO_OFF"]["delay"] = 14
+    net.cells["DNLL"]["delay"] = 12
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    return net
+
+def C_ANURANS_T(net,a,stim,getparams=False):
+    if getparams:
+        stims = [2,5,10,15,20,25,30,40,50,100]
+        #stims = [5,100]
+        param = [1]
+        return [20,200,stims,param]
+
+    mult = 1.0
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 3 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.00119*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.036*2*mult,Beta=0.0066,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.00032)
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/9000
+
+    net.cells["MSO_ON"]["delay"] = 34+4
+    net.cells["MSO_OFF"]["delay"] = 0 
+    net.cells["DNLL"]["delay"] = 25+4 
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0
 
     return net
 
