@@ -1,0 +1,24 @@
+Simulations using the Python interface to Neuron 7.2 (Development Version)
+Written by Brandon Aubie
+brandon@aubie.ca
+
+How to Use
+==========
+Install NEURON along with the Python interface.
+To make use of multiple cores (or workstations), install the OpenMP toolset.
+
+View run.py for instructions on running different simulations and reproducing a subset of the figures in Aubie et al. (2012).
+
+In general, once you have a simulation defined (the appropriate lines uncommented in run.py), you can simply run:
+
+# ./run
+
+and the simulations will run in multiple threads.  If OpenMP is not available on your system, you can simply run:
+
+# python run.py
+
+Output files are CSV files suitable for producing graphs with many graphing programs such as GLE (http://glx.sourceforge.net/).
+
+References
+==========
+Aubie, B., Sayegh, R., & Faure, P. A. (2012). Duration Tuning across Vertebrates. Journal of Neuroscience, 32(18), 6373–6390.

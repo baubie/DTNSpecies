@@ -1,1 +1,0 @@
-mpiexec --prefix /home/aubiebn/local64 -np 10 --hostfile my-hosts --byslot --host hopper,franklin /home/aubiebn/neuron/nrn/x86_64/bin/nrniv -mpi -python run.py NOX

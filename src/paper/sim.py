@@ -58,6 +58,39 @@ class Simulation(object):
                             self.clamps[-1].dur = 1
                             self.clamps[-1].delay = self.delay+self.stim_dur+self.network.cells[c]["delay"]
 
+                elif self.network.cells[c]["stim"] == "PoissonFixed15":
+                    for i in self.network.cells[c]["cells"]:
+                        self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                        self.poisson.play(self.clamps[-1]._ref_amp)
+                        if self.network.cells[c]["type"] == "Sustained":
+                            self.clamps[-1].delay = 50
+                            self.clamps[-1].dur = 15
+                        elif self.network.cells[c]["type"] == "Onset":
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                            self.clamps[-1].dur = max([self.network.cells[c]["mindur"], min([self.stim_dur,2])])
+                        elif self.network.cells[c]["type"] == "Offset":
+                            self.clamps[-1].delay = self.delay+self.stim_dur+self.network.cells[c]["delay"]
+                            self.clamps[-1].dur = max([self.network.cells[c]["mindur"], min([self.stim_dur,2])])
+
+                elif self.network.cells[c]["stim"] == "IClampFixed15":
+                    for i in self.network.cells[c]["cells"]:
+                        self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                        if self.network.cells[c]["type"] == "Sustained":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = self.stim_dur
+                            self.clamps[-1].delay = self.delay+self.network.cells[c]["delay"]
+                        if self.network.cells[c]["type"] == "Onset":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = 1
+                            self.clamps[-1].delay = self.delay+50
+                        if self.network.cells[c]["type"] == "Offset":
+                            self.clamps.append(neuron.h.IClamp(0.5, sec=i.sec["soma"]))
+                            self.clamps[-1].amp = self.network.cells[c]["stimamp"]
+                            self.clamps[-1].dur = 1
+                            self.clamps[-1].delay = self.delay+50+15
+
     def run(self):
         if self.verbose: print "Initializing Simulation"
         self.set_stim()

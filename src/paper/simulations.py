@@ -15,7 +15,7 @@ def run(netdef,tosave,modify,procs,thisProc,stims,param,repeats,sim_time,SaveSpi
     # Randomseed was 200 for most figures
     # Changed to 200 for rat
     # Changed to 200 for anurans
-    s = Simulation(net, randomseed=202,delay=25)
+    s = Simulation(net, randomseed=200,delay=25)
     s.verbose = False
     s.sim_time = sim_time
     s.dt = 0.050
@@ -69,17 +69,49 @@ def C_JUST_DNLL(net,a,stim,getparams=False):
 
     return net
 
+def C_PAIREDTONE(net,a,stim,getparams=False):
+    if getparams:
+        stims = [1]
+        delay = [i for i in range(0,105,5)]
+        param = []
+        for i in delay:
+            param.append([i])
+        return [20,250,stims,param]
+
+    # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*4)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.020*4,mg=1.0)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0025*2)
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
+
+    net.cells["MSO_ON"]["delay"] = 10+a[0]
+    net.cells["MSO_OFF"]["delay"] = 6+a[0]
+    net.cells["DNLL"]["delay"] = 9+a[0]
+
+    net.cells["MSO_ON2"]["delay"] = 10
+    net.cells["MSO_OFF2"]["delay"] = 6
+    net.cells["DNLL2"]["delay"] = 9
+
+    net.cells["MSO_ON"]["stim"] = "IClamp"
+    net.cells["MSO_ON"]["stimamp"] = 0.1
+    net.cells["MSO_OFF"]["stim"] = "IClamp"
+    net.cells["MSO_OFF"]["stimamp"] = 0.1
+
+    net.cells["MSO_ON2"]["stim"] = "IClampFixed15"
+    net.cells["MSO_ON2"]["stimamp"] = 0.1
+    net.cells["MSO_OFF2"]["stim"] = "IClampFixed15"
+    net.cells["MSO_OFF2"]["stimamp"] = 0.1
+
+    return net
+
 def C_DEFAULT(net,a,stim,getparams=False):
     if getparams:
         stims = [i for i in range(1,26,1)]
         param = [1]
-        return [20,100,stims,param]
+        return [1,100,stims,param]
 
-    if stim <= 2:
-        mult = 0.375*(stim)
-        mult = 1.0
-    else:
-        mult = 1.0
+    mult = 1.0
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*2*mult)
@@ -134,12 +166,13 @@ def C_NMDA_BETA(net,a,stim,getparams=False):
 
 def C_TAU(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,201,2)]
-        tau = [2000,3000,4000,5000,6000,8000,10000]
+        stims = [i for i in range(1,201,5)]
+        tau = [7000,8000,9000,10000]
+        #tau = [2000,3000,4000,5000,6000]
         param = []
         for t in tau:
             param.append([t])
-        return [20,500,stims,param]
+        return [20,300,stims,param]
 
     mult = 1
 
@@ -164,18 +197,22 @@ def C_GABA(net,a,stim,getparams=False):
 
     if getparams:
         stims = [i for i in range(1,201,5)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,26,1)]
+        #stims = [i for i in range(1,51,2)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
         inhg = [0.0,0.001, 0.0015, 0.0025, 0.0035, 0.0045]
+        inhg = [0.0]
         param = []
         for i in inhg:
             param.append([i])
-        return [20,500,stims,param]
+        return [20,200,stims,param]
 
     mult = 1 
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*2*mult)
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.020*2*mult,Beta=0.0066,mg=1.0)
-    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=a[0]) # Normally 0.0035
+    net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=a[0]) # Normally 0.0025
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
 
     net.cells["MSO_ON"]["delay"] = 10 
     net.cells["MSO_OFF"]["delay"] = 6 
@@ -191,19 +228,23 @@ def C_GABA(net,a,stim,getparams=False):
 def C_NMDA(net,a,stim,getparams=False):
 
     if getparams:
-        stims = [i for i in range(1,201,5)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
-        inhg = [0.0,0.005,0.015,0.02,0.025,0.03,0.035]
+        stims = [i for i in range(10,201,10)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,51,2)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        inhg = [0.0,0.005,0.01,0.015,0.02,0.025,0.03,0.035]
+        inhg = [0.035, 0.045, 0.55, 0.65, 0.75, 0.85, 0.95, 0.105]
         param = []
         for i in inhg:
             param.append([i])
-        return [20,500,stims,param]
+        return [20,200,stims,param]
 
     mult = 1 
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
-    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*2*mult)
+    net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=(0.004+0.002)*2*mult)
+    #net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=(0.004+0.002)*2*mult) # For NMDA onset test
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=a[0]*2*mult,Beta=0.0066,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0025) # Normally 0.0035
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
 
     net.cells["MSO_ON"]["delay"] = 10 
     net.cells["MSO_OFF"]["delay"] = 6 
@@ -219,12 +260,12 @@ def C_NMDA(net,a,stim,getparams=False):
 def C_AMPA(net,a,stim,getparams=False):
 
     if getparams:
-        stims = [i for i in range(1,201,5)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        stims = [i for i in range(1,51,2)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
         inhg = [0.0,0.002,0.004,0.006,0.008]
         param = []
         for i in inhg:
             param.append([i])
-        return [20,500,stims,param]
+        return [20,200,stims,param]
 
     mult = 1 
 
@@ -232,6 +273,7 @@ def C_AMPA(net,a,stim,getparams=False):
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=a[0]*2*mult)
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.020*2*mult,Beta=0.0066,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0025) # Normally 0.0035
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
 
     net.cells["MSO_ON"]["delay"] = 10 
     net.cells["MSO_OFF"]["delay"] = 6 
@@ -246,24 +288,21 @@ def C_AMPA(net,a,stim,getparams=False):
 
 def C_ONSET(net,a,stim,getparams=False):
     if getparams:
-        stims = [i for i in range(1,201,5)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
-        Onset = [10,15,25,50,75]
+        stims = [i for i in range(1,61,2)]#+[i for i in range(50,100,2)]+[i for i in range(100,251,5)];
+        Onset = [10,20,30,40]
         param = []
         for a in Onset:
             param.append([a])
         return [20,500,stims,param]
 
-    if stim <= 25:
-        mult = 0.375*(stim)
-        mult = 0.04*stim
-        mult = 1
-    else:
-        mult = 1.0
+    mult = 1
 
     # modifyAMPA/NMDA scale by total number of receptors so we multiply by 2 since we have 2 inputs
     net.cells["IC"]["cells"][0].sec["soma"].modifyAMPA(gmax=0.004*2*mult)
     net.cells["IC"]["cells"][0].sec["soma"].modifyNMDA(gmax=0.020*2*mult,Beta=0.0066,mg=1.0)
     net.cells["IC"]["cells"][0].sec["soma"].modifyGABAa(gmax=0.0025) # Normally 0.0035
+
+    net.cells["IC"]["cells"][0].sec["soma"](0.5).pas.g = 1.0/4000
 
     net.cells["MSO_ON"]["delay"] = a[0]
     net.cells["MSO_OFF"]["delay"] = 6 

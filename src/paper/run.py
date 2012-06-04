@@ -5,13 +5,50 @@ import sys
 import netshow as ns
 
 
+###############################################################
+# Uncomment the netdef, modify and base_filename lines for the
+# simulation you wish to run (and add #'s to all others)
+###############################################################
+
+# Default Model (Figure 3)
+netdef = network.DTN_CoincidenceSimple
+modify = sims.C_DEFAULT
+base_filename = "c_default"
+
+# BAT (Figure 9)
+# netdef = network.DTN_CoincidenceSimple
+# modify = sims.C_BAT_JUN2
+# base_filename = "c_bat"
+
+# RAT (Figure 10)
+# netdef = network.DTN_CoincidenceSimpleEarly
+# modify = sims.C_RAT
+# base_filename = "c_rat"
+
+# MOUSE (Figure 11)
+# netdef = network.DTN_CoincidenceSimple
+# modify = sims.C_MOUSE_SP
+# base_filename = "c_mouse"
+
+# FROG (Figure 12)
+# netdef = network.DTN_CoincidenceSimple
+# modify = sims.C_ANURANS
+# base_filename = "c_anurans"
+
+# Look in simulations.py for additional simulations available
+# such as C_ONSET to test latencies, C_AMPA to test AMPA conductances,
+# C_NMDA to test NMDA conductances, etc.
+
+###############################################################
+
+# Setup the simulation options
 # Define Paramters
 ShowMean = False
 ShowVoltage = False
 ShowSpikes = False
 ShowConductance = False
 
-SaveFSL = False
+SaveFSL = True
 SaveMean = True
 SaveSpikes = False
 
@@ -19,13 +56,9 @@ SaveVoltage = False
 SaveConductance = False
 SaveCurrent = False
 
-netdef = network.DTN_CoincidenceSimple
-modify = sims.C_JUST_DNLL
-
-base_filename = "c_just_dnll"
-
 #tosave = [["IC","soma"],["MSO_ON","soma"],["MSO_OFF","soma"]]
-tosave = [["IC","soma"],["DNLL","soma"]]
+#tosave = [["IC","soma"],["DNLL","soma"]]
+tosave = [["IC","soma"]]
 
 
 
@@ -76,7 +109,7 @@ if ShowMean:
 
 if SaveMean:
     ns.save_mean_spikes(net, "IC-soma", param, base_filename+"_mean.dat")
-    ns.save_mean_spikes(net, "DNLL-soma", param, base_filename+"_DNLL_mean.dat")
+#    ns.save_mean_spikes(net, "DNLL-soma", param, base_filename+"_DNLL_mean.dat")
 
 if SaveSpikes:
     for a in param:
@@ -115,8 +148,6 @@ if ShowVoltage:
         for a in param:
             key = [a,d]
             ns.plot_voltage(net, "IC-soma", key)
-            ns.plot_voltage(net, "MSO_ON-soma", key)
-            ns.plot_voltage(net, "MSO_OFF-soma", key)
     ns.legend()
     ns.show()
 
